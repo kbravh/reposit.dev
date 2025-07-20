@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "fix": "npm run lint && npm run format",
-    "check": "npm run lint:check && npm run format:check"
+    "check": "npm run lint:check && npm run format:check",
+    "test": "echo \"Tests are not implemented yet\""
   },
   "dependencies": {
     "@tanstack/react-router": "^1.128.6",

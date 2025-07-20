@@ -10,7 +10,9 @@
     "dev": "vite dev",
     "build": "vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
-    "lint:check": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint:check": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@tanstack/react-router": "^1.128.6",
@@ -31,6 +33,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "prettier": "^3.4.2",
     "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4"
   },

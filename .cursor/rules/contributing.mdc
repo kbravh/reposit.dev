@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+
+Always run `npm run fix` after making changes.
+
+Styling should be done with Tailwind v4.
+
+When making any new components or pages, always check `examples/` for example components and pages (from Tailwind Plus).

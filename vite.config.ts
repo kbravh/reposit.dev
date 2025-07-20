@@ -1,7 +1,9 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
+import { coverageConfigDefaults } from 'vitest/config';
 import tsConfigPaths from 'vite-tsconfig-paths';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
-import react from '@vitejs/plugin-react-oxc';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   server: {
@@ -12,4 +14,19 @@ export default defineConfig({
     tanstackStart({ customViteReactPlugin: true }),
     react(),
   ],
+  test: {
+    environment: 'jsdom',
+    setupFiles: [],
+    passWithNoTests: true,
+    coverage: {
+      enabled: true,
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        ...coverageConfigDefaults.exclude,
+        'examples',
+        'routeTree.gen.ts',
+        'tanstack-router.gen.ts',
+      ],
+    },
+  },
 });

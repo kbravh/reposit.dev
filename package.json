@@ -12,7 +12,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
     "lint:check": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "fix": "npm run lint && npm run format",
+    "check": "npm run lint:check && npm run format:check"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.128.6",

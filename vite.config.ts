@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite'
-import tsConfigPaths from 'vite-tsconfig-paths'
-import { tanstackStart } from '@tanstack/react-start/plugin/vite'
-import react from '@vitejs/plugin-react-oxc'
+import { defineConfig } from 'vite';
+import tsConfigPaths from 'vite-tsconfig-paths';
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import react from '@vitejs/plugin-react-oxc';
 
 export default defineConfig({
   server: {
@@ -12,4 +12,4 @@ export default defineConfig({
     tanstackStart({ customViteReactPlugin: true }),
     react(),
   ],
-})
+});

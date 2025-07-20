@@ -1,0 +1,36 @@
+export default function Example() {
+	return (
+		<>
+			<button
+				type="button"
+				className="rounded-sm bg-indigo-500 px-2 py-1 font-semibold text-white text-xs shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-indigo-500 focus-visible:outline-offset-2"
+			>
+				Button text
+			</button>
+			<button
+				type="button"
+				className="rounded-sm bg-indigo-500 px-2 py-1 font-semibold text-sm text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-indigo-500 focus-visible:outline-offset-2"
+			>
+				Button text
+			</button>
+			<button
+				type="button"
+				className="rounded-md bg-indigo-500 px-2.5 py-1.5 font-semibold text-sm text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-indigo-500 focus-visible:outline-offset-2"
+			>
+				Button text
+			</button>
+			<button
+				type="button"
+				className="rounded-md bg-indigo-500 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-indigo-500 focus-visible:outline-offset-2"
+			>
+				Button text
+			</button>
+			<button
+				type="button"
+				className="rounded-md bg-indigo-500 px-3.5 py-2.5 font-semibold text-sm text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-indigo-500 focus-visible:outline-offset-2"
+			>
+				Button text
+			</button>
+		</>
+	);
+}

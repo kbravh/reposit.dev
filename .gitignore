@@ -1,7 +1,9 @@
-node_modules
+node_modules/
 
-.output
+.output/
 
-.tanstack
+.tanstack/
 
-.nitro
+.nitro/
+
+coverage/

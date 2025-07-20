@@ -1,5 +1,5 @@
 import js from '@eslint/js';
-import { browser, es2022 } from 'globals';
+import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from '@typescript-eslint/eslint-plugin';
@@ -8,13 +8,19 @@ import react from 'eslint-plugin-react';
 
 export default [
   {
-    ignores: ['dist/**', 'node_modules/**', '.eslintrc.js'],
+    ignores: [
+      '.nitro/*',
+      'node_modules/**',
+      '.eslintrc.js',
+      '.output/*',
+      '.tanstack/*',
+    ],
   },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      ecmaVersion: es2022,
-      globals: browser,
+      ecmaVersion: 'latest',
+      globals: globals.browser,
       parser: tsParser,
       parserOptions: {
         ecmaVersion: 'latest',

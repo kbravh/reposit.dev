@@ -1,0 +1,194 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Auth Tables (NextAuth.js compatible)
+model User {
+  id            String    @id
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Auth relations
+  accounts Account[]
+  sessions Session[]
+
+  // App relations
+  repositories Repository[] @relation("UserRepositories")
+  tags         Tag[]        @relation("UserTags")
+  lists        List[]       @relation("UserLists")
+
+  @@map("reposit.dev_user")
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  @@index([userId])
+  @@map("reposit.dev_account")
+}
+
+model Session {
+  sessionToken String   @id
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("reposit.dev_session")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+  @@map("reposit.dev_verification_token")
+}
+
+// Reposit.dev Application Tables
+model Repository {
+  id          String   @id
+  name        String
+  owner       String   // GitHub/GitLab username or org
+  url         String
+  description String?
+  isArchived  Boolean  @default(false)
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User @relation("UserRepositories", fields: [createdById], references: [id])
+
+  // Relations
+  tags        RepositoryTag[]
+  listEntries ListRepositoryEntry[]
+
+  @@index([owner, name])
+  @@index([createdById])
+  @@index([isArchived])
+  @@map("reposit.dev_repository")
+}
+
+model Tag {
+  id          String   @id
+  name        String
+  color       String   @default("#3B82F6") // Default blue hex color
+  createdById String
+  createdAt   DateTime @default(now())
+
+  createdBy User @relation("UserTags", fields: [createdById], references: [id])
+
+  // Relations
+  repositories RepositoryTag[]
+  listFilters  ListTagFilter[]
+
+  @@index([name])
+  @@index([createdById])
+  @@map("reposit.dev_tag")
+}
+
+model RepositoryTag {
+  repositoryId String
+  tagId        String
+  createdAt    DateTime @default(now())
+
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  tag        Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([repositoryId, tagId])
+  @@index([repositoryId])
+  @@index([tagId])
+  @@map("reposit.dev_repository_tag")
+}
+
+model List {
+  id          String   @id
+  name        String
+  description String?
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User @relation("UserLists", fields: [createdById], references: [id])
+
+  // Relations
+  repositoryEntries ListRepositoryEntry[]
+  tagFilters        ListTagFilter[]
+
+  @@index([name])
+  @@index([createdById])
+  @@map("reposit.dev_list")
+}
+
+model ListRepositoryEntry {
+  id           String              @id
+  listId       String
+  repositoryId String
+  entryType    ListRepositoryType // "include" or "exclude"
+  createdAt    DateTime            @default(now())
+
+  list       List       @relation(fields: [listId], references: [id], onDelete: Cascade)
+  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, repositoryId])
+  @@index([listId])
+  @@index([repositoryId])
+  @@map("reposit.dev_list_repository_entry")
+}
+
+model ListTagFilter {
+  id         String        @id
+  listId     String
+  tagId      String
+  filterType ListFilterType // "include" or "exclude"
+  createdAt  DateTime      @default(now())
+
+  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@index([listId])
+  @@index([tagId])
+  @@map("reposit.dev_list_tag_filter")
+}
+
+// Enums
+enum ListRepositoryType {
+  include
+  exclude
+}
+
+enum ListFilterType {
+  include
+  exclude
+}

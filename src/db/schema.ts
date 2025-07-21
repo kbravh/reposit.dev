@@ -1,4 +1,11 @@
-import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  uniqueIndex,
+  index,
+} from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const user = pgTable('user', {
@@ -65,69 +72,145 @@ export const verification = pgTable('verification', {
     .notNull(),
 });
 
-export const repository = pgTable('repository', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  description: text('description'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => sql`now()`)
-    .notNull(),
-});
+export const repository = pgTable(
+  'repository',
+  {
+    id: text('id').primaryKey(),
+    htmlUrl: text('html_url').notNull(),
+    org: text('org').notNull(),
+    name: text('name').notNull(),
+    description: text('description'),
+    private: boolean('private').notNull(),
+    provider: text('provider').default('github').notNull(),
+    lastSyncedAt: timestamp('last_synced_at'),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    primaryLanguage: text('primary_language'),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => sql`now()`)
+      .notNull(),
+  },
+  table => [
+    // Unique constraint for org, name, provider (a repo is unique in a provider/org by name)
+    uniqueIndex('repository_org_name_provider_unique').on(
+      table.org,
+      table.name,
+      table.provider
+    ),
+    // Indexes for common queries
+    index('repository_org_idx').on(table.org),
+    index('repository_name_idx').on(table.name),
+    index('repository_org_name_idx').on(table.org, table.name),
+  ]
+);
 
-export const repositoryEntry = pgTable('repository_entry', {
-  id: text('id').primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  repositoryId: text('repository_id')
-    .notNull()
-    .references(() => repository.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => sql`now()`)
-    .notNull(),
-});
+export const repositoryEntry = pgTable(
+  'repository_entry',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    repositoryId: text('repository_id')
+      .notNull()
+      .references(() => repository.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => sql`now()`)
+      .notNull(),
+  },
+  table => [
+    // Unique constraint for userId + repositoryId
+    uniqueIndex('repository_entry_user_repository_unique').on(
+      table.userId,
+      table.repositoryId
+    ),
+    // Indexes for common queries
+    index('repository_entry_user_idx').on(table.userId),
+    index('repository_entry_repository_idx').on(table.repositoryId),
+  ]
+);
 
-export const tag = pgTable('tag', {
-  id: text('id').primaryKey(),
-  color: text('color'),
-  title: text('title').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => sql`now()`)
-    .notNull(),
-});
+export const tag = pgTable(
+  'tag',
+  {
+    id: text('id').primaryKey(),
+    title: text('title').notNull(),
+    color: text('color').default('#10b981').notNull(), // Tailwind emerald-500 as default
+    visibility: text('visibility').default('user').notNull(), // 'user', 'team', 'global'
+    ownerId: text('owner_id'), // nullable for global tags
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => sql`now()`)
+      .notNull(),
+  },
+  table => [
+    uniqueIndex('tag_title_owner_visibility_unique').on(
+      table.title,
+      table.ownerId,
+      table.visibility
+    ),
+  ]
+);
 
-export const userTag = pgTable('user_tag', {
-  id: text('id').primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  tagId: text('tag_id')
-    .notNull()
-    .references(() => tag.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => sql`now()`)
-    .notNull(),
-});
+export const repositoryInstance = pgTable(
+  'repository_instance',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    repositoryId: text('repository_id')
+      .notNull()
+      .references(() => repository.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => sql`now()`)
+      .notNull(),
+  },
+  table => [
+    uniqueIndex('repository_instance_user_repository_unique').on(
+      table.userId,
+      table.repositoryId
+    ),
+    index('repository_instance_user_idx').on(table.userId),
+    index('repository_instance_repository_idx').on(table.repositoryId),
+  ]
+);
 
-export const repositoryEntryTag = pgTable('repository_entry_tag', {
-  id: text('id').primaryKey(),
-  repositoryEntryId: text('repository_entry_id')
-    .notNull()
-    .references(() => repositoryEntry.id, { onDelete: 'cascade' }),
-  tagId: text('tag_id')
-    .notNull()
-    .references(() => tag.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => sql`now()`)
-    .notNull(),
-});
+export const tagInstance = pgTable(
+  'tag_instance',
+  {
+    id: text('id').primaryKey(),
+    tagId: text('tag_id')
+      .notNull()
+      .references(() => tag.id, { onDelete: 'cascade' }),
+    repositoryInstanceId: text('repository_instance_id')
+      .notNull()
+      .references(() => repositoryInstance.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }), // who assigned the tag
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => sql`now()`)
+      .notNull(),
+  },
+  table => [
+    uniqueIndex('tag_instance_unique').on(
+      table.tagId,
+      table.repositoryInstanceId,
+      table.userId
+    ),
+    index('tag_instance_tag_idx').on(table.tagId),
+    index('tag_instance_repository_instance_idx').on(
+      table.repositoryInstanceId
+    ),
+    index('tag_instance_user_idx').on(table.userId),
+  ]
+);

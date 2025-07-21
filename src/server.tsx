@@ -5,6 +5,9 @@ import {
 import { createRouter } from './router';
 import * as Sentry from '@sentry/tanstackstart-react';
 
+// Verify that the environment variables are set
+import './env';
+
 // eslint-disable-next-line react-refresh/only-export-components
 export default createStartHandler({
   createRouter,

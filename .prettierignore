@@ -30,6 +30,7 @@ coverage/
 
 # AI Context
 examples/
+.cursor/
 
 # Husky
 .husky/

@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+
+Common tasks should be exposed to the user via keyboard shortcuts.
+
+Take inspiration from common web patterns (e.g. CMD + K to search) and common terminal patterns (Vim).
+
+All existing keyboard shortcuts should be catalogued in `keyboard-shortcuts.md`.

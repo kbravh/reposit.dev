@@ -14,6 +14,8 @@ export default [
       '.eslintrc.js',
       '.output/*',
       '.tanstack/*',
+      'coverage/*',
+      'examples/*',
     ],
   },
   {

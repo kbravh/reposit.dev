@@ -24,3 +24,9 @@ package-lock.json
 # Config files that should maintain their original formatting
 *.min.js
 *.min.css
+
+# Test output
+coverage/
+
+# AI Context
+examples/

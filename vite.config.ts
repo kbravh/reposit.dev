@@ -4,6 +4,7 @@ import { coverageConfigDefaults } from 'vitest/config';
 import tsConfigPaths from 'vite-tsconfig-paths';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   server: {
@@ -13,6 +14,7 @@ export default defineConfig({
     tsConfigPaths(),
     tanstackStart({ customViteReactPlugin: true }),
     react(),
+    tailwindcss(),
   ],
   test: {
     environment: 'jsdom',

@@ -30,3 +30,9 @@ coverage/
 
 # AI Context
 examples/
+
+# Husky
+.husky/
+
+# Prettier
+.prettierignore

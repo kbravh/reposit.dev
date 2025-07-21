@@ -7,8 +7,9 @@ import {
   Scripts,
 } from '@tanstack/react-router';
 import appCss from '../styles/app.css?url';
+import { wrapCreateRootRouteWithSentry } from '@sentry/tanstackstart-react';
 
-export const Route = createRootRoute({
+export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
   head: () => ({
     meta: [
       {

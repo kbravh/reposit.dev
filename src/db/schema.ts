@@ -1,37 +1,38 @@
 import {
-  pgTable,
+  sqliteTable,
   text,
-  timestamp,
-  boolean,
+  integer,
   uniqueIndex,
   index,
-} from 'drizzle-orm/pg-core';
+} from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 import uniqid from 'uniqid';
 
-export const user = pgTable('user', {
+export const user = sqliteTable('user', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
-  emailVerified: boolean('email_verified')
+  emailVerified: integer('email_verified', { mode: 'boolean' })
     .$defaultFn(() => false)
     .notNull(),
   image: text('image'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => sql`now()`)
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
 });
 
-export const session = pgTable('session', {
+export const session = sqliteTable('session', {
   id: text('id').primaryKey(),
-  expiresAt: timestamp('expires_at').notNull(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   token: text('token').notNull().unique(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => sql`now()`)
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
@@ -40,7 +41,7 @@ export const session = pgTable('session', {
     .references(() => user.id, { onDelete: 'cascade' }),
 });
 
-export const account = pgTable('account', {
+export const account = sqliteTable('account', {
   id: text('id').primaryKey(),
   accountId: text('account_id').notNull(),
   providerId: text('provider_id').notNull(),
@@ -50,30 +51,36 @@ export const account = pgTable('account', {
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   idToken: text('id_token'),
-  accessTokenExpiresAt: timestamp('access_token_expires_at'),
-  refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
+  accessTokenExpiresAt: integer('access_token_expires_at', {
+    mode: 'timestamp',
+  }),
+  refreshTokenExpiresAt: integer('refresh_token_expires_at', {
+    mode: 'timestamp',
+  }),
   scope: text('scope'),
   password: text('password'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => sql`now()`)
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
 });
 
-export const verification = pgTable('verification', {
+export const verification = sqliteTable('verification', {
   id: text('id').primaryKey(),
   identifier: text('identifier').notNull(),
   value: text('value').notNull(),
-  expiresAt: timestamp('expires_at').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => sql`now()`)
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
 });
 
-export const repository = pgTable(
+export const repository = sqliteTable(
   'repository',
   {
     id: text('id')
@@ -83,32 +90,31 @@ export const repository = pgTable(
     org: text('org').notNull(),
     name: text('name').notNull(),
     description: text('description'),
-    private: boolean('private').notNull(),
+    private: integer('private', { mode: 'boolean' }).notNull(),
     provider: text('provider').default('github').notNull(),
-    lastSyncedAt: timestamp('last_synced_at'),
-    deletedAt: timestamp('deleted_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
+    lastSyncedAt: integer('last_synced_at', { mode: 'timestamp' }),
+    deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
     primaryLanguage: text('primary_language'),
-    updatedAt: timestamp('updated_at')
-      .defaultNow()
-      .$onUpdate(() => sql`now()`)
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .default(sql`(CURRENT_TIMESTAMP)`)
       .notNull(),
   },
   table => [
-    // Unique constraint for org, name, provider (a repo is unique in a provider/org by name)
     uniqueIndex('repository_org_name_provider_unique').on(
       table.org,
       table.name,
       table.provider
     ),
-    // Indexes for common queries
     index('repository_org_idx').on(table.org),
     index('repository_name_idx').on(table.name),
     index('repository_org_name_idx').on(table.org, table.name),
   ]
 );
 
-export const repositoryInstance = pgTable(
+export const repositoryInstance = sqliteTable(
   'repository_instance',
   {
     id: text('id')
@@ -120,10 +126,11 @@ export const repositoryInstance = pgTable(
     repositoryId: text('repository_id')
       .notNull()
       .references(() => repository.id, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at')
-      .defaultNow()
-      .$onUpdate(() => sql`now()`)
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .default(sql`(CURRENT_TIMESTAMP)`)
       .notNull(),
   },
   table => [
@@ -136,7 +143,7 @@ export const repositoryInstance = pgTable(
   ]
 );
 
-export const tagInstance = pgTable(
+export const tagInstance = sqliteTable(
   'tag_instance',
   {
     id: text('id')
@@ -147,16 +154,17 @@ export const tagInstance = pgTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
     color: text('color').default('#10b981').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at')
-      .defaultNow()
-      .$onUpdate(() => sql`now()`)
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .default(sql`(CURRENT_TIMESTAMP)`)
       .notNull(),
   },
   table => [index('tag_instance_user_idx').on(table.userId)]
 );
 
-export const tagToRepository = pgTable(
+export const tagToRepository = sqliteTable(
   'tag_instance_repository_instance',
   {
     id: text('id')

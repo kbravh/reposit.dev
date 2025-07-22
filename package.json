@@ -25,7 +25,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.1",
+    "@libsql/client": "^0.15.10",
     "@sentry/tanstackstart-react": "^9.40.0",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-router": "^1.128.6",

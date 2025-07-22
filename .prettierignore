@@ -35,5 +35,6 @@ examples/
 # Husky
 .husky/
 
-# Prettier
+# Ignores
 .prettierignore
+.gitignore

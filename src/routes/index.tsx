@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { authClient } from '../lib/auth-client';
+import { createTag } from '../actions/tags';
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -28,6 +29,9 @@ function Home() {
           Sign In
         </button>
       )}
+      <button onClick={() => createTag({ data: { title: 'test' } })}>
+        Create Tag
+      </button>
     </>
   );
 }

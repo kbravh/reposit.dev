@@ -5,9 +5,9 @@ import {
   boolean,
   uniqueIndex,
   index,
-  uuid,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
+import uniqid from 'uniqid';
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -76,7 +76,9 @@ export const verification = pgTable('verification', {
 export const repository = pgTable(
   'repository',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uniqid()),
     htmlUrl: text('html_url').notNull(),
     org: text('org').notNull(),
     name: text('name').notNull(),
@@ -109,7 +111,9 @@ export const repository = pgTable(
 export const repositoryInstance = pgTable(
   'repository_instance',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uniqid()),
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -135,7 +139,9 @@ export const repositoryInstance = pgTable(
 export const tagInstance = pgTable(
   'tag_instance',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uniqid()),
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -153,11 +159,13 @@ export const tagInstance = pgTable(
 export const tagToRepository = pgTable(
   'tag_instance_repository_instance',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
-    tagInstanceId: uuid('tag_instance_id')
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uniqid()),
+    tagInstanceId: text('tag_instance_id')
       .notNull()
       .references(() => tagInstance.id, { onDelete: 'cascade' }),
-    repositoryInstanceId: uuid('repository_instance_id')
+    repositoryInstanceId: text('repository_instance_id')
       .notNull()
       .references(() => repositoryInstance.id, { onDelete: 'cascade' }),
   },

@@ -5,7 +5,6 @@ import {
   uniqueIndex,
   index,
 } from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
 import uniqid from 'uniqid';
 
 export const user = sqliteTable('user', {
@@ -17,10 +16,10 @@ export const user = sqliteTable('user', {
     .notNull(),
   image: text('image'),
   createdAt: integer('created_at', { mode: 'timestamp' })
-    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$defaultFn(() => new Date())
     .notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' })
-    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$defaultFn(() => new Date())
     .notNull(),
 });
 
@@ -29,10 +28,10 @@ export const session = sqliteTable('session', {
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   token: text('token').notNull().unique(),
   createdAt: integer('created_at', { mode: 'timestamp' })
-    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$defaultFn(() => new Date())
     .notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' })
-    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$defaultFn(() => new Date())
     .notNull(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
@@ -60,10 +59,10 @@ export const account = sqliteTable('account', {
   scope: text('scope'),
   password: text('password'),
   createdAt: integer('created_at', { mode: 'timestamp' })
-    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$defaultFn(() => new Date())
     .notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' })
-    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$defaultFn(() => new Date())
     .notNull(),
 });
 
@@ -73,10 +72,10 @@ export const verification = sqliteTable('verification', {
   value: text('value').notNull(),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' })
-    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$defaultFn(() => new Date())
     .notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' })
-    .default(sql`(CURRENT_TIMESTAMP)`)
+    .$defaultFn(() => new Date())
     .notNull(),
 });
 
@@ -95,11 +94,11 @@ export const repository = sqliteTable(
     lastSyncedAt: integer('last_synced_at', { mode: 'timestamp' }),
     deletedAt: integer('deleted_at', { mode: 'timestamp' }),
     createdAt: integer('created_at', { mode: 'timestamp' })
-      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$defaultFn(() => new Date())
       .notNull(),
     primaryLanguage: text('primary_language'),
     updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$defaultFn(() => new Date())
       .notNull(),
   },
   table => [
@@ -127,10 +126,10 @@ export const repositoryInstance = sqliteTable(
       .notNull()
       .references(() => repository.id, { onDelete: 'cascade' }),
     createdAt: integer('created_at', { mode: 'timestamp' })
-      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$defaultFn(() => new Date())
       .notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$defaultFn(() => new Date())
       .notNull(),
   },
   table => [
@@ -155,10 +154,10 @@ export const tagInstance = sqliteTable(
     title: text('title').notNull(),
     color: text('color').default('#10b981').notNull(),
     createdAt: integer('created_at', { mode: 'timestamp' })
-      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$defaultFn(() => new Date())
       .notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$defaultFn(() => new Date())
       .notNull(),
   },
   table => [index('tag_instance_user_idx').on(table.userId)]

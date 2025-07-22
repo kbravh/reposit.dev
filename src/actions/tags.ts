@@ -22,6 +22,7 @@ export const createTag = createServerFn({
     }) => {
       const userId = session.userId;
       const newTag = await db.transaction(async tx => {
+        console.log('Beginning transaction');
         const [tag] = await tx
           .insert(tagInstance)
           .values({
@@ -30,14 +31,18 @@ export const createTag = createServerFn({
             color,
           })
           .returning();
+        console.log('Tag created', tag);
         if (repositoryInstanceId) {
+          console.log('Adding tag to repository');
           await tx.insert(tagToRepository).values({
             tagInstanceId: tag.id,
             repositoryInstanceId,
           });
         }
+        console.log('Transaction complete');
         return tag;
       });
+      console.log('Transaction complete', newTag);
       return newTag;
     }
   );

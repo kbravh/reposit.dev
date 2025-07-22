@@ -5,6 +5,7 @@ import {
   boolean,
   uniqueIndex,
   index,
+  uuid,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -75,7 +76,7 @@ export const verification = pgTable('verification', {
 export const repository = pgTable(
   'repository',
   {
-    id: text('id').primaryKey(),
+    id: uuid('id').primaryKey().defaultRandom(),
     htmlUrl: text('html_url').notNull(),
     org: text('org').notNull(),
     name: text('name').notNull(),
@@ -105,61 +106,10 @@ export const repository = pgTable(
   ]
 );
 
-export const repositoryEntry = pgTable(
-  'repository_entry',
-  {
-    id: text('id').primaryKey(),
-    userId: text('user_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    repositoryId: text('repository_id')
-      .notNull()
-      .references(() => repository.id, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at')
-      .defaultNow()
-      .$onUpdate(() => sql`now()`)
-      .notNull(),
-  },
-  table => [
-    // Unique constraint for userId + repositoryId
-    uniqueIndex('repository_entry_user_repository_unique').on(
-      table.userId,
-      table.repositoryId
-    ),
-    // Indexes for common queries
-    index('repository_entry_user_idx').on(table.userId),
-    index('repository_entry_repository_idx').on(table.repositoryId),
-  ]
-);
-
-export const tag = pgTable(
-  'tag',
-  {
-    id: text('id').primaryKey(),
-    title: text('title').notNull(),
-    color: text('color').default('#10b981').notNull(), // Tailwind emerald-500 as default
-    visibility: text('visibility').default('user').notNull(), // 'user', 'team', 'global'
-    ownerId: text('owner_id'), // nullable for global tags
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at')
-      .defaultNow()
-      .$onUpdate(() => sql`now()`)
-      .notNull(),
-  },
-  table => [
-    uniqueIndex('tag_title_owner_visibility_unique').on(
-      table.title,
-      table.ownerId,
-      table.visibility
-    ),
-  ]
-);
-
 export const repositoryInstance = pgTable(
   'repository_instance',
   {
-    id: text('id').primaryKey(),
+    id: uuid('id').primaryKey().defaultRandom(),
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -185,32 +135,36 @@ export const repositoryInstance = pgTable(
 export const tagInstance = pgTable(
   'tag_instance',
   {
-    id: text('id').primaryKey(),
-    tagId: text('tag_id')
-      .notNull()
-      .references(() => tag.id, { onDelete: 'cascade' }),
-    repositoryInstanceId: text('repository_instance_id')
-      .notNull()
-      .references(() => repositoryInstance.id, { onDelete: 'cascade' }),
+    id: uuid('id').primaryKey().defaultRandom(),
     userId: text('user_id')
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }), // who assigned the tag
+      .references(() => user.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    color: text('color').default('#10b981').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()
       .$onUpdate(() => sql`now()`)
       .notNull(),
   },
+  table => [index('tag_instance_user_idx').on(table.userId)]
+);
+
+export const tagToRepository = pgTable(
+  'tag_instance_repository_instance',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tagInstanceId: uuid('tag_instance_id')
+      .notNull()
+      .references(() => tagInstance.id, { onDelete: 'cascade' }),
+    repositoryInstanceId: uuid('repository_instance_id')
+      .notNull()
+      .references(() => repositoryInstance.id, { onDelete: 'cascade' }),
+  },
   table => [
-    uniqueIndex('tag_instance_unique').on(
-      table.tagId,
-      table.repositoryInstanceId,
-      table.userId
-    ),
-    index('tag_instance_tag_idx').on(table.tagId),
-    index('tag_instance_repository_instance_idx').on(
+    uniqueIndex('tag_instance_repository_instance_unique').on(
+      table.tagInstanceId,
       table.repositoryInstanceId
     ),
-    index('tag_instance_user_idx').on(table.userId),
   ]
 );

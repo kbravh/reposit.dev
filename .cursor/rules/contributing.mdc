@@ -4,6 +4,8 @@ alwaysApply: true
 
 Always run `npm run fix` after making changes.
 
+Whenever you run tests, run `npm run test:run` so that vitest does not go into watch mode.
+
 Styling should be done with Tailwind v4.
 
 When making any new components or pages, always check `examples/` for example components and pages (from Tailwind Plus).

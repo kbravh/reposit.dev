@@ -9,6 +9,7 @@ import {
 } from '../db/schema';
 import { authMiddleware } from './middleware/auth';
 import { eq, and, desc } from 'drizzle-orm';
+import { getLanguageColor } from '../utils/github';
 
 export const createTag = createServerFn({
   method: 'POST',
@@ -34,7 +35,7 @@ export const createTag = createServerFn({
           .values({
             title,
             userId,
-            color,
+            color: color || getLanguageColor(title),
           })
           .returning();
         console.log('Tag created', tag);

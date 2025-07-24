@@ -1,4 +1,5 @@
 import githubColors from '../data/colors.json';
+import { z } from 'zod';
 
 type GitHubLanguageColors = Record<
   string,
@@ -132,3 +133,67 @@ export function getLanguageColor(languageName: string): string | undefined {
 
   return undefined;
 }
+
+export const parseRepositoryUrl = (
+  url: string
+): { org: string; repo: string } => {
+  if (!url || typeof url !== 'string') {
+    throw new Error('Invalid URL provided');
+  }
+
+  const trimmedUrl = url.trim();
+
+  // Regex to match all three patterns:
+  // 1. https://github.com/org/repo
+  // 2. git@github.com:org/repo.git
+  // 3. org/repo
+  const match = trimmedUrl.match(
+    /^(?:https?:\/\/github\.com\/|git@github\.com:|)([^/]+)\/([^/]+?)(?:\.git)?(?:\/.*)?$/i
+  );
+
+  if (match) {
+    return {
+      org: match[1],
+      repo: match[2],
+    };
+  }
+
+  throw new Error(
+    'Invalid GitHub repository URL format. Supported formats: https://github.com/org/repo, git@github.com:org/repo.git, or org/repo'
+  );
+};
+
+const GitHubRepositorySchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  private: z.boolean(),
+  htmlUrl: z.string(),
+  description: z.string().optional(),
+  language: z.string().optional(),
+  owner: z.object({
+    login: z.string(),
+  }),
+});
+
+export type GitHubRepository = z.infer<typeof GitHubRepositorySchema>;
+
+// TODO: Allow a user to see their private repos
+export const getRepositoryDetails = async (
+  url: string
+): Promise<GitHubRepository> => {
+  const { org, repo } = parseRepositoryUrl(url);
+  const response = await fetch(`https://api.github.com/repos/${org}/${repo}`);
+  const data = await response.json();
+  const parsedData = GitHubRepositorySchema.parse(data);
+  return parsedData;
+};
+
+export const getRepositoryDetailsFromProviderId = async (
+  providerId: string,
+  _provider: string
+): Promise<GitHubRepository> => {
+  const response = await fetch(`https://api.github.com/repos/${providerId}`);
+  const data = await response.json();
+  const parsedData = GitHubRepositorySchema.parse(data);
+  return parsedData;
+};

@@ -91,6 +91,7 @@ export const repository = sqliteTable(
     description: text('description'),
     private: integer('private', { mode: 'boolean' }).notNull(),
     provider: text('provider').default('github').notNull(),
+    providerId: text('provider_id').notNull(),
     lastSyncedAt: integer('last_synced_at', { mode: 'timestamp' }),
     deletedAt: integer('deleted_at', { mode: 'timestamp' }),
     createdAt: integer('created_at', { mode: 'timestamp' })
@@ -106,6 +107,10 @@ export const repository = sqliteTable(
       table.org,
       table.name,
       table.provider
+    ),
+    uniqueIndex('repository_provider_id_unique').on(
+      table.provider,
+      table.providerId
     ),
     index('repository_org_idx').on(table.org),
     index('repository_name_idx').on(table.name),

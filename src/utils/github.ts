@@ -187,3 +187,13 @@ export const getRepositoryDetails = async (
   const parsedData = GitHubRepositorySchema.parse(data);
   return parsedData;
 };
+
+export const getRepositoryDetailsFromProviderId = async (
+  providerId: string,
+  _provider: string
+): Promise<GitHubRepository> => {
+  const response = await fetch(`https://api.github.com/repos/${providerId}`);
+  const data = await response.json();
+  const parsedData = GitHubRepositorySchema.parse(data);
+  return parsedData;
+};

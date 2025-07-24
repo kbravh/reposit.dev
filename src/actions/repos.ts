@@ -3,8 +3,11 @@ import { z } from 'zod';
 import { db } from '../db';
 import { repository, repositoryInstance } from '../db/schema';
 import { authMiddleware } from './middleware/auth';
-import { getRepositoryDetails } from '../utils/github';
-import { eq } from 'drizzle-orm';
+import {
+  getRepositoryDetails,
+  getRepositoryDetailsFromProviderId,
+} from '../utils/github';
+import { eq, and, desc } from 'drizzle-orm';
 
 export const createRepository = createServerFn({
   method: 'POST',
@@ -48,4 +51,140 @@ export const createRepository = createServerFn({
         .returning();
       return newRepoInstance;
     });
+  });
+
+export const getRepositories = createServerFn({
+  method: 'GET',
+})
+  .middleware([authMiddleware])
+  .handler(async ({ context: { session } }) => {
+    const userId = session.userId;
+    const repositories = await db
+      .select({
+        repositoryInstance: repositoryInstance,
+        repository: repository,
+      })
+      .from(repositoryInstance)
+      .innerJoin(repository, eq(repositoryInstance.repositoryId, repository.id))
+      .where(eq(repositoryInstance.userId, userId))
+      .orderBy(desc(repositoryInstance.createdAt));
+
+    return repositories;
+  });
+
+export const getRepository = createServerFn({
+  method: 'GET',
+})
+  .validator(
+    z.object({
+      repositoryInstanceId: z.string(),
+    })
+  )
+  .middleware([authMiddleware])
+  .handler(async ({ data: { repositoryInstanceId }, context: { session } }) => {
+    const userId = session.userId;
+    const [repo] = await db
+      .select({
+        repositoryInstance: repositoryInstance,
+        repository: repository,
+      })
+      .from(repositoryInstance)
+      .innerJoin(repository, eq(repositoryInstance.repositoryId, repository.id))
+      .where(
+        and(
+          eq(repositoryInstance.id, repositoryInstanceId),
+          eq(repositoryInstance.userId, userId)
+        )
+      );
+
+    if (!repo) {
+      throw new Error('Repository not found');
+    }
+
+    return repo;
+  });
+
+export const deleteRepository = createServerFn()
+  .validator(
+    z.object({
+      repositoryInstanceId: z.string(),
+    })
+  )
+  .middleware([authMiddleware])
+  .handler(async ({ data: { repositoryInstanceId }, context: { session } }) => {
+    const userId = session.userId;
+
+    // First verify the repository instance belongs to the user
+    const [repoInstance] = await db
+      .select()
+      .from(repositoryInstance)
+      .where(
+        and(
+          eq(repositoryInstance.id, repositoryInstanceId),
+          eq(repositoryInstance.userId, userId)
+        )
+      );
+
+    if (!repoInstance) {
+      throw new Error('Repository not found');
+    }
+
+    // Delete the repository instance (this removes the user's connection to the repo)
+    await db
+      .delete(repositoryInstance)
+      .where(eq(repositoryInstance.id, repositoryInstanceId));
+
+    return { success: true };
+  });
+
+export const syncRepository = createServerFn()
+  .validator(
+    z.object({
+      repositoryInstanceId: z.string(),
+    })
+  )
+  .middleware([authMiddleware])
+  .handler(async ({ data: { repositoryInstanceId }, context: { session } }) => {
+    const userId = session.userId;
+
+    // First verify the repository instance belongs to the user
+    const [repoInstance] = await db
+      .select({
+        repositoryInstance: repositoryInstance,
+        repository: repository,
+      })
+      .from(repositoryInstance)
+      .innerJoin(repository, eq(repositoryInstance.repositoryId, repository.id))
+      .where(
+        and(
+          eq(repositoryInstance.id, repositoryInstanceId),
+          eq(repositoryInstance.userId, userId)
+        )
+      );
+
+    if (!repoInstance) {
+      throw new Error('Repository not found');
+    }
+
+    // Fetch latest repository details from GitHub
+    const repoDetails = await getRepositoryDetailsFromProviderId(
+      repoInstance.repository.providerId,
+      repoInstance.repository.provider
+    );
+
+    // Update the repository with latest details
+    const [updatedRepo] = await db
+      .update(repository)
+      .set({
+        name: repoDetails.name,
+        description: repoDetails.description,
+        private: repoDetails.private,
+        primaryLanguage: repoDetails.language,
+        lastSyncedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(repository.id, repoInstance.repository.id))
+      .returning();
+
+    return updatedRepo;
   });

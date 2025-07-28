@@ -9,6 +9,8 @@ import {
   RotateCcw,
   Trash2,
   Code,
+  Tag,
+  X,
 } from 'lucide-react';
 import {
   getRepositories,
@@ -16,10 +18,136 @@ import {
   deleteRepository,
   syncRepository,
 } from '../../actions/repos';
+import {
+  getTags,
+  getTagsForRepository,
+  addTagToRepository,
+  removeTagFromRepository,
+} from '../../actions/tags';
 
 export const Route = createFileRoute('/_authenticated/repositories')({
   component: Repositories,
 });
+
+function RepositoryTags({
+  repositoryInstanceId,
+}: {
+  repositoryInstanceId: string;
+}) {
+  const [isAddingTag, setIsAddingTag] = useState(false);
+  const [newTagTitle, setNewTagTitle] = useState('');
+  const queryClient = useQueryClient();
+
+  const { data: availableTags = [] } = useQuery({
+    queryKey: ['tags'],
+    queryFn: () => getTags(),
+  });
+
+  const { data: repositoryTags = [] } = useQuery({
+    queryKey: ['repository-tags', repositoryInstanceId],
+    queryFn: () => getTagsForRepository({ data: { repositoryInstanceId } }),
+  });
+
+  const addTagMutation = useMutation({
+    mutationFn: (variables: { tagId: string; repositoryInstanceId: string }) =>
+      addTagToRepository({ data: variables }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['repository-tags', repositoryInstanceId],
+      });
+    },
+  });
+
+  const removeTagMutation = useMutation({
+    mutationFn: (variables: { tagId: string; repositoryInstanceId: string }) =>
+      removeTagFromRepository({ data: variables }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['repository-tags', repositoryInstanceId],
+      });
+    },
+  });
+
+  const availableToAdd = availableTags.filter(
+    tag => !repositoryTags.some(repoTag => repoTag.id === tag.id)
+  );
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {repositoryTags.map(tag => (
+        <span
+          key={tag.id}
+          className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium"
+          style={{ backgroundColor: tag.color + '20', color: tag.color }}
+        >
+          {tag.title}
+          <button
+            onClick={() =>
+              removeTagMutation.mutate({
+                tagId: tag.id,
+                repositoryInstanceId,
+              })
+            }
+            disabled={removeTagMutation.isPending}
+            className="hover:text-red-600"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        </span>
+      ))}
+
+      {!isAddingTag ? (
+        <button
+          onClick={() => setIsAddingTag(true)}
+          className="inline-flex items-center gap-1 rounded-full border border-dashed border-gray-300 px-2 py-1 text-xs text-gray-500 hover:border-gray-400 hover:text-gray-600"
+        >
+          <Tag className="h-3 w-3" />
+          Add tag
+        </button>
+      ) : (
+        <div className="flex gap-1">
+          <select
+            value={newTagTitle}
+            onChange={e => setNewTagTitle(e.target.value)}
+            className="rounded border border-gray-300 px-2 py-1 text-xs"
+          >
+            <option value="">Select tag...</option>
+            {availableToAdd.map(tag => (
+              <option key={tag.id} value={tag.id}>
+                {tag.title}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              if (newTagTitle) {
+                addTagMutation.mutate({
+                  tagId: newTagTitle,
+                  repositoryInstanceId,
+                });
+                setNewTagTitle('');
+                setIsAddingTag(false);
+              }
+            }}
+            disabled={!newTagTitle || addTagMutation.isPending}
+            className="rounded bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-500 disabled:opacity-50"
+          >
+            Add
+          </button>
+          <button
+            onClick={() => {
+              setIsAddingTag(false);
+              setNewTagTitle('');
+            }}
+            className="rounded bg-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Repositories() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,30 +202,6 @@ function Repositories() {
     if (trimmedUrl) {
       createRepoMutation.mutate({ url: trimmedUrl });
     }
-  };
-
-  const getLanguageColor = (language: string | null) => {
-    const colors: Record<string, string> = {
-      JavaScript: 'bg-yellow-100 text-yellow-800',
-      TypeScript: 'bg-blue-100 text-blue-800',
-      Python: 'bg-green-100 text-green-800',
-      Java: 'bg-red-100 text-red-800',
-      Go: 'bg-cyan-100 text-cyan-800',
-      Rust: 'bg-orange-100 text-orange-800',
-      'C++': 'bg-purple-100 text-purple-800',
-      'C#': 'bg-indigo-100 text-indigo-800',
-      PHP: 'bg-violet-100 text-violet-800',
-      Ruby: 'bg-red-100 text-red-800',
-    };
-    return colors[language || ''] || 'bg-gray-100 text-gray-800';
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   };
 
   return (
@@ -238,15 +342,9 @@ function Repositories() {
                     </th>
                     <th
                       scope="col"
-                      className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 lg:table-cell"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Language
-                    </th>
-                    <th
-                      scope="col"
-                      className="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell"
-                    >
-                      Added
+                      Tags
                     </th>
                     <th
                       scope="col"
@@ -283,21 +381,10 @@ function Repositories() {
                           </div>
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {item.repository.primaryLanguage ? (
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getLanguageColor(
-                              item.repository.primaryLanguage
-                            )}`}
-                          >
-                            {item.repository.primaryLanguage}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">—</span>
-                        )}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {formatDate(item.repositoryInstance.createdAt)}
+                      <td className="px-3 py-4 text-sm">
+                        <RepositoryTags
+                          repositoryInstanceId={item.repositoryInstance.id}
+                        />
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                         <div className="flex items-center justify-end gap-2">

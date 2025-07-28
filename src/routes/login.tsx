@@ -1,17 +1,14 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { authClient } from '../lib/auth-client';
 import { SiGithub } from '@icons-pack/react-simple-icons';
-import { getAuth } from '../lib/auth';
-import { getWebRequest } from '@tanstack/react-start/server';
+import { getSession } from '../actions/auth';
 
 // TODO: Take advantage of the `redirect` parameter to redirect to the specific page the user was trying to access
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
   beforeLoad: async () => {
-    const session = await getAuth().api.getSession({
-      headers: getWebRequest().headers,
-    });
+    const session = await getSession();
     if (session) {
       throw redirect({ to: '/' });
     }

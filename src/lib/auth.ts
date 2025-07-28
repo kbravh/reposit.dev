@@ -8,7 +8,7 @@ import { user, session, account, verification } from '../db/schema';
 
 const env = getEnv();
 
-const auth = betterAuth({
+export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: 'sqlite',
     schema: {
@@ -25,5 +25,3 @@ const auth = betterAuth({
     },
   },
 });
-
-export const getAuth = () => auth;

@@ -1,14 +1,13 @@
 import { Home, Settings, List, Code, User } from 'lucide-react';
-import { ElementType, ReactNode } from 'react';
+import { ElementType } from 'react';
 import MobileSidebar, {
   MobileSidebarButton,
 } from '../components/MobileSidebar';
 import { authClient } from '../lib/auth-client';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { getAuth } from '../lib/auth';
 import { redirect } from '@tanstack/react-router';
-import { getWebRequest } from '@tanstack/react-start/server';
+import { getSession } from '../actions/auth';
 
 export type NavigationItem = {
   name: string;
@@ -26,8 +25,7 @@ const navigation: NavigationItem[] = [
 export const Route = createFileRoute('/_authenticated')({
   component: LoggedInLayout,
   beforeLoad: async ({ location }) => {
-    const headers = getWebRequest().headers;
-    const session = await getAuth().api.getSession({ headers });
+    const session = await getSession();
 
     if (!session) {
       throw redirect({ to: '/login', search: { redirect: location.href } });
@@ -35,7 +33,7 @@ export const Route = createFileRoute('/_authenticated')({
   },
 });
 
-function LoggedInLayout({ children }: { children: ReactNode }) {
+function LoggedInLayout() {
   const { data: user, isPending } = useQuery({
     queryKey: ['session'],
     queryFn: () => authClient.getSession().then(res => res.data?.user),
@@ -131,7 +129,9 @@ function LoggedInLayout({ children }: { children: ReactNode }) {
         </div>
 
         <main className="py-10 lg:pl-72">
-          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
+          <div className="px-4 sm:px-6 lg:px-8">
+            <Outlet />
+          </div>
         </main>
       </div>
     </>

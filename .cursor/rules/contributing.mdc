@@ -10,4 +10,4 @@ Styling should be done with Tailwind v4.
 
 When making any new components or pages, always check `examples/` for example components and pages (from Tailwind Plus).
 
-Icons should be from the `lucide-react` package.
+Icons should be from the `lucide-react` package, except for brand icons which come `@icons-pack/react-simple-icons`.

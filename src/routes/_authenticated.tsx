@@ -1,29 +1,38 @@
 import { Home, Settings, List, Code, User } from 'lucide-react';
-import { cn } from '../utils/cn';
 import { ElementType, ReactNode } from 'react';
 import MobileSidebar, {
   MobileSidebarButton,
 } from '../components/MobileSidebar';
 import { authClient } from '../lib/auth-client';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
+import { getAuth } from '../lib/auth';
+import { redirect } from '@tanstack/react-router';
+import { getWebRequest } from '@tanstack/react-start/server';
 
 export type NavigationItem = {
   name: string;
   href: string;
   icon: ElementType;
-  current: boolean;
 };
 
 const navigation: NavigationItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home, current: true },
-  { name: 'Repositories', href: '/repositories', icon: Code, current: false },
-  { name: 'Lists', href: '/lists', icon: List, current: false },
-  { name: 'Settings', href: '/settings', icon: Settings, current: false },
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Repositories', href: '/repositories', icon: Code },
+  { name: 'Lists', href: '/lists', icon: List },
+  { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export const Route = createFileRoute('/_authenticated')({
   component: LoggedInLayout,
+  beforeLoad: async ({ location }) => {
+    const headers = getWebRequest().headers;
+    const session = await getAuth().api.getSession({ headers });
+
+    if (!session) {
+      throw redirect({ to: '/login', search: { redirect: location.href } });
+    }
+  },
 });
 
 function LoggedInLayout({ children }: { children: ReactNode }) {
@@ -52,21 +61,23 @@ function LoggedInLayout({ children }: { children: ReactNode }) {
                   <ul className="-mx-2 space-y-1">
                     {navigation.map(item => (
                       <li key={item.name}>
-                        <a
-                          href={item.href}
-                          className={cn(
-                            item.current
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:bg-gray-800 hover:text-white',
-                            'group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6'
-                          )}
+                        <Link
+                          to={item.href}
+                          activeProps={{
+                            className:
+                              'bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
+                          }}
+                          inactiveProps={{
+                            className:
+                              'text-gray-400 hover:bg-gray-800 hover:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
+                          }}
                         >
                           <item.icon
                             aria-hidden="true"
                             className="size-6 shrink-0"
                           />
                           {item.name}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>

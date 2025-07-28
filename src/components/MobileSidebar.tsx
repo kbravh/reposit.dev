@@ -5,8 +5,8 @@ import {
   TransitionChild,
 } from '@headlessui/react';
 import { NavigationItem } from '../routes/_authenticated';
-import { cn } from '../utils/cn';
 import { Menu, X } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 
 import { create } from 'zustand';
 
@@ -70,21 +70,23 @@ export default function MobileSidebar({
                   <ul className="-mx-2 space-y-1">
                     {navigationItems.map(item => (
                       <li key={item.name}>
-                        <a
-                          href={item.href}
-                          className={cn(
-                            item.current
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:bg-gray-800 hover:text-white',
-                            'group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6'
-                          )}
+                        <Link
+                          to={item.href}
+                          activeProps={{
+                            className:
+                              'bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
+                          }}
+                          inactiveProps={{
+                            className:
+                              'text-gray-400 hover:bg-gray-800 hover:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
+                          }}
                         >
                           <item.icon
                             aria-hidden="true"
                             className="size-6 shrink-0"
                           />
                           {item.name}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>

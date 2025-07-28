@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.6",
+    "@icons-pack/react-simple-icons": "^13.6.0",
     "@libsql/client": "^0.15.10",
     "@sentry/tanstackstart-react": "^9.40.0",
     "@tailwindcss/vite": "^4.1.11",

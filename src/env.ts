@@ -1,3 +1,5 @@
+'use server';
+
 import 'dotenv/config';
 import { z } from 'zod';
 
@@ -19,4 +21,4 @@ if (!_env.success) {
   throw new Error('Invalid environment variables');
 }
 
-export const env = _env.data;
+export const getEnv = () => _env.data;

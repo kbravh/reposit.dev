@@ -33,7 +33,7 @@ export const createRepository = createServerFn({
               provider: 'github',
               providerId: repoDetails.id.toString(),
               name: repoDetails.name,
-              htmlUrl: repoDetails.htmlUrl,
+              htmlUrl: repoDetails.html_url,
               private: repoDetails.private,
               org: repoDetails.owner.login,
               description: repoDetails.description,

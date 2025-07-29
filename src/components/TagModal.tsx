@@ -154,12 +154,16 @@ export function TagModal({
                     {repositoryTags.map(tag => (
                       <span
                         key={tag.id}
-                        className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium"
-                        style={{
-                          backgroundColor: tag.color + '20',
-                          color: tag.color,
-                        }}
+                        className="inline-flex items-center gap-x-1.5 rounded-md px-3 py-1 text-sm font-medium text-gray-900 ring-1 ring-gray-300 ring-inset"
                       >
+                        <svg
+                          viewBox="0 0 6 6"
+                          aria-hidden="true"
+                          className="size-1.5"
+                          style={{ fill: tag.color }}
+                        >
+                          <circle r={3} cx={3} cy={3} />
+                        </svg>
                         {tag.title}
                         <button
                           onClick={() =>
@@ -169,7 +173,7 @@ export function TagModal({
                             })
                           }
                           disabled={removeTagMutation.isPending}
-                          className="hover:text-red-600 focus:outline-none"
+                          className="ml-1 hover:text-red-600 focus:outline-none"
                           type="button"
                         >
                           <X className="h-4 w-4" />
@@ -211,10 +215,14 @@ export function TagModal({
                             }`}
                             onClick={() => handleSuggestionClick(tag)}
                           >
-                            <span
-                              className="inline-block w-3 h-3 rounded-full mr-2"
-                              style={{ backgroundColor: tag.color }}
-                            />
+                            <svg
+                              viewBox="0 0 6 6"
+                              aria-hidden="true"
+                              className="size-1.5 mr-2"
+                              style={{ fill: tag.color }}
+                            >
+                              <circle r={3} cx={3} cy={3} />
+                            </svg>
                             {tag.title}
                           </button>
                         ))}
@@ -233,7 +241,13 @@ export function TagModal({
                               }`}
                               onClick={handleAddTags}
                             >
-                              <span className="inline-block w-3 h-3 rounded-full mr-2 bg-gray-400" />
+                              <svg
+                                viewBox="0 0 6 6"
+                                aria-hidden="true"
+                                className="size-1.5 mr-2 fill-gray-400"
+                              >
+                                <circle r={3} cx={3} cy={3} />
+                              </svg>
                               Create &ldquo;{inputValue.toLowerCase().trim()}
                               &rdquo;
                             </button>

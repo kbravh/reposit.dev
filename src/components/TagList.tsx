@@ -22,9 +22,16 @@ export function RepositoryTags({
         {repositoryTags.slice(0, 3).map(tag => (
           <span
             key={tag.id}
-            className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
-            style={{ backgroundColor: tag.color + '20', color: tag.color }}
+            className="inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium text-gray-900 ring-1 ring-gray-300 ring-inset"
           >
+            <svg
+              viewBox="0 0 6 6"
+              aria-hidden="true"
+              className="size-1.5"
+              style={{ fill: tag.color }}
+            >
+              <circle r={3} cx={3} cy={3} />
+            </svg>
             {tag.title}
           </span>
         ))}

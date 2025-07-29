@@ -10,6 +10,7 @@ import {
 import { authMiddleware } from './middleware/auth';
 import { eq, and, desc, inArray } from 'drizzle-orm';
 import { getLanguageColor } from '../utils/github';
+import { getHashedTagColor } from '../utils/colors';
 
 export const createTag = createServerFn({
   method: 'POST',
@@ -58,7 +59,7 @@ export const createTag = createServerFn({
           .values({
             title,
             userId,
-            color: color || getLanguageColor(title),
+            color: color || getLanguageColor(title) || getHashedTagColor(title),
           })
           .returning();
 
@@ -447,7 +448,7 @@ export const createManyTags = createServerFn({
             newTitles.map(title => ({
               title,
               userId,
-              color: getLanguageColor(title) || '#10b981',
+              color: getLanguageColor(title) || getHashedTagColor(title),
             }))
           )
           .returning();

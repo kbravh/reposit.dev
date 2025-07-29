@@ -165,7 +165,10 @@ export const tagInstance = sqliteTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  table => [index('tag_instance_user_idx').on(table.userId)]
+  table => [
+    uniqueIndex('tag_instance_user_title_unique').on(table.userId, table.title),
+    index('tag_instance_user_idx').on(table.userId),
+  ]
 );
 
 export const tagToRepository = sqliteTable(

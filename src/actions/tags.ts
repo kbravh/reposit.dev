@@ -8,9 +8,8 @@ import {
   repository,
 } from '../db/schema';
 import { authMiddleware } from './middleware/auth';
-import { eq, and, desc, inArray } from 'drizzle-orm';
-import { getLanguageColor } from '../utils/github';
-import { getHashedTagColor } from '../utils/colors';
+import { eq, and, desc, sql } from 'drizzle-orm';
+import { getLanguageColor, getHashedTagColor } from '../utils/colors';
 
 export const createTag = createServerFn({
   method: 'POST',
@@ -422,40 +421,24 @@ export const createManyTags = createServerFn({
 
       const uniqueTitles = [...new Set(titles)]; // Remove duplicates
 
-      // First, get existing tags to avoid duplicates (since we don't have a unique constraint yet)
-      const existingTags = await db
-        .select()
-        .from(tagInstance)
-        .where(
-          and(
-            eq(tagInstance.userId, userId),
-            inArray(tagInstance.title, uniqueTitles)
-          )
-        );
-
-      // Find which titles don't exist yet
-      const existingTitles = new Set(existingTags.map(tag => tag.title));
-      const newTitles = uniqueTitles.filter(
-        title => !existingTitles.has(title)
-      );
-
-      // Bulk insert new tags if any
-      let newTags: typeof existingTags = [];
-      if (newTitles.length > 0) {
-        newTags = await db
-          .insert(tagInstance)
-          .values(
-            newTitles.map(title => ({
-              title,
-              userId,
-              color: getLanguageColor(title) || getHashedTagColor(title),
-            }))
-          )
-          .returning();
-      }
-
-      // Combine existing and new tags
-      const allTags = [...existingTags, ...newTags];
+      // Bulk upsert all tags using onConflictDoUpdate
+      const allTags = await db
+        .insert(tagInstance)
+        .values(
+          uniqueTitles.map(title => ({
+            title,
+            userId,
+            color: getLanguageColor(title) || getHashedTagColor(title),
+          }))
+        )
+        .onConflictDoUpdate({
+          target: [tagInstance.userId, tagInstance.title],
+          set: {
+            color: sql.raw(`excluded.${tagInstance.color.name}`),
+            updatedAt: sql.raw(`excluded.${tagInstance.updatedAt.name}`),
+          },
+        })
+        .returning();
 
       // Bulk upsert tag-to-repository relationships
       if (allTags.length > 0) {

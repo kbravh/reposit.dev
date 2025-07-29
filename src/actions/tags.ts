@@ -8,7 +8,7 @@ import {
   repository,
 } from '../db/schema';
 import { authMiddleware } from './middleware/auth';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, inArray } from 'drizzle-orm';
 import { getLanguageColor } from '../utils/github';
 
 export const createTag = createServerFn({
@@ -16,7 +16,10 @@ export const createTag = createServerFn({
 })
   .validator(
     z.object({
-      title: z.string(),
+      title: z
+        .string()
+        .min(1)
+        .transform(val => val.toLowerCase().trim()),
       color: z.string().optional(),
       repositoryInstanceId: z.string().optional(),
     })
@@ -28,8 +31,28 @@ export const createTag = createServerFn({
       context: { session },
     }) => {
       const userId = session.userId;
+
+      // Check if tag with this title already exists for this user
+      const [existingTag] = await db
+        .select()
+        .from(tagInstance)
+        .where(
+          and(eq(tagInstance.title, title), eq(tagInstance.userId, userId))
+        )
+        .limit(1);
+
+      if (existingTag) {
+        // If tag exists and we have a repository to associate, just create the association
+        if (repositoryInstanceId) {
+          await db.insert(tagToRepository).values({
+            tagInstanceId: existingTag.id,
+            repositoryInstanceId,
+          });
+        }
+        return existingTag;
+      }
+
       const newTag = await db.transaction(async tx => {
-        console.log('Beginning transaction');
         const [tag] = await tx
           .insert(tagInstance)
           .values({
@@ -38,18 +61,15 @@ export const createTag = createServerFn({
             color: color || getLanguageColor(title),
           })
           .returning();
-        console.log('Tag created', tag);
+
         if (repositoryInstanceId) {
-          console.log('Adding tag to repository');
           await tx.insert(tagToRepository).values({
             tagInstanceId: tag.id,
             repositoryInstanceId,
           });
         }
-        console.log('Transaction complete');
         return tag;
       });
-      console.log('Transaction complete', newTag);
       return newTag;
     }
   );
@@ -96,7 +116,10 @@ export const updateTag = createServerFn()
   .validator(
     z.object({
       tagId: z.string(),
-      title: z.string().optional(),
+      title: z
+        .string()
+        .optional()
+        .transform(val => (val ? val.toLowerCase().trim() : val)),
       color: z.string().optional(),
     })
   )
@@ -112,6 +135,21 @@ export const updateTag = createServerFn()
 
     if (!existingTag) {
       throw new Error('Tag not found');
+    }
+
+    // If updating title, check for duplicates
+    if (title && title !== existingTag.title) {
+      const [duplicateTag] = await db
+        .select()
+        .from(tagInstance)
+        .where(
+          and(eq(tagInstance.title, title), eq(tagInstance.userId, userId))
+        )
+        .limit(1);
+
+      if (duplicateTag) {
+        throw new Error('A tag with this title already exists');
+      }
     }
 
     const [updatedTag] = await db
@@ -343,3 +381,94 @@ export const getTagsForRepository = createServerFn({
 
     return tags.map(t => t.tagInstance);
   });
+
+export const createManyTags = createServerFn({
+  method: 'POST',
+})
+  .validator(
+    z.object({
+      titles: z.array(
+        z
+          .string()
+          .min(1)
+          .transform(val => val.toLowerCase().trim())
+      ),
+      repositoryInstanceId: z.string(),
+    })
+  )
+  .middleware([authMiddleware])
+  .handler(
+    async ({
+      data: { titles, repositoryInstanceId },
+      context: { session },
+    }) => {
+      const userId = session.userId;
+
+      // Verify the repository instance belongs to the user
+      const [repositoryInst] = await db
+        .select()
+        .from(repositoryInstance)
+        .where(
+          and(
+            eq(repositoryInstance.id, repositoryInstanceId),
+            eq(repositoryInstance.userId, userId)
+          )
+        );
+
+      if (!repositoryInst) {
+        throw new Error('Repository not found');
+      }
+
+      const uniqueTitles = [...new Set(titles)]; // Remove duplicates
+
+      // First, get existing tags to avoid duplicates (since we don't have a unique constraint yet)
+      const existingTags = await db
+        .select()
+        .from(tagInstance)
+        .where(
+          and(
+            eq(tagInstance.userId, userId),
+            inArray(tagInstance.title, uniqueTitles)
+          )
+        );
+
+      // Find which titles don't exist yet
+      const existingTitles = new Set(existingTags.map(tag => tag.title));
+      const newTitles = uniqueTitles.filter(
+        title => !existingTitles.has(title)
+      );
+
+      // Bulk insert new tags if any
+      let newTags: typeof existingTags = [];
+      if (newTitles.length > 0) {
+        newTags = await db
+          .insert(tagInstance)
+          .values(
+            newTitles.map(title => ({
+              title,
+              userId,
+              color: getLanguageColor(title) || '#10b981',
+            }))
+          )
+          .returning();
+      }
+
+      // Combine existing and new tags
+      const allTags = [...existingTags, ...newTags];
+
+      // Bulk upsert tag-to-repository relationships
+      if (allTags.length > 0) {
+        await db
+          .insert(tagToRepository)
+          .values(
+            allTags.map(tag => ({
+              tagInstanceId: tag.id,
+              repositoryInstanceId,
+            }))
+          )
+          .onConflictDoNothing(); // Using onConflictDoNothing since we just want to create relationships that don't exist
+      }
+
+      return allTags;
+    }
+  );

@@ -9,7 +9,7 @@ import {
 } from '../db/schema';
 import { authMiddleware } from './middleware/auth';
 import { eq, and, desc, sql } from 'drizzle-orm';
-import { getLanguageColor, getHashedTagColor } from '../utils/colors';
+import { getPredefinedColor, getHashedTagColor } from '../utils/colors';
 
 export const createTag = createServerFn({
   method: 'POST',
@@ -58,7 +58,8 @@ export const createTag = createServerFn({
           .values({
             title,
             userId,
-            color: color || getLanguageColor(title) || getHashedTagColor(title),
+            color:
+              color || getPredefinedColor(title) || getHashedTagColor(title),
           })
           .returning();
 
@@ -428,7 +429,7 @@ export const createManyTags = createServerFn({
           uniqueTitles.map(title => ({
             title,
             userId,
-            color: getLanguageColor(title) || getHashedTagColor(title),
+            color: getPredefinedColor(title) || getHashedTagColor(title),
           }))
         )
         .onConflictDoUpdate({

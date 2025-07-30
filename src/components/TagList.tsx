@@ -19,7 +19,7 @@ export function RepositoryTags({
   return (
     <>
       <div className="flex flex-wrap gap-1">
-        {repositoryTags.slice(0, 3).map(tag => (
+        {repositoryTags.map(tag => (
           <span
             key={tag.id}
             className="inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium text-gray-900 ring-1 ring-gray-300 ring-inset"
@@ -35,11 +35,6 @@ export function RepositoryTags({
             {tag.title}
           </span>
         ))}
-        {repositoryTags.length > 3 && (
-          <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
-            +{repositoryTags.length - 3}
-          </span>
-        )}
         <button
           onClick={() => setIsModalOpen(true)}
           className="inline-flex items-center gap-1 rounded-full border border-dashed border-gray-300 px-2 py-1 text-xs text-gray-500 hover:border-gray-400 hover:text-gray-600"

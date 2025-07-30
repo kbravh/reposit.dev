@@ -72,47 +72,47 @@ describe('colors utilities', () => {
 
   describe('getPredefinedColor', () => {
     it('should return verified brand colors', () => {
-      expect(getPredefinedColor('obsidian')).toBe('#8758FF');
-      expect(getPredefinedColor('twitter')).toBe('#1DA1F2');
-      expect(getPredefinedColor('facebook')).toBe('#1877F2');
+      expect(getPredefinedColor('obsidian')).toBe('#8758ff');
+      expect(getPredefinedColor('twitter')).toBe('#1da1f2');
+      expect(getPredefinedColor('facebook')).toBe('#1877f2');
       expect(getPredefinedColor('github')).toBe('#181717');
-      expect(getPredefinedColor('google')).toBe('#4285F4');
+      expect(getPredefinedColor('google')).toBe('#4285f4');
     });
 
     it('should be case insensitive for brand colors', () => {
-      expect(getPredefinedColor('OBSIDIAN')).toBe('#8758FF');
-      expect(getPredefinedColor('TWITTER')).toBe('#1DA1F2');
+      expect(getPredefinedColor('OBSIDIAN')).toBe('#8758ff');
+      expect(getPredefinedColor('TWITTER')).toBe('#1da1f2');
       expect(getPredefinedColor('GitHub')).toBe('#181717');
-      expect(getPredefinedColor('GOOGLE')).toBe('#4285F4');
+      expect(getPredefinedColor('GOOGLE')).toBe('#4285f4');
     });
 
     it('should return GitHub language colors when no brand color exists', () => {
       // These should fall back to GitHub language colors since they're not in our brand list
       expect(getPredefinedColor('JavaScript')).toBe('#f1e05a');
-      expect(getPredefinedColor('Python')).toBe('#3572A5');
-      expect(getPredefinedColor('TypeScript')).toBe('#3178C6');
+      expect(getPredefinedColor('Python')).toBe('#3572a5');
+      expect(getPredefinedColor('TypeScript')).toBe('#3178c6');
       expect(getPredefinedColor('Java')).toBe('#b07219');
-      expect(getPredefinedColor('Go')).toBe('#00ADD8');
-      expect(getPredefinedColor('Vue')).toBe('#42B883'); // GitHub Vue color, not a brand color
+      expect(getPredefinedColor('Go')).toBe('#00add8');
+      expect(getPredefinedColor('Vue')).toBe('#42b883'); // GitHub Vue color, not a brand color
     });
 
     it('should return color for case-insensitive match', () => {
       expect(getPredefinedColor('javascript')).toBe('#f1e05a');
-      expect(getPredefinedColor('PYTHON')).toBe('#3572A5');
-      expect(getPredefinedColor('typescript')).toBe('#3178C6');
+      expect(getPredefinedColor('PYTHON')).toBe('#3572a5');
+      expect(getPredefinedColor('typescript')).toBe('#3178c6');
       expect(getPredefinedColor('JAVA')).toBe('#b07219');
     });
 
     it('should return color for common aliases', () => {
       expect(getPredefinedColor('js')).toBe('#f1e05a'); // JavaScript
       expect(getPredefinedColor('ts')).toBe('#3178c6'); // TypeScript
-      expect(getPredefinedColor('py')).toBe('#3572A5'); // Python
+      expect(getPredefinedColor('py')).toBe('#3572a5'); // Python
       expect(getPredefinedColor('cpp')).toBe('#f34b7d'); // C++
       expect(getPredefinedColor('c++')).toBe('#f34b7d'); // C++
       expect(getPredefinedColor('cs')).toBe('#178600'); // C#
       expect(getPredefinedColor('c#')).toBe('#178600'); // C#
       expect(getPredefinedColor('csharp')).toBe('#178600'); // C#
-      expect(getPredefinedColor('golang')).toBe('#00ADD8'); // Go
+      expect(getPredefinedColor('golang')).toBe('#00add8'); // Go
       expect(getPredefinedColor('rs')).toBe('#dea584'); // Rust
       expect(getPredefinedColor('rb')).toBe('#701516'); // Ruby
     });
@@ -130,7 +130,7 @@ describe('colors utilities', () => {
       expect(getPredefinedColor('css')).toBe('#663399'); // CSS
       expect(getPredefinedColor('scss')).toBe('#c6538c'); // SCSS
       expect(getPredefinedColor('sass')).toBe('#a53b70'); // Sass
-      expect(getPredefinedColor('vue')).toBe('#42B883'); // GitHub Vue color
+      expect(getPredefinedColor('vue')).toBe('#42b883'); // GitHub Vue color
     });
 
     it('should return color for functional languages', () => {
@@ -140,7 +140,7 @@ describe('colors utilities', () => {
       expect(getPredefinedColor('clj')).toBe('#db5855'); // Clojure
       expect(getPredefinedColor('elixir')).toBe('#6e4a7e'); // Elixir
       expect(getPredefinedColor('ex')).toBe('#6e4a7e'); // Elixir
-      expect(getPredefinedColor('elm')).toBe('#60B5CC'); // Elm
+      expect(getPredefinedColor('elm')).toBe('#60b5cc'); // Elm
     });
 
     it('should return color for systems languages', () => {
@@ -148,8 +148,8 @@ describe('colors utilities', () => {
       expect(getPredefinedColor('rust')).toBe('#dea584'); // Rust
       expect(getPredefinedColor('zig')).toBe('#ec915c'); // Zig
       expect(getPredefinedColor('nim')).toBe('#ffc200'); // Nim
-      expect(getPredefinedColor('assembly')).toBe('#6E4C13'); // Assembly
-      expect(getPredefinedColor('asm')).toBe('#6E4C13'); // Assembly
+      expect(getPredefinedColor('assembly')).toBe('#6e4c13'); // Assembly
+      expect(getPredefinedColor('asm')).toBe('#6e4c13'); // Assembly
     });
 
     it('should return undefined for tags that do not exist', () => {
@@ -175,7 +175,7 @@ describe('colors utilities', () => {
       expect(getPredefinedColor('f#')).toBe('#b845fc'); // F# case insensitive
       expect(getPredefinedColor('fsharp')).toBe('#b845fc'); // F# alias
       expect(getPredefinedColor('C++')).toBe('#f34b7d'); // C++
-      expect(getPredefinedColor('1C Enterprise')).toBe('#814CCC'); // Language with number and space
+      expect(getPredefinedColor('1C Enterprise')).toBe('#814ccc'); // Language with number and space
     });
   });
 });

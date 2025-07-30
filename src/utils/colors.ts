@@ -62,14 +62,14 @@ export function getPredefinedColor(tagName: string): string | undefined {
 
   // First check brand colors
   if (BRAND_COLORS[normalizedName]) {
-    return BRAND_COLORS[normalizedName];
+    return BRAND_COLORS[normalizedName].toLowerCase();
   }
 
   const colors = githubColors as unknown as GitHubLanguageColors;
 
   // Then try exact match in GitHub colors
   if (colors[tagName]) {
-    return colors[tagName].color || undefined;
+    return colors[tagName].color?.toLowerCase() || undefined;
   }
 
   // Try case-insensitive match in GitHub colors
@@ -78,13 +78,13 @@ export function getPredefinedColor(tagName: string): string | undefined {
   );
 
   if (languageKey) {
-    return colors[languageKey].color || undefined;
+    return colors[languageKey].color?.toLowerCase() || undefined;
   }
 
   // Try common variations and aliases for GitHub languages
   if (aliases[normalizedName]) {
     const aliasedLanguage = aliases[normalizedName];
-    return colors[aliasedLanguage]?.color || undefined;
+    return colors[aliasedLanguage]?.color?.toLowerCase() || undefined;
   }
 
   return undefined;

@@ -137,9 +137,9 @@ export function TagModal({
         <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <DialogPanel
             transition
-            className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+            className="relative transform overflow-visible rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:min-h-96 data-closed:sm:translate-y-0 data-closed:sm:scale-95 flex flex-col"
           >
-            <div>
+            <div className="flex-1 px-4 pt-5 pb-4 sm:p-6">
               <div className="mt-3 sm:mt-0">
                 <DialogTitle
                   as="h3"
@@ -154,17 +154,14 @@ export function TagModal({
                     {repositoryTags.map(tag => (
                       <span
                         key={tag.id}
-                        className="inline-flex items-center gap-x-1.5 rounded-md px-3 py-1 text-sm font-medium text-gray-900 ring-1 ring-gray-300 ring-inset"
+                        className="inline-flex items-center gap-x-2 rounded-md px-3 py-1.5 text-sm font-medium text-gray-900 ring-1 ring-gray-300 ring-inset"
                       >
-                        <svg
-                          viewBox="0 0 6 6"
+                        <span
+                          className="inline-block size-2 shrink-0 rounded-full"
+                          style={{ backgroundColor: tag.color }}
                           aria-hidden="true"
-                          className="size-1.5"
-                          style={{ fill: tag.color }}
-                        >
-                          <circle r={3} cx={3} cy={3} />
-                        </svg>
-                        {tag.title}
+                        />
+                        <span className="truncate">{tag.title}</span>
                         <button
                           onClick={() =>
                             removeTagMutation.mutate({
@@ -173,10 +170,10 @@ export function TagModal({
                             })
                           }
                           disabled={removeTagMutation.isPending}
-                          className="ml-1 hover:text-red-600 focus:outline-none"
+                          className="ml-0.5 hover:text-red-600 focus:outline-none"
                           type="button"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-3.5 w-3.5" />
                         </button>
                       </span>
                     ))}
@@ -188,6 +185,7 @@ export function TagModal({
                   <input
                     ref={inputRef}
                     type="text"
+                    name="tag"
                     value={inputValue}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
@@ -203,7 +201,7 @@ export function TagModal({
                   {isInputFocused &&
                     inputValue.trim() &&
                     suggestions.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-48 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
                         {suggestions.map((tag, index) => (
                           <button
                             key={tag.id}
@@ -215,15 +213,14 @@ export function TagModal({
                             }`}
                             onClick={() => handleSuggestionClick(tag)}
                           >
-                            <svg
-                              viewBox="0 0 6 6"
-                              aria-hidden="true"
-                              className="size-1.5 mr-2"
-                              style={{ fill: tag.color }}
-                            >
-                              <circle r={3} cx={3} cy={3} />
-                            </svg>
-                            {tag.title}
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="inline-block size-2 shrink-0 rounded-full"
+                                style={{ backgroundColor: tag.color }}
+                                aria-hidden="true"
+                              />
+                              <span className="truncate">{tag.title}</span>
+                            </div>
                           </button>
                         ))}
 
@@ -241,15 +238,17 @@ export function TagModal({
                               }`}
                               onClick={handleAddTags}
                             >
-                              <svg
-                                viewBox="0 0 6 6"
-                                aria-hidden="true"
-                                className="size-1.5 mr-2 fill-gray-400"
-                              >
-                                <circle r={3} cx={3} cy={3} />
-                              </svg>
-                              Create &ldquo;{inputValue.toLowerCase().trim()}
-                              &rdquo;
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="inline-block size-2 shrink-0 rounded-full bg-gray-400"
+                                  aria-hidden="true"
+                                />
+                                <span className="truncate">
+                                  Create &ldquo;
+                                  {inputValue.toLowerCase().trim()}
+                                  &rdquo;
+                                </span>
+                              </div>
                             </button>
                           )}
                       </div>
@@ -258,11 +257,11 @@ export function TagModal({
               </div>
             </div>
 
-            <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+            <div className="border-t border-gray-200 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
               <button
                 type="button"
                 onClick={onClose}
-                className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
+                className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer sm:w-auto sm:text-sm"
               >
                 Done
               </button>

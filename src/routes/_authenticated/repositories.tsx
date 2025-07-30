@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { type FormEvent } from 'react';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import {
   Search,
   Plus,
@@ -159,132 +160,104 @@ function Repositories() {
         </div>
       </div>
 
-      {/* Repositories Table */}
-      <div className="mt-8 flow-root">
-        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block py-2 align-middle sm:px-6 lg:px-8">
-            {isLoading ? (
-              <div className="text-center py-12">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-gray-400"></div>
-                <p className="mt-2 text-sm text-gray-500">
-                  Loading repositories...
-                </p>
+      {/* Repositories List */}
+      <div className="mt-8">
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-gray-400"></div>
+            <p className="mt-2 text-sm text-gray-500">
+              Loading repositories...
+            </p>
+          </div>
+        ) : filteredRepositories.length === 0 ? (
+          <div className="text-center py-12">
+            <Code className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-semibold text-gray-900">
+              No repositories
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {searchQuery
+                ? 'No repositories match your search.'
+                : 'Get started by adding a repository.'}
+            </p>
+            {!searchQuery && (
+              <div className="mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsAddingRepo(true)}
+                  className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  <Plus className="-ml-0.5 mr-1.5 h-5 w-5" />
+                  Add repository
+                </button>
               </div>
-            ) : filteredRepositories.length === 0 ? (
-              <div className="text-center py-12">
-                <Code className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-semibold text-gray-900">
-                  No repositories
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {searchQuery
-                    ? 'No repositories match your search.'
-                    : 'Get started by adding a repository.'}
-                </p>
-                {!searchQuery && (
-                  <div className="mt-6">
-                    <button
-                      type="button"
-                      onClick={() => setIsAddingRepo(true)}
-                      className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    >
-                      <Plus className="-ml-0.5 mr-1.5 h-5 w-5" />
-                      Add repository
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead>
-                  <tr>
-                    <th
-                      scope="col"
-                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
-                    >
-                      Repository
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      Tags
-                    </th>
-                    <th
-                      scope="col"
-                      className="relative py-3.5 pl-3 pr-4 sm:pr-0"
-                    >
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredRepositories.map(item => (
-                    <tr key={item.repositoryInstance.id}>
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-0">
-                        <div className="flex items-center">
-                          <div>
-                            <div className="flex items-center">
-                              <div className="text-sm font-medium text-gray-900">
-                                {item.repository.org}/{item.repository.name}
-                              </div>
-                              <a
-                                href={item.repository.htmlUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="ml-2 text-gray-400 hover:text-gray-600"
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
-                            </div>
-                            {item.repository.description && (
-                              <div className="text-sm text-gray-500 max-w-md truncate">
-                                {item.repository.description}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-3 py-4 text-sm">
-                        <RepositoryTags
-                          repositoryInstanceId={item.repositoryInstance.id}
-                        />
-                      </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                        <div className="relative">
-                          <details className="group">
-                            <summary className="flex cursor-pointer items-center justify-center rounded-md p-2 text-gray-400 hover:text-gray-600 focus:outline-none group-open:text-gray-600">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </summary>
-                            <div className="absolute right-0 z-10 mt-1 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                              <button
-                                onClick={() => {
-                                  deleteRepoMutation.mutate({
-                                    repositoryInstanceId:
-                                      item.repositoryInstance.id,
-                                  });
-                                  // Close the menu by removing focus
-                                  (
-                                    document.activeElement as HTMLElement
-                                  )?.blur();
-                                }}
-                                disabled={deleteRepoMutation.isPending}
-                                className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50"
-                              >
-                                <Trash2 className="mr-3 h-4 w-4" />
-                                Remove repository
-                              </button>
-                            </div>
-                          </details>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             )}
           </div>
-        </div>
+        ) : (
+          <ul className="divide-y divide-gray-100">
+            {filteredRepositories.map(item => (
+              <li
+                key={item.repositoryInstance.id}
+                className="flex flex-col gap-3 py-5 sm:flex-row sm:justify-between sm:gap-x-6"
+              >
+                <div className="min-w-0 flex-auto">
+                  <div className="flex items-center gap-x-2">
+                    <p className="font-semibold text-gray-900 text-sm/6">
+                      {item.repository.org}/{item.repository.name}
+                    </p>
+                    <a
+                      href={item.repository.htmlUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      <span className="sr-only">Open repository in GitHub</span>
+                    </a>
+                  </div>
+                  {item.repository.description && (
+                    <p className="mt-1 text-gray-500 text-sm/6 truncate">
+                      {item.repository.description}
+                    </p>
+                  )}
+                  <div className="mt-2">
+                    <RepositoryTags
+                      repositoryInstanceId={item.repositoryInstance.id}
+                    />
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-start justify-end sm:items-center">
+                  <Menu as="div" className="relative flex-none">
+                    <MenuButton className="relative block text-gray-500 hover:text-gray-900">
+                      <span className="-inset-2.5 absolute" />
+                      <span className="sr-only">Open options</span>
+                      <MoreHorizontal aria-hidden="true" className="size-5" />
+                    </MenuButton>
+                    <MenuItems
+                      transition
+                      className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-leave:duration-75 data-enter:ease-out data-leave:ease-in"
+                    >
+                      <MenuItem>
+                        <button
+                          onClick={() => {
+                            deleteRepoMutation.mutate({
+                              repositoryInstanceId: item.repositoryInstance.id,
+                            });
+                          }}
+                          disabled={deleteRepoMutation.isPending}
+                          className="flex w-full items-center px-4 py-2 text-sm text-red-600 data-focus:bg-gray-50 data-focus:outline-hidden disabled:opacity-50"
+                        >
+                          <Trash2 className="mr-3 h-4 w-4" />
+                          Remove repository
+                        </button>
+                      </MenuItem>
+                    </MenuItems>
+                  </Menu>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

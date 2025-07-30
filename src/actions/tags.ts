@@ -473,7 +473,7 @@ export const getTagsWithRepositoryCount = createServerFn({
         createdAt: tagInstance.createdAt,
         updatedAt: tagInstance.updatedAt,
         repositoryCount:
-          sql<number>`count(${tagToRepository.repositoryInstanceId})::int`.as(
+          sql<number>`count(case when ${tagToRepository.repositoryInstanceId} is not null then 1 end)`.as(
             'repositoryCount'
           ),
       })

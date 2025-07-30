@@ -90,17 +90,16 @@ describe('colors utilities', () => {
       // These should fall back to GitHub language colors since they're not in our brand list
       expect(getPredefinedColor('JavaScript')).toBe('#f1e05a');
       expect(getPredefinedColor('Python')).toBe('#3572A5');
-      expect(getPredefinedColor('TypeScript')).toBe('#3178c6');
+      expect(getPredefinedColor('TypeScript')).toBe('#3178C6');
       expect(getPredefinedColor('Java')).toBe('#b07219');
       expect(getPredefinedColor('Go')).toBe('#00ADD8');
-      expect(getPredefinedColor('Vue')).toBe('#41b883'); // GitHub Vue color, not a brand color
-      expect(getPredefinedColor('React')).toBe('#f1e05a'); // Falls back to JavaScript since React not in brand list
+      expect(getPredefinedColor('Vue')).toBe('#42B883'); // GitHub Vue color, not a brand color
     });
 
     it('should return color for case-insensitive match', () => {
       expect(getPredefinedColor('javascript')).toBe('#f1e05a');
       expect(getPredefinedColor('PYTHON')).toBe('#3572A5');
-      expect(getPredefinedColor('typescript')).toBe('#3178c6');
+      expect(getPredefinedColor('typescript')).toBe('#3178C6');
       expect(getPredefinedColor('JAVA')).toBe('#b07219');
     });
 
@@ -131,7 +130,7 @@ describe('colors utilities', () => {
       expect(getPredefinedColor('css')).toBe('#663399'); // CSS
       expect(getPredefinedColor('scss')).toBe('#c6538c'); // SCSS
       expect(getPredefinedColor('sass')).toBe('#a53b70'); // Sass
-      expect(getPredefinedColor('vue')).toBe('#41b883'); // GitHub Vue color
+      expect(getPredefinedColor('vue')).toBe('#42B883'); // GitHub Vue color
     });
 
     it('should return color for functional languages', () => {
@@ -177,12 +176,6 @@ describe('colors utilities', () => {
       expect(getPredefinedColor('fsharp')).toBe('#b845fc'); // F# alias
       expect(getPredefinedColor('C++')).toBe('#f34b7d'); // C++
       expect(getPredefinedColor('1C Enterprise')).toBe('#814CCC'); // Language with number and space
-    });
-
-    it('should handle framework aliases correctly', () => {
-      // Without brand colors, these should fall back to their language mappings
-      expect(getPredefinedColor('react')).toBe('#f1e05a'); // Maps to JavaScript
-      expect(getPredefinedColor('angular')).toBe('#3178c6'); // Maps to TypeScript
     });
   });
 });

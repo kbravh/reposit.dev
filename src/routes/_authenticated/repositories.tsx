@@ -196,7 +196,10 @@ function Repositories() {
         ) : (
           <ul className="divide-y divide-gray-100">
             {filteredRepositories.map(item => (
-              <li key={item.repositoryInstance.id} className="flex flex-col gap-3 py-5 sm:flex-row sm:justify-between sm:gap-x-6">
+              <li
+                key={item.repositoryInstance.id}
+                className="flex flex-col gap-3 py-5 sm:flex-row sm:justify-between sm:gap-x-6"
+              >
                 <div className="min-w-0 flex-auto">
                   <div className="flex items-center gap-x-2">
                     <p className="font-semibold text-gray-900 text-sm/6">

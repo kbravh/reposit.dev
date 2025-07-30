@@ -1,5 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
+import {
+  useRef,
+  useState,
+  useEffect,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from 'react';
 import {
   Dialog,
   DialogBackdrop,
@@ -28,6 +34,18 @@ export function TagModal({
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when modal opens with proper timing
+  useEffect(() => {
+    if (isOpen) {
+      // Wait for the modal transition to complete
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 350); // Slightly longer than the transition duration
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   const { data: availableTags = [] } = useQuery({
     queryKey: ['tags'],
@@ -170,7 +188,7 @@ export function TagModal({
                             })
                           }
                           disabled={removeTagMutation.isPending}
-                          className="ml-0.5 hover:text-red-600 focus:outline-none"
+                          className="ml-0.5 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded-sm"
                           type="button"
                         >
                           <X className="h-3.5 w-3.5" />

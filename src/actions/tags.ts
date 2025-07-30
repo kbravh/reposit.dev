@@ -457,3 +457,34 @@ export const createManyTags = createServerFn({
       return allTags;
     }
   );
+
+export const getTagsWithRepositoryCount = createServerFn({
+  method: 'GET',
+})
+  .middleware([authMiddleware])
+  .handler(async ({ context: { session } }) => {
+    const userId = session.userId;
+
+    const tagsWithCount = await db
+      .select({
+        id: tagInstance.id,
+        title: tagInstance.title,
+        color: tagInstance.color,
+        createdAt: tagInstance.createdAt,
+        updatedAt: tagInstance.updatedAt,
+        repositoryCount:
+          sql<number>`count(case when ${tagToRepository.repositoryInstanceId} is not null then 1 end)`.as(
+            'repositoryCount'
+          ),
+      })
+      .from(tagInstance)
+      .leftJoin(
+        tagToRepository,
+        eq(tagInstance.id, tagToRepository.tagInstanceId)
+      )
+      .where(eq(tagInstance.userId, userId))
+      .groupBy(tagInstance.id)
+      .orderBy(desc(tagInstance.createdAt));
+
+    return tagsWithCount;
+  });

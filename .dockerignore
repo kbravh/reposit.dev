@@ -74,12 +74,6 @@ scripts/
 eslint.config.js
 lint-staged.config.mjs
 
-# Package manager files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-bun.lockb
-
 # Docker files themselves
 Dockerfile*
 .dockerignore

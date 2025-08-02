@@ -16,8 +16,12 @@ const envSchema = z.object({
 // eslint-disable-next-line no-undef
 const _env = envSchema.safeParse(process.env);
 
-if (!_env.success) {
-  console.error('❌ Invalid environment variables:', _env.error.format());
+// eslint-disable-next-line no-undef
+if (!_env.success && !process.env.CI) {
+  console.error(
+    '❌ Invalid environment variables:',
+    z.prettifyError(_env.error)
+  );
   throw new Error('Invalid environment variables');
 }
 

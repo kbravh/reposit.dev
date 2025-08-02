@@ -63,13 +63,12 @@ When you push to the `main` branch, GitHub Actions automatically:
 2. **Installs** dependencies
 3. **Runs** quality checks (linting, format checks)
 4. **Executes** test suite
-5. **Generates** database migrations
-6. **Builds** the application
-7. **Applies** migrations to production database
-8. **Creates** Docker image
-9. **Pushes** image to GitHub Container Registry
-10. **Triggers** Coolify deployment via webhook
-11. **Commits** migration files to repository
+5. **Builds** the application
+6. **Pushes** changes to production database
+7. **Creates** Docker image
+8. **Pushes** image to GitHub Container Registry
+9. **Triggers** Coolify deployment via webhook
+10. **Commits** migration files to repository
 
 ### Health Check
 

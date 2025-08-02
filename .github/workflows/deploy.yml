@@ -56,23 +56,17 @@ jobs:
           npm run test:run
           echo "✅ Tests completed"
 
-      - name: Generate migrations
-        run: |
-          echo "📄 Generating migrations..."
-          npm run db:generate || echo "⚠️ No new migrations needed"
-          echo "✅ Migration generation completed"
-
       - name: Build application
         run: |
           echo "📄 Building application..."
           npm run build
           echo "✅ Application build completed"
 
-      - name: Apply migrations
+      - name: Push schema changes
         run: |
-          echo "📄 Applying migrations..."
-          npm run db:migrate:prod
-          echo "✅ Migrations applied"
+          echo "📄 Pushing schema changes to database..."
+          npm run db:push
+          echo "✅ Schema changes applied"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -106,19 +100,3 @@ jobs:
           echo "🎉 Deployment completed successfully!"
           echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           echo "🔗 Commit: ${{ github.sha }}"
-
-      - name: Commit migration files
-        run: |
-          echo "📄 Committing migration files..."
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-          # Check if there are any migration files to commit
-          if git diff --exit-code drizzle/; then
-            echo "ℹ️ No migration files to commit"
-          else
-            git add drizzle/
-            git commit -m "Add generated migration files [skip ci]"
-            git push
-            echo "✅ Migration files committed and pushed"
-          fi

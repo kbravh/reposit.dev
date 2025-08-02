@@ -7,6 +7,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
   CI: true
 
 jobs:
@@ -30,9 +32,6 @@ jobs:
         run: npm ci
 
       - name: Validate environment variables
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
         run: |
           if [ -z "$DATABASE_URL" ] || [ -z "$DATABASE_AUTH_TOKEN" ]; then
             echo "❌ Missing required environment variables for migrations"
@@ -58,19 +57,12 @@ jobs:
           echo "✅ Tests completed"
 
       - name: Generate migrations
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
         run: |
           echo "📄 Generating migrations..."
           npm run db:generate || echo "⚠️ No new migrations needed"
           echo "✅ Migration generation completed"
 
       - name: Apply migrations
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
-          NODE_ENV: production
         run: |
           echo "📄 Applying migrations..."
           npm run db:migrate:prod

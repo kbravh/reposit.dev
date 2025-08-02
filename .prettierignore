@@ -38,3 +38,7 @@ examples/
 # Ignores
 .prettierignore
 .gitignore
+
+# Docker
+Dockerfile
+.dockerignore

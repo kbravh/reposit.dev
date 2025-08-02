@@ -6,7 +6,9 @@ import { config } from 'dotenv';
 config();
 
 function log(message, type = 'info') {
-  const prefix = { info: '📄', success: '✅', warning: '⚠️', error: '❌' }[type];
+  const prefix = { info: '📄', success: '✅', warning: '⚠️', error: '❌' }[
+    type
+  ];
   console.log(`${prefix} [${new Date().toISOString()}] ${message}`);
 }
 
@@ -22,7 +24,13 @@ function runCommand(command, description) {
 }
 
 function validateEnvironment() {
-  const required = ['DATABASE_URL', 'BETTER_AUTH_URL', 'BETTER_AUTH_SECRET', 'GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET'];
+  const required = [
+    'DATABASE_URL',
+    'BETTER_AUTH_URL',
+    'BETTER_AUTH_SECRET',
+    'GITHUB_CLIENT_ID',
+    'GITHUB_CLIENT_SECRET',
+  ];
   const missing = required.filter(key => !process.env[key]);
   if (missing.length > 0) {
     throw new Error(`Missing environment variables: ${missing.join(', ')}`);
@@ -35,7 +43,7 @@ async function main() {
     log('Starting production build...', 'info');
     validateEnvironment();
     runCommand('npm ci', 'Installing dependencies');
-    
+
     if (process.env.SKIP_CHECKS !== 'true') {
       runCommand('npm run lint:check', 'Linting');
       runCommand('npm run format:check', 'Format check');
@@ -43,16 +51,16 @@ async function main() {
         runCommand('npm run test:run', 'Tests');
       }
     }
-    
+
     try {
       runCommand('npm run db:generate', 'Generating migrations');
     } catch (error) {
       log('No new migrations needed', 'warning');
     }
-    
+
     runCommand('npm run db:migrate:prod', 'Applying migrations');
     runCommand('vite build', 'Building application');
-    
+
     log('🎉 Build completed successfully!', 'success');
   } catch (error) {
     log(`💥 Build failed: ${error.message}`, 'error');

@@ -6,7 +6,7 @@ This app is configured for easy deployment with Coolify using a unified build pr
 
 ### Coolify Configuration
 
-**Build Command**: `npm run build`  
+**Build Command**: `npm run build`
 **Start Command**: `npm start`
 
 ### Environment Variables Required
@@ -34,6 +34,7 @@ NODE_ENV=production
 ### What Happens on Build
 
 The `npm run build` command automatically:
+
 1. Validates environment variables
 2. Installs dependencies
 3. Runs quality checks (linting, tests)

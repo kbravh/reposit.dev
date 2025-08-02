@@ -6,6 +6,9 @@
   "author": "",
   "type": "module",
   "main": "index.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "node scripts/build-production.js",

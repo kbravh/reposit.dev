@@ -9,7 +9,7 @@ interface ThemeStore {
 }
 
 export const useThemeStore = create<ThemeStore>((set, get) => ({
-  theme: 'light', // Default theme, will be overridden by the effect
+  theme: 'light', // Default theme
 
   setTheme: (theme: Theme) => {
     localStorage.setItem('theme', theme);
@@ -30,7 +30,6 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
   },
 }));
 
-// Initialize theme from localStorage or system preference
 export const initializeTheme = () => {
   const storedTheme = localStorage.getItem('theme') as Theme | null;
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

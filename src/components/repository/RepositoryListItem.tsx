@@ -1,8 +1,8 @@
 import { ExternalLink, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { RepositoryTags } from './TagList';
-import { deleteRepository } from '../actions/repos';
+import { RepositoryTags } from '../tags/TagList';
+import { deleteRepository } from '../../actions/repos';
 
 type Repository = {
   repositoryInstance: {

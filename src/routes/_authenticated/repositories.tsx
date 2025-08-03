@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { type FormEvent } from 'react';
 import { Search, Plus, Code } from 'lucide-react';
 import { getRepositories, createRepository } from '../../actions/repos';
-import { RepositoryListItem } from '../../components/RepositoryListItem';
+import { RepositoryListItem } from '../../components/repository/RepositoryListItem';
 
 export const Route = createFileRoute('/_authenticated/repositories')({
   component: Repositories,

@@ -4,10 +4,10 @@ import {
   DialogPanel,
   TransitionChild,
 } from '@headlessui/react';
-import { NavigationItem } from '../routes/_authenticated';
+import { NavigationItem } from '../../routes/_authenticated';
 import { Menu, X } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
-import { useSidebarStore } from '../stores/sidebarStore';
+import { useSidebarStore } from '../../stores/sidebarStore';
 
 export default function MobileSidebar({
   navigationItems,

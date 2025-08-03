@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { RepositoryListItem } from './RepositoryListItem';
+import { RepositoryListItem } from '../repository/RepositoryListItem';
 
 type Repository = {
   repositoryInstance: {

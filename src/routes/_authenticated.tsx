@@ -2,7 +2,7 @@ import { Home, Settings, List, Code, User, Tag } from 'lucide-react';
 import { ElementType } from 'react';
 import MobileSidebar, {
   MobileSidebarButton,
-} from '../components/MobileSidebar';
+} from '../components/layout/MobileSidebar';
 import { authClient } from '../lib/auth-client';
 import {
   createFileRoute,

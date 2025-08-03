@@ -2,10 +2,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { getRepositories } from '../../actions/repos';
 import { getTagsWithRepositoryCount } from '../../actions/tags';
-import { EmptyDashboardState } from '../../components/EmptyDashboardState';
-import { QuickActions } from '../../components/QuickActions';
-import { DashboardStats } from '../../components/DashboardStats';
-import { RecentRepositories } from '../../components/RecentRepositories';
+import { EmptyDashboardState } from '../../components/dashboard/EmptyDashboardState';
+import { QuickActions } from '../../components/ui/QuickActions';
+import { DashboardStats } from '../../components/dashboard/DashboardStats';
+import { RecentRepositories } from '../../components/dashboard/RecentRepositories';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: Dashboard,

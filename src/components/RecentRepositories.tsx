@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Code, ArrowRight } from 'lucide-react';
+import { RepositoryListItem } from './RepositoryListItem';
 
 type Repository = {
   repositoryInstance: {
@@ -37,43 +37,14 @@ export function RecentRepositories({ repositories }: RecentRepositoriesProps) {
         <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
           Recent Repositories
         </h3>
-        <div className="space-y-3">
+        <ul className="divide-y divide-gray-100">
           {repositories.slice(0, 5).map(repo => (
-            <div
+            <RepositoryListItem
               key={repo.repositoryInstance.id}
-              className="flex items-center justify-between py-2"
-            >
-              <div className="flex items-center space-x-3">
-                <Code className="h-5 w-5 text-gray-400" />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {repo.repository.org}/{repo.repository.name}
-                  </p>
-                  {repo.repository.description && (
-                    <p className="text-sm text-gray-500 truncate max-w-md">
-                      {repo.repository.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                {repo.repository.primaryLanguage && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                    {repo.repository.primaryLanguage}
-                  </span>
-                )}
-                <a
-                  href={repo.repository.htmlUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </div>
-            </div>
+              repository={repo}
+            />
           ))}
-        </div>
+        </ul>
         {repositories.length > 5 && (
           <div className="mt-4 text-center">
             <Link

@@ -10,7 +10,7 @@ import { Link } from '@tanstack/react-router';
 
 import { create } from 'zustand';
 
-const useSidebarStore = create<{
+export const useSidebarStore = create<{
   sidebarOpen: boolean;
   setSidebarOpen: (sidebarOpen: boolean) => void;
 }>(set => ({
@@ -72,6 +72,7 @@ export default function MobileSidebar({
                       <li key={item.name}>
                         <Link
                           to={item.href}
+                          onClick={() => setSidebarOpen(false)}
                           activeProps={{
                             className:
                               'bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',

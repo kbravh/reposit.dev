@@ -1,14 +1,67 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import { getRepositories } from '../../actions/repos';
+import { getTagsWithRepositoryCount } from '../../actions/tags';
+import { EmptyDashboardState } from '../../components/EmptyDashboardState';
+import { QuickActions } from '../../components/QuickActions';
+import { DashboardStats } from '../../components/DashboardStats';
+import { RecentRepositories } from '../../components/RecentRepositories';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: Dashboard,
 });
 
 function Dashboard() {
+  const { data: repositories = [], isLoading: isReposLoading } = useQuery({
+    queryKey: ['repositories'],
+    queryFn: () => getRepositories(),
+  });
+
+  const { data: tags = [], isLoading: isTagsLoading } = useQuery({
+    queryKey: ['tags-with-count'],
+    queryFn: () => getTagsWithRepositoryCount(),
+  });
+
+  const isLoading = isReposLoading || isTagsLoading;
+
+  const isNewUser =
+    !isLoading && repositories.length === 0 && tags.length === 0;
+  const hasRepos = !isReposLoading && repositories.length > 0;
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-      <p className="mt-2 text-gray-600">Dashboard page coming soon...</p>
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="border-b border-gray-200 pb-8">
+        <div className="md:flex md:items-center md:justify-between">
+          <div className="min-w-0 flex-1 flex flex-col gap-2">
+            <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+              Welcome back!
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              {isNewUser
+                ? "Let's get you started with organizing your repositories."
+                : "Here's what's happening with your repositories and tags."}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {isNewUser ? (
+        /* Empty State for New Users */
+        <EmptyDashboardState />
+      ) : (
+        /* Dashboard Content for Existing Users */
+        <div className="space-y-8">
+          {/* Stats Cards */}
+          <DashboardStats repositories={repositories} tags={tags} />
+
+          {/* Quick Actions */}
+          <QuickActions />
+
+          {/* Recent Content */}
+          {hasRepos && <RecentRepositories repositories={repositories} />}
+        </div>
+      )}
     </div>
   );
 }

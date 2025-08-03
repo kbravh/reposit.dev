@@ -7,16 +7,7 @@ import {
 import { NavigationItem } from '../routes/_authenticated';
 import { Menu, X } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
-
-import { create } from 'zustand';
-
-const useSidebarStore = create<{
-  sidebarOpen: boolean;
-  setSidebarOpen: (sidebarOpen: boolean) => void;
-}>(set => ({
-  sidebarOpen: false,
-  setSidebarOpen: sidebarOpen => set({ sidebarOpen }),
-}));
+import { useSidebarStore } from '../stores/sidebarStore';
 
 export default function MobileSidebar({
   navigationItems,
@@ -72,6 +63,7 @@ export default function MobileSidebar({
                       <li key={item.name}>
                         <Link
                           to={item.href}
+                          onClick={() => setSidebarOpen(false)}
                           activeProps={{
                             className:
                               'bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',

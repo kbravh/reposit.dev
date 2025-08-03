@@ -4,7 +4,12 @@ import MobileSidebar, {
   MobileSidebarButton,
 } from '../components/MobileSidebar';
 import { authClient } from '../lib/auth-client';
-import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useRouterState,
+} from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { redirect } from '@tanstack/react-router';
 import { getSession } from '../actions/auth';
@@ -39,6 +44,15 @@ function LoggedInLayout() {
     queryKey: ['session'],
     queryFn: () => authClient.getSession().then(res => res.data?.user),
   });
+
+  const routerState = useRouterState();
+
+  // Get the current page name based on the route
+  const getCurrentPageName = () => {
+    const pathname = routerState.location.pathname;
+    const currentNav = navigation.find(item => item.href === pathname);
+    return currentNav?.name || 'Dashboard';
+  };
 
   return (
     <>
@@ -111,7 +125,7 @@ function LoggedInLayout() {
         <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-xs sm:px-6 lg:hidden">
           <MobileSidebarButton />
           <div className="flex-1 font-semibold text-sm/6 text-white">
-            Dashboard
+            {getCurrentPageName()}
           </div>
           {!isPending && user && (
             <a href="#">

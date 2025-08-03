@@ -1,31 +1,18 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { authClient } from '../lib/auth-client';
 import { useQuery } from '@tanstack/react-query';
-import { getSession } from '../actions/auth';
 import { SiGithub } from '@icons-pack/react-simple-icons';
 import { Code, Tag, List, GitBranch, Search, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/')({
   component: Home,
-  beforeLoad: async () => {
-    const session = await getSession();
-    if (session) {
-      throw redirect({ to: '/dashboard' });
-    }
-  },
 });
 
 function Home() {
-  const { data: user, isPending } = useQuery({
+  const { data: user } = useQuery({
     queryKey: ['session'],
     queryFn: () => authClient.getSession().then(res => res.data?.user),
   });
-
-  if (isPending) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-gray-600">Loading...</div>
-    </div>;
-  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -40,24 +27,41 @@ function Home() {
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
-              <span className="ml-2 text-xl font-bold text-gray-900">Reposit</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">
+                Reposit
+              </span>
             </div>
-            
+
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => authClient.signIn.social({ provider: 'github' })}
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
-              >
-                Sign in
-              </button>
-              <button
-                onClick={() => authClient.signIn.social({ provider: 'github' })}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
-              >
-                Get started
-              </button>
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <button
+                    onClick={() =>
+                      authClient.signIn.social({ provider: 'github' })
+                    }
+                    className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium cursor-pointer"
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    onClick={() =>
+                      authClient.signIn.social({ provider: 'github' })
+                    }
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 cursor-pointer"
+                  >
+                    Get started
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -71,17 +75,33 @@ function Home() {
               Your Repository Management Hub
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600">
-              Keep track of repositories that matter. Organize, tag, and manage your GitHub repositories with powerful lists and intuitive workflows.
+              Keep track of repositories that matter. Organize, tag, and manage
+              your GitHub repositories with powerful lists and intuitive
+              workflows.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              <button
-                onClick={() => authClient.signIn.social({ provider: 'github' })}
-                className="bg-indigo-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 rounded-md flex items-center gap-2"
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  className="bg-indigo-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 rounded-md flex items-center gap-2"
+                >
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <button
+                  onClick={() =>
+                    authClient.signIn.social({ provider: 'github' })
+                  }
+                  className="bg-indigo-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 rounded-md flex items-center gap-2 cursor-pointer"
+                >
+                  <SiGithub className="h-5 w-5" />
+                  Sign up with GitHub
+                </button>
+              )}
+              <a
+                href="#features"
+                className="text-lg font-semibold leading-6 text-gray-900"
               >
-                <SiGithub className="h-5 w-5" />
-                Sign up with GitHub
-              </button>
-              <a href="#features" className="text-lg font-semibold leading-6 text-gray-900">
                 Learn more <span aria-hidden="true">→</span>
               </a>
             </div>
@@ -97,7 +117,8 @@ function Home() {
               Everything you need to manage repositories
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
-              Powerful features designed for developers who want to stay organized and productive.
+              Powerful features designed for developers who want to stay
+              organized and productive.
             </p>
           </div>
 
@@ -106,9 +127,12 @@ function Home() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-indigo-600">
                 <GitBranch className="h-6 w-6 text-white" />
               </div>
-              <h3 className="mt-6 text-lg font-semibold text-gray-900">Easy Repository Adding</h3>
+              <h3 className="mt-6 text-lg font-semibold text-gray-900">
+                Easy Repository Adding
+              </h3>
               <p className="mt-2 text-gray-600">
-                Add repositories to your collection by URL or org/name. Keep track of projects that inspire you.
+                Add repositories to your collection by URL or org/name. Keep
+                track of projects that inspire you.
               </p>
             </div>
 
@@ -116,9 +140,12 @@ function Home() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-indigo-600">
                 <Tag className="h-6 w-6 text-white" />
               </div>
-              <h3 className="mt-6 text-lg font-semibold text-gray-900">Smart Tagging System</h3>
+              <h3 className="mt-6 text-lg font-semibold text-gray-900">
+                Smart Tagging System
+              </h3>
               <p className="mt-2 text-gray-600">
-                Organize with tags that automatically use GitHub's language colors. Tag by language, framework, or custom categories.
+                Organize with tags that automatically use GitHub&apos;s language
+                colors. Tag by language, framework, or custom categories.
               </p>
             </div>
 
@@ -126,9 +153,12 @@ function Home() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-indigo-600">
                 <List className="h-6 w-6 text-white" />
               </div>
-              <h3 className="mt-6 text-lg font-semibold text-gray-900">Dynamic Lists</h3>
+              <h3 className="mt-6 text-lg font-semibold text-gray-900">
+                Dynamic Lists
+              </h3>
               <p className="mt-2 text-gray-600">
-                Create powerful lists using tag filters. Include or exclude tags to build collections that update automatically.
+                Create powerful lists using tag filters. Include or exclude tags
+                to build collections that update automatically.
               </p>
             </div>
 
@@ -136,9 +166,12 @@ function Home() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-indigo-600">
                 <Zap className="h-6 w-6 text-white" />
               </div>
-              <h3 className="mt-6 text-lg font-semibold text-gray-900">Keyboard Shortcuts</h3>
+              <h3 className="mt-6 text-lg font-semibold text-gray-900">
+                Keyboard Shortcuts
+              </h3>
               <p className="mt-2 text-gray-600">
-                Power user features with keyboard shortcuts for common tasks. Navigate and manage repositories lightning-fast.
+                Power user features with keyboard shortcuts for common tasks.
+                Navigate and manage repositories lightning-fast.
               </p>
             </div>
 
@@ -146,9 +179,12 @@ function Home() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-indigo-600">
                 <Code className="h-6 w-6 text-white" />
               </div>
-              <h3 className="mt-6 text-lg font-semibold text-gray-900">Language Intelligence</h3>
+              <h3 className="mt-6 text-lg font-semibold text-gray-900">
+                Language Intelligence
+              </h3>
               <p className="mt-2 text-gray-600">
-                Automatic language detection and color coding using GitHub's official language color scheme.
+                Automatic language detection and color coding using
+                GitHub&apos;s official language color scheme.
               </p>
             </div>
 
@@ -156,9 +192,12 @@ function Home() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-indigo-600">
                 <Search className="h-6 w-6 text-white" />
               </div>
-              <h3 className="mt-6 text-lg font-semibold text-gray-900">Team Management</h3>
+              <h3 className="mt-6 text-lg font-semibold text-gray-900">
+                Team Management
+              </h3>
               <p className="mt-2 text-gray-600">
-                Perfect for teams managing multiple repositories. Keep everyone organized and on the same page.
+                Perfect for teams managing multiple repositories. Keep everyone
+                organized and on the same page.
               </p>
             </div>
           </div>
@@ -173,16 +212,28 @@ function Home() {
               Ready to organize your repositories?
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-indigo-200">
-              Join developers who are already using Reposit to stay organized and productive.
+              Join developers who are already using Reposit to stay organized
+              and productive.
             </p>
             <div className="mt-8">
-              <button
-                onClick={() => authClient.signIn.social({ provider: 'github' })}
-                className="bg-white px-6 py-3 text-lg font-semibold text-indigo-600 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded-md flex items-center gap-2 mx-auto"
-              >
-                <SiGithub className="h-5 w-5" />
-                Get started with GitHub
-              </button>
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  className="bg-white px-6 py-3 text-lg font-semibold text-indigo-600 shadow-sm hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded-md flex items-center gap-2 mx-auto"
+                >
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <button
+                  onClick={() =>
+                    authClient.signIn.social({ provider: 'github' })
+                  }
+                  className="bg-white px-6 py-3 text-lg font-semibold text-indigo-600 shadow-sm hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded-md flex items-center gap-2 mx-auto cursor-pointer"
+                >
+                  <SiGithub className="h-5 w-5" />
+                  Get started with GitHub
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -197,9 +248,11 @@ function Home() {
               viewBox="0 0 24 24"
               fill="currentColor"
             >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
-            <span className="ml-2 text-lg font-semibold text-gray-900">Reposit</span>
+            <span className="ml-2 text-lg font-semibold text-gray-900">
+              Reposit
+            </span>
           </div>
           <p className="mt-4 text-center text-sm text-gray-600">
             The ultimate repository management tool for developers.

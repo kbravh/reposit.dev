@@ -1,0 +1,102 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  DATABASE_AUTH_TOKEN: ${{ secrets.DATABASE_AUTH_TOKEN }}
+  CI: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate environment variables
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$DATABASE_AUTH_TOKEN" ]; then
+            echo "❌ Missing required environment variables for migrations"
+            echo "Required: DATABASE_URL, DATABASE_AUTH_TOKEN"
+            exit 1
+          fi
+          echo "✅ Environment validation passed"
+
+      - name: Run quality checks
+        run: |
+          echo "📄 Running lint check..."
+          npm run lint:check
+          echo "✅ Lint check completed"
+
+          echo "📄 Running format check..."
+          npm run format:check
+          echo "✅ Format check completed"
+
+      - name: Run tests
+        run: |
+          echo "📄 Running tests..."
+          npm run test:run
+          echo "✅ Tests completed"
+
+      - name: Build application
+        run: |
+          echo "📄 Building application..."
+          npm run build
+          echo "✅ Application build completed"
+
+      - name: Push schema changes
+        run: |
+          echo "📄 Pushing schema changes to database..."
+          npm run db:push
+          echo "✅ Schema changes applied"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          platforms: linux/arm64
+
+      - name: Deploy to Coolify
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+        run: |
+          echo "📄 Triggering Coolify deployment..."
+          curl --request GET "$COOLIFY_WEBHOOK" --header "Authorization: Bearer $COOLIFY_TOKEN"
+          echo "✅ Coolify deployment triggered"
+
+      - name: Deployment Summary
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          echo "🔗 Commit: ${{ github.sha }}"

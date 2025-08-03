@@ -1,0 +1,92 @@
+# Dependencies (will be installed in container)
+node_modules/
+npm-debug.log*
+
+# Git and version control
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Development files
+.env*
+.env.example
+.env.local
+.env.development
+
+# Development build artifacts (we only want .output)
+dist/
+build/
+.vinxi/
+.vite/
+.turbo/
+coverage/
+
+# Testing
+vitest.config.ts
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__/
+**/__mocks__/
+
+# Documentation
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+auth-investigation.md
+deploy.md
+*.md
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.vim
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Development scripts
+scripts/
+
+# Linting and formatting
+.eslintrc*
+.prettierrc*
+.prettierignore
+eslint.config.js
+lint-staged.config.mjs
+
+# Docker files themselves
+Dockerfile*
+.dockerignore
+
+# Examples and documentation
+examples/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build configuration (not needed in runtime)
+vite.config.ts
+tsconfig.json
+drizzle.config.ts

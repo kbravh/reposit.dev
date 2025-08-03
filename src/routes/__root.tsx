@@ -8,8 +8,9 @@ import {
 } from '@tanstack/react-router';
 import appCss from '../styles/app.css?url';
 import { wrapCreateRootRouteWithSentry } from '@sentry/tanstackstart-react';
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { initializeTheme } from '../stores/themeStore';
 
 const queryClient = new QueryClient();
 
@@ -28,12 +29,33 @@ export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
       },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
+    scripts: [
+      {
+        dangerouslySetInnerHTML: {
+          __html: `(function() {
+            const theme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (theme === 'dark' || (!theme && prefersDark)) {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
+          })();`,
+        },
+      },
+    ],
   }),
   component: RootComponent,
   notFoundComponent: () => <div>Not found</div>,
 });
 
 function RootComponent() {
+  useEffect(() => {
+    // Initialize theme from localStorage after component mounts
+    initializeTheme();
+  }, []);
+
   return (
     <RootDocument>
       <Outlet />
@@ -43,7 +65,7 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html className="h-full bg-white">
+    <html className="h-full bg-white dark:bg-gray-900">
       <head>
         <HeadContent />
       </head>

@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Code, 
-  Tag, 
-  Plus, 
-  ArrowRight, 
-  GitBranch, 
+import {
+  Code,
+  Tag,
+  Plus,
+  ArrowRight,
+  GitBranch,
   Star,
   Users,
-  Calendar
+  Calendar,
 } from 'lucide-react';
 import { getRepositories } from '../../actions/repos';
 import { getTagsWithRepositoryCount } from '../../actions/tags';
@@ -24,19 +24,18 @@ function Dashboard() {
     queryFn: () => authClient.getSession().then(res => res.data?.user),
   });
 
-  const { data: repositories = [], isLoading: reposLoading } = useQuery({
+  const { data: repositories = [] } = useQuery({
     queryKey: ['repositories'],
     queryFn: () => getRepositories(),
   });
 
-  const { data: tags = [], isLoading: tagsLoading } = useQuery({
+  const { data: tags = [] } = useQuery({
     queryKey: ['tags-with-count'],
     queryFn: () => getTagsWithRepositoryCount(),
   });
 
   const isNewUser = repositories.length === 0 && tags.length === 0;
   const hasRepos = repositories.length > 0;
-  const hasTags = tags.length > 0;
 
   return (
     <div className="space-y-8">
@@ -48,10 +47,9 @@ function Dashboard() {
               Welcome back{user?.name ? `, ${user.name}` : ''}!
             </h1>
             <p className="mt-1 text-sm text-gray-500">
-              {isNewUser 
-                ? "Let's get you started with organizing your repositories."
-                : "Here's what's happening with your repositories and tags."
-              }
+              {isNewUser
+                ? 'Let&apos;s get you started with organizing your repositories.'
+                : 'Here&apos;s what&apos;s happening with your repositories and tags.'}
             </p>
           </div>
         </div>
@@ -85,8 +83,8 @@ function Dashboard() {
               </div>
               <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
-                  <Link 
-                    to="/repositories" 
+                  <Link
+                    to="/repositories"
                     className="font-medium text-cyan-700 hover:text-cyan-900"
                   >
                     View all
@@ -115,8 +113,8 @@ function Dashboard() {
               </div>
               <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
-                  <Link 
-                    to="/tags" 
+                  <Link
+                    to="/tags"
                     className="font-medium text-cyan-700 hover:text-cyan-900"
                   >
                     Manage tags
@@ -137,16 +135,20 @@ function Dashboard() {
                         Languages
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {new Set(repositories.map(r => r.primaryLanguage).filter(Boolean)).size}
+                        {
+                          new Set(
+                            repositories
+                              .map(r => r.primaryLanguage)
+                              .filter(Boolean)
+                          ).size
+                        }
                       </dd>
                     </dl>
                   </div>
                 </div>
               </div>
               <div className="bg-gray-50 px-5 py-3">
-                <div className="text-sm text-gray-500">
-                  Unique languages
-                </div>
+                <div className="text-sm text-gray-500">Unique languages</div>
               </div>
             </div>
 
@@ -162,7 +164,10 @@ function Dashboard() {
                         Tagged Repos
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {tags.reduce((sum, tag) => sum + tag.repositoryCount, 0)}
+                        {tags.reduce(
+                          (sum, tag) => sum + tag.repositoryCount,
+                          0
+                        )}
                       </dd>
                     </dl>
                   </div>
@@ -187,8 +192,11 @@ function Dashboard() {
                   Recent Repositories
                 </h3>
                 <div className="space-y-3">
-                  {repositories.slice(0, 5).map((repo) => (
-                    <div key={repo.id} className="flex items-center justify-between py-2">
+                  {repositories.slice(0, 5).map(repo => (
+                    <div
+                      key={repo.id}
+                      className="flex items-center justify-between py-2"
+                    >
                       <div className="flex items-center space-x-3">
                         <Code className="h-5 w-5 text-gray-400" />
                         <div>
@@ -247,15 +255,16 @@ function EmptyDashboardState() {
       icon: Code,
       href: '/repositories',
       background: 'bg-blue-500',
-      action: 'Add Repository'
+      action: 'Add Repository',
     },
     {
       title: 'Create Tags',
-      description: 'Organize your repositories with custom tags and categories.',
+      description:
+        'Organize your repositories with custom tags and categories.',
       icon: Tag,
       href: '/tags',
       background: 'bg-green-500',
-      action: 'Create Tag'
+      action: 'Create Tag',
     },
     {
       title: 'Explore Lists',
@@ -263,7 +272,7 @@ function EmptyDashboardState() {
       icon: Users,
       href: '/lists',
       background: 'bg-purple-500',
-      action: 'View Lists'
+      action: 'View Lists',
     },
     {
       title: 'Customize Settings',
@@ -271,7 +280,7 @@ function EmptyDashboardState() {
       icon: Calendar,
       href: '/settings',
       background: 'bg-orange-500',
-      action: 'Open Settings'
+      action: 'Open Settings',
     },
   ];
 
@@ -293,10 +302,11 @@ function EmptyDashboardState() {
           />
         </svg>
         <h2 className="mt-2 text-base font-semibold text-gray-900">
-          Let's get you started!
+          Let&apos;s get you started!
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Welcome to Reposit! Choose one of the options below to begin organizing your repositories.
+          Welcome to Reposit! Choose one of the options below to begin
+          organizing your repositories.
         </p>
       </div>
 

@@ -7,16 +7,7 @@ import {
 import { NavigationItem } from '../routes/_authenticated';
 import { Menu, X } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
-
-import { create } from 'zustand';
-
-export const useSidebarStore = create<{
-  sidebarOpen: boolean;
-  setSidebarOpen: (sidebarOpen: boolean) => void;
-}>(set => ({
-  sidebarOpen: false,
-  setSidebarOpen: sidebarOpen => set({ sidebarOpen }),
-}));
+import { useSidebarStore } from '../stores/sidebarStore';
 
 export default function MobileSidebar({
   navigationItems,

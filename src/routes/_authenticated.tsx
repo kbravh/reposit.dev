@@ -4,7 +4,12 @@ import MobileSidebar, {
   MobileSidebarButton,
 } from '../components/MobileSidebar';
 import { authClient } from '../lib/auth-client';
-import { createFileRoute, Link, Outlet, useRouterState } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useRouterState,
+} from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { redirect } from '@tanstack/react-router';
 import { getSession } from '../actions/auth';
@@ -41,7 +46,7 @@ function LoggedInLayout() {
   });
 
   const routerState = useRouterState();
-  
+
   // Get the current page name based on the route
   const getCurrentPageName = () => {
     const pathname = routerState.location.pathname;

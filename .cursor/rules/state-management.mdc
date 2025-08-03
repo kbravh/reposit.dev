@@ -1,0 +1,8 @@
+---
+description: Client-side state management in components and across the React application.
+alwaysApply: false
+---
+
+Use `zustand` for global state and for state that needs to be shared across components in different parts of the tree. Do _not_ use React context. Use zustand instead.
+
+Zustand stores should be created in `src/stores`.

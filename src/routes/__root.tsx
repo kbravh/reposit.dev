@@ -29,22 +29,6 @@ export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
       },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
-    scripts: [
-      {
-        dangerouslySetInnerHTML: {
-          __html: `(function() {
-            const theme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
-            if (theme === 'dark' || (!theme && prefersDark)) {
-              document.documentElement.classList.add('dark');
-            } else {
-              document.documentElement.classList.remove('dark');
-            }
-          })();`,
-        },
-      },
-    ],
   }),
   component: RootComponent,
   notFoundComponent: () => <div>Not found</div>,
@@ -67,6 +51,18 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html className="h-full bg-white dark:bg-gray-900">
       <head>
+        <script>
+          {`(function() {
+              const theme = localStorage.getItem('theme');
+              const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+              if (theme === 'dark' || (!theme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+              }
+            })();`}
+        </script>
         <HeadContent />
       </head>
       <body className="h-full">

@@ -1,0 +1,6 @@
+---
+description: Describes form and input patterns
+alwaysApply: false
+---
+
+Where possible, avoid controlled pattern for form inputs. Use uncontrolled inputs and let the browser manage state. When submitting a form, form handlers should consume `FormData`, a browser standard.

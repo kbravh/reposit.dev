@@ -12,30 +12,27 @@ import {
 } from 'lucide-react';
 import { getRepositories } from '../../actions/repos';
 import { getTagsWithRepositoryCount } from '../../actions/tags';
-import { authClient } from '../../lib/auth-client';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: Dashboard,
 });
 
 function Dashboard() {
-  const { data: user } = useQuery({
-    queryKey: ['session'],
-    queryFn: () => authClient.getSession().then(res => res.data?.user),
-  });
-
-  const { data: repositories = [] } = useQuery({
+  const { data: repositories = [], isLoading: isReposLoading } = useQuery({
     queryKey: ['repositories'],
     queryFn: () => getRepositories(),
   });
 
-  const { data: tags = [] } = useQuery({
+  const { data: tags = [], isLoading: isTagsLoading } = useQuery({
     queryKey: ['tags-with-count'],
     queryFn: () => getTagsWithRepositoryCount(),
   });
 
-  const isNewUser = repositories.length === 0 && tags.length === 0;
-  const hasRepos = repositories.length > 0;
+  const isLoading = isReposLoading || isTagsLoading;
+
+  const isNewUser =
+    !isLoading && repositories.length === 0 && tags.length === 0;
+  const hasRepos = !isReposLoading && repositories.length > 0;
 
   return (
     <div className="space-y-8">
@@ -44,12 +41,12 @@ function Dashboard() {
         <div className="md:flex md:items-center md:justify-between">
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-              Welcome back{user?.name ? `, ${user.name}` : ''}!
+              Welcome back!
             </h1>
             <p className="mt-1 text-sm text-gray-500">
               {isNewUser
-                ? 'Let&apos;s get you started with organizing your repositories.'
-                : 'Here&apos;s what&apos;s happening with your repositories and tags.'}
+                ? "Let's get you started with organizing your repositories."
+                : "Here's what's happening with your repositories and tags."}
             </p>
           </div>
         </div>
@@ -138,7 +135,7 @@ function Dashboard() {
                         {
                           new Set(
                             repositories
-                              .map(r => r.primaryLanguage)
+                              .map(r => r.repository.primaryLanguage)
                               .filter(Boolean)
                           ).size
                         }
@@ -194,30 +191,30 @@ function Dashboard() {
                 <div className="space-y-3">
                   {repositories.slice(0, 5).map(repo => (
                     <div
-                      key={repo.id}
+                      key={repo.repositoryInstance.id}
                       className="flex items-center justify-between py-2"
                     >
                       <div className="flex items-center space-x-3">
                         <Code className="h-5 w-5 text-gray-400" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">
-                            {repo.org}/{repo.name}
+                            {repo.repository.org}/{repo.repository.name}
                           </p>
-                          {repo.description && (
+                          {repo.repository.description && (
                             <p className="text-sm text-gray-500 truncate max-w-md">
-                              {repo.description}
+                              {repo.repository.description}
                             </p>
                           )}
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        {repo.primaryLanguage && (
+                        {repo.repository.primaryLanguage && (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            {repo.primaryLanguage}
+                            {repo.repository.primaryLanguage}
                           </span>
                         )}
                         <a
-                          href={repo.htmlUrl}
+                          href={repo.repository.htmlUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-gray-400 hover:text-gray-600"

@@ -22,4 +22,10 @@ if (!_env.success && !process.env.CI) {
   throw new Error('Invalid environment variables');
 }
 
-export const getEnv = () => _env.data;
+export const getEnv = () => {
+  if (!_env.data) {
+    throw new Error('Environment variables are not set.');
+  }
+
+  return _env.data;
+};

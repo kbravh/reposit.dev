@@ -32,12 +32,12 @@ interface RecentRepositoriesProps {
 
 export function RecentRepositories({ repositories }: RecentRepositoriesProps) {
   return (
-    <div className="bg-white shadow rounded-lg">
+    <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
       <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
+        <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
           Recent Repositories
         </h3>
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-gray-100 dark:divide-gray-700">
           {repositories.slice(0, 5).map(repo => (
             <RepositoryListItem
               key={repo.repositoryInstance.id}
@@ -49,7 +49,7 @@ export function RecentRepositories({ repositories }: RecentRepositoriesProps) {
           <div className="mt-4 text-center">
             <Link
               to="/repositories"
-              className="text-sm font-medium text-cyan-700 hover:text-cyan-900"
+              className="text-sm font-medium text-cyan-700 hover:text-cyan-900 dark:text-cyan-400 dark:hover:text-cyan-300"
             >
               View all {repositories.length} repositories →
             </Link>

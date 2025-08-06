@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { TagModal } from './TagModal';
-import { getTagsForRepository } from '../actions/tags';
+import { getTagsForRepository } from '../../actions/tags';
 import { useState } from 'react';
 
 export function RepositoryTags({

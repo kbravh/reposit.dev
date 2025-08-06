@@ -10,10 +10,10 @@ import {
   deleteTag,
   getRepositoriesForTag,
 } from '../../actions/tags';
-import { TagCard } from '../../components/TagCard';
-import { AddTagForm } from '../../components/AddTagForm';
-import { EditTagModal } from '../../components/EditTagModal';
-import { DeleteTagModal } from '../../components/DeleteTagModal';
+import { TagCard } from '../../components/tags/TagCard';
+import { AddTagForm } from '../../components/tags/AddTagForm';
+import { EditTagModal } from '../../components/tags/EditTagModal';
+import { DeleteTagModal } from '../../components/tags/DeleteTagModal';
 
 export const Route = createFileRoute('/_authenticated/tags')({
   component: Tags,

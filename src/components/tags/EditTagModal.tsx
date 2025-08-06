@@ -6,7 +6,7 @@ import {
 } from '@headlessui/react';
 import { Edit3 } from 'lucide-react';
 import { useState, useEffect, type FormEvent } from 'react';
-import { TAG_COLORS } from '../utils/colors';
+import { TAG_COLORS } from '../../utils/colors';
 
 type TagWithCount = {
   id: string;

@@ -2,7 +2,7 @@ import { Home, Settings, List, Code, User, Tag } from 'lucide-react';
 import { ElementType } from 'react';
 import MobileSidebar, {
   MobileSidebarButton,
-} from '../components/MobileSidebar';
+} from '../components/layout/MobileSidebar';
 import { authClient } from '../lib/auth-client';
 import {
   createFileRoute,
@@ -97,24 +97,33 @@ function LoggedInLayout() {
                 </li>
                 {!isPending && user && (
                   <li className="-mx-6 mt-auto">
-                    <a
-                      href="#"
-                      className="flex items-center gap-x-4 px-6 py-3 font-semibold text-sm/6 text-white hover:bg-gray-800"
-                    >
-                      <>
-                        {user?.image ? (
-                          <img
-                            alt=""
-                            src={user.image}
-                            className="size-8 rounded-full bg-gray-800"
-                          />
-                        ) : (
-                          <User className="size-8 rounded-full bg-gray-800" />
-                        )}
-                      </>
-                      <span className="sr-only">Your profile</span>
-                      <span aria-hidden="true">{user?.name}</span>
-                    </a>
+                    <div className="border-t border-gray-700 pt-4">
+                      <div className="flex items-center gap-x-4 px-6 py-3">
+                        <>
+                          {user?.image ? (
+                            <img
+                              alt=""
+                              src={user.image}
+                              className="size-8 rounded-full bg-gray-800"
+                            />
+                          ) : (
+                            <User className="size-8 rounded-full bg-gray-800" />
+                          )}
+                        </>
+                        <div className="flex-1">
+                          <span className="text-sm font-semibold text-white">
+                            {user?.name}
+                          </span>
+                          <span className="sr-only">Your profile</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => authClient.signOut()}
+                        className="w-full text-left px-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 cursor-pointer"
+                      >
+                        Sign out
+                      </button>
+                    </div>
                   </li>
                 )}
               </ul>
@@ -128,18 +137,12 @@ function LoggedInLayout() {
             {getCurrentPageName()}
           </div>
           {!isPending && user && (
-            <a href="#">
-              <span className="sr-only">Your profile</span>
-              {!isPending && user?.image ? (
-                <img
-                  alt=""
-                  src={user.image}
-                  className="size-8 rounded-full bg-gray-800"
-                />
-              ) : (
-                <User className="size-8 rounded-full bg-gray-800" />
-              )}
-            </a>
+            <button
+              onClick={() => authClient.signOut()}
+              className="text-sm text-gray-400 hover:text-white cursor-pointer"
+            >
+              Sign out
+            </button>
           )}
         </div>
 

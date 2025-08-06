@@ -17,7 +17,7 @@ import {
   getTags,
   getTagsForRepository,
   removeTagFromRepository,
-} from '../actions/tags';
+} from '../../actions/tags';
 import { X } from 'lucide-react';
 
 export function TagModal({

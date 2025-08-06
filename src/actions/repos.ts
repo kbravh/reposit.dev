@@ -6,6 +6,7 @@ import { authMiddleware } from './middleware/auth';
 import {
   getRepositoryDetails,
   getRepositoryDetailsFromProviderId,
+  searchRepositories,
 } from '../utils/github';
 import { eq, and, desc } from 'drizzle-orm';
 
@@ -187,4 +188,12 @@ export const syncRepository = createServerFn()
       .returning();
 
     return updatedRepo;
+  });
+
+export const searchGitHubRepositories = createServerFn({
+  method: 'POST',
+})
+  .validator(z.object({ query: z.string() }))
+  .handler(async ({ data: { query } }) => {
+    return await searchRepositories(query, 25);
   });

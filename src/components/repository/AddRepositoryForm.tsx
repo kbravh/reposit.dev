@@ -1,48 +1,103 @@
-import { type FormEvent } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Code } from 'lucide-react';
 import {
   Dialog,
   DialogBackdrop,
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import { createRepository } from '../../actions/repos';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Code, GitFork, Plus, Search, Star } from 'lucide-react';
+import { type FormEvent, useState } from 'react';
+import {
+  createRepository,
+  searchGitHubRepositories,
+} from '../../actions/repos';
+import type { GitHubRepository } from '../../utils/github';
+import { isValidRepositoryUrl } from '../../utils/github';
 
 interface AddRepositoryFormProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+type FormMode = 'input' | 'search-results';
+
 export function AddRepositoryForm({
   isOpen,
   onOpenChange,
 }: AddRepositoryFormProps) {
   const queryClient = useQueryClient();
+  const [mode, setMode] = useState<FormMode>('input');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<GitHubRepository[]>([]);
 
   const createRepoMutation = useMutation({
     mutationFn: (variables: { url: string }) =>
       createRepository({ data: variables }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['repositories'] });
+      handleReset();
       onOpenChange(false);
     },
   });
 
-  const handleCreateRepository = async (e: FormEvent<HTMLFormElement>) => {
+  const searchMutation = useMutation({
+    mutationFn: (variables: { query: string }) =>
+      searchGitHubRepositories({ data: variables }),
+    onSuccess: data => {
+      setSearchResults(data.items);
+      setMode('search-results');
+    },
+  });
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const url = formData.get('repo-url') as string;
-    const trimmedUrl = url?.trim();
+    const input = formData.get('repo-input') as string;
+    const trimmedInput = input?.trim();
 
-    if (trimmedUrl) {
-      createRepoMutation.mutate({ url: trimmedUrl });
+    if (!trimmedInput) return;
+
+    setSearchQuery(trimmedInput);
+
+    // Check if input is a valid repository URL/format
+    if (isValidRepositoryUrl(trimmedInput)) {
+      // Direct repository creation
+      createRepoMutation.mutate({ url: trimmedInput });
+    } else {
+      // Search for repositories
+      searchMutation.mutate({ query: trimmedInput });
     }
+  };
+
+  const handleSelectRepository = (repo: GitHubRepository) => {
+    // Create repository using the HTML URL from the selected search result
+    createRepoMutation.mutate({ url: repo.html_url });
+  };
+
+  const handleBackToSearch = () => {
+    setMode('input');
+    setSearchResults([]);
+    searchMutation.reset();
+  };
+
+  const handleReset = () => {
+    setMode('input');
+    setSearchQuery('');
+    setSearchResults([]);
+    createRepoMutation.reset();
+    searchMutation.reset();
   };
 
   const handleCancel = () => {
     onOpenChange(false);
-    createRepoMutation.reset();
+    handleReset();
+  };
+
+  const formatNumber = (num: number): string => {
+    if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}k`;
+    }
+    return num.toString();
   };
 
   return (
@@ -60,11 +115,7 @@ export function AddRepositoryForm({
       </div>
 
       {/* Add Repository Dialog */}
-      <Dialog
-        open={isOpen}
-        onClose={() => onOpenChange(false)}
-        className="relative z-10"
-      >
+      <Dialog open={isOpen} onClose={handleCancel} className="relative z-10">
         <DialogBackdrop
           transition
           className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in"
@@ -74,81 +125,213 @@ export function AddRepositoryForm({
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <DialogPanel
               transition
-              className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+              className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in sm:my-8 sm:w-full sm:max-w-2xl sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
             >
-              <div>
-                <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-indigo-100">
-                  <Code aria-hidden="true" className="size-6 text-indigo-600" />
-                </div>
-                <div className="mt-3 text-center sm:mt-5">
-                  <DialogTitle
-                    as="h3"
-                    className="font-semibold text-base text-gray-900"
-                  >
-                    Add Repository
-                  </DialogTitle>
-                  <div className="mt-2">
-                    <p className="text-gray-500 text-sm">
-                      Enter a repository URL or owner/name to add it to your
-                      collection.
-                    </p>
+              {mode === 'input' && (
+                <>
+                  <div>
+                    <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-indigo-100">
+                      <Code
+                        aria-hidden="true"
+                        className="size-6 text-indigo-600"
+                      />
+                    </div>
+                    <div className="mt-3 text-center sm:mt-5">
+                      <DialogTitle
+                        as="h3"
+                        className="font-semibold text-base text-gray-900"
+                      >
+                        Add Repository
+                      </DialogTitle>
+                      <div className="mt-2">
+                        <p className="text-gray-500 text-sm">
+                          Enter a repository URL (like
+                          github.com/microsoft/TypeScript) or search for
+                          repositories by name.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              <form onSubmit={handleCreateRepository} className="mt-5 sm:mt-6">
-                <div>
-                  <label
-                    htmlFor="repo-url"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Repository URL or org/name
-                  </label>
-                  <div className="mt-1 grid grid-cols-1">
-                    <input
-                      id="repo-url"
-                      name="repo-url"
-                      type="text"
-                      placeholder="microsoft/TypeScript or https://github.com/microsoft/TypeScript"
-                      className="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                      required
-                    />
-                    <Code
-                      aria-hidden="true"
-                      className="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4"
-                    />
+                  <form onSubmit={handleSubmit} className="mt-5 sm:mt-6">
+                    <div>
+                      <label
+                        htmlFor="repo-input"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Repository URL or search term
+                      </label>
+                      <div className="mt-1 grid grid-cols-1">
+                        <input
+                          id="repo-input"
+                          name="repo-input"
+                          type="text"
+                          placeholder="microsoft/TypeScript or react framework"
+                          className="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                          required
+                        />
+                        <Search
+                          aria-hidden="true"
+                          className="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4"
+                        />
+                      </div>
+                    </div>
+
+                    {(createRepoMutation.error || searchMutation.error) && (
+                      <div className="mt-3">
+                        <p className="text-sm text-red-600">
+                          {createRepoMutation.error instanceof Error
+                            ? createRepoMutation.error.message
+                            : searchMutation.error instanceof Error
+                              ? searchMutation.error.message
+                              : 'An error occurred'}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                      <button
+                        type="submit"
+                        disabled={
+                          createRepoMutation.isPending ||
+                          searchMutation.isPending
+                        }
+                        className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2 disabled:opacity-50 sm:col-start-2"
+                      >
+                        {createRepoMutation.isPending
+                          ? 'Adding...'
+                          : searchMutation.isPending
+                            ? 'Searching...'
+                            : 'Add or Search'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 text-sm shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
+
+              {mode === 'search-results' && (
+                <>
+                  <div>
+                    <div className="flex items-center gap-x-3">
+                      <button
+                        type="button"
+                        onClick={handleBackToSearch}
+                        className="rounded-full bg-indigo-100 p-2 text-indigo-600 hover:bg-indigo-200"
+                      >
+                        <ArrowLeft className="size-4" />
+                      </button>
+                      <div>
+                        <DialogTitle
+                          as="h3"
+                          className="font-semibold text-base text-gray-900"
+                        >
+                          Search Results
+                        </DialogTitle>
+                        <p className="text-gray-500 text-sm">
+                          Found {searchResults.length} repositories for &ldquo;
+                          {searchQuery}&rdquo;
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                {createRepoMutation.error && (
-                  <div className="mt-3">
-                    <p className="text-sm text-red-600">
-                      {createRepoMutation.error instanceof Error
-                        ? createRepoMutation.error.message
-                        : 'Failed to add repository'}
-                    </p>
+                  <div className="mt-5 sm:mt-6">
+                    {searchResults.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500 text-sm">
+                          No repositories found. Try a different search term.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="max-h-96 overflow-y-auto">
+                        <ul className="divide-y divide-gray-100">
+                          {searchResults.map(repo => (
+                            <li
+                              key={repo.id}
+                              className="flex items-center justify-between gap-x-6 py-4"
+                            >
+                              <div className="flex min-w-0 gap-x-4">
+                                <div className="flex-shrink-0">
+                                  <div className="size-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                    <Code className="size-5 text-gray-600" />
+                                  </div>
+                                </div>
+                                <div className="min-w-0 flex-auto">
+                                  <p className="font-semibold text-gray-900 text-sm truncate">
+                                    {repo.owner.login}/{repo.name}
+                                  </p>
+                                  <p className="mt-1 text-gray-500 text-xs truncate">
+                                    {repo.description ||
+                                      'No description available'}
+                                  </p>
+                                  <div className="mt-1 flex items-center gap-x-4 text-xs text-gray-500">
+                                    {repo.language && (
+                                      <span className="flex items-center gap-x-1">
+                                        <div className="size-2 rounded-full bg-blue-500" />
+                                        {repo.language}
+                                      </span>
+                                    )}
+                                    <span className="flex items-center gap-x-1">
+                                      <Star className="size-3" />
+                                      {formatNumber(repo.stargazers_count || 0)}
+                                    </span>
+                                    <span className="flex items-center gap-x-1">
+                                      <GitFork className="size-3" />
+                                      {formatNumber(repo.forks_count || 0)}
+                                    </span>
+                                    {repo.private && (
+                                      <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
+                                        Private
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleSelectRepository(repo)}
+                                disabled={createRepoMutation.isPending}
+                                className="rounded-md bg-indigo-600 px-3 py-1.5 font-semibold text-white text-xs shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2 disabled:opacity-50"
+                              >
+                                {createRepoMutation.isPending
+                                  ? 'Adding...'
+                                  : 'Add'}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {createRepoMutation.error && (
+                      <div className="mt-3">
+                        <p className="text-sm text-red-600">
+                          {createRepoMutation.error instanceof Error
+                            ? createRepoMutation.error.message
+                            : 'Failed to add repository'}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-5 sm:mt-6">
+                      <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 text-sm shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
+                      >
+                        Close
+                      </button>
+                    </div>
                   </div>
-                )}
-
-                <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                  <button
-                    type="submit"
-                    disabled={createRepoMutation.isPending}
-                    className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2 disabled:opacity-50 sm:col-start-2"
-                  >
-                    {createRepoMutation.isPending
-                      ? 'Adding...'
-                      : 'Add Repository'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 text-sm shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:col-start-1 sm:mt-0"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
+                </>
+              )}
             </DialogPanel>
           </div>
         </div>

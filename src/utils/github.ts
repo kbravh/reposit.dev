@@ -36,12 +36,69 @@ const GitHubRepositorySchema = z.object({
   html_url: z.string(),
   description: z.string().nullable().optional(),
   language: z.string().nullable().optional(),
+  stargazers_count: z.number().optional(),
+  forks_count: z.number().optional(),
   owner: z.object({
     login: z.string(),
   }),
 });
 
 export type GitHubRepository = z.infer<typeof GitHubRepositorySchema>;
+
+const GitHubSearchResultSchema = z.object({
+  total_count: z.number(),
+  incomplete_results: z.boolean(),
+  items: z.array(GitHubRepositorySchema),
+});
+
+export type GitHubSearchResult = z.infer<typeof GitHubSearchResultSchema>;
+
+export const searchRepositories = async (
+  query: string,
+  limit: number = 25
+): Promise<GitHubSearchResult> => {
+  if (!query || typeof query !== 'string' || query.trim().length === 0) {
+    throw new Error('Search query cannot be empty');
+  }
+
+  const encodedQuery = encodeURIComponent(query.trim());
+  const response = await fetch(
+    `https://api.github.com/search/repositories?q=${encodedQuery}&sort=stars&order=desc&per_page=${limit}`
+  );
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error(
+        'GitHub API rate limit exceeded. Please try again later.'
+      );
+    }
+    if (response.status === 422) {
+      throw new Error('Invalid search query. Please check your search terms.');
+    }
+    throw new Error(
+      `GitHub search failed: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const data = await response.json();
+  const parsedData = GitHubSearchResultSchema.parse(data);
+  return parsedData;
+};
+
+export const isValidRepositoryUrl = (input: string): boolean => {
+  if (!input || typeof input !== 'string') {
+    return false;
+  }
+
+  const trimmedInput = input.trim();
+
+  // Use the same regex pattern as parseRepositoryUrl
+  const match = trimmedInput.match(
+    /^(?:https?:\/\/github\.com\/|git@github\.com:|)([^/]+)\/([^/]+?)(?:\.git)?(?:\/.*)?$/i
+  );
+
+  return !!match;
+};
 
 // TODO: Allow a user to see their private repos
 export const getRepositoryDetails = async (

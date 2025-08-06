@@ -31,13 +31,13 @@ function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="border-b border-gray-200 pb-8">
+      <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
         <div className="md:flex md:items-center md:justify-between">
           <div className="min-w-0 flex-1 flex flex-col gap-2">
-            <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+            <h1 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tight">
               Welcome back!
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {isNewUser
                 ? "Let's get you started with organizing your repositories."
                 : "Here's what's happening with your repositories and tags."}

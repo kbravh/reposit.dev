@@ -59,7 +59,7 @@ function LoggedInLayout() {
       <div>
         <MobileSidebar navigationItems={navigation} />
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6">
+          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-black/10 px-6 ring-1 ring-white/5">
             <div className="flex h-16 shrink-0 items-center">
               {/* TODO: Add logo */}
               <img
@@ -131,7 +131,7 @@ function LoggedInLayout() {
           </div>
         </div>
 
-        <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-xs sm:px-6 lg:hidden">
+        <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 dark:bg-gray-800 px-4 py-4 shadow-xs border-b border-white/5 dark:border-gray-700 sm:px-6 lg:hidden">
           <MobileSidebarButton />
           <div className="flex-1 font-semibold text-sm/6 text-white">
             {getCurrentPageName()}

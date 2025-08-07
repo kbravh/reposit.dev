@@ -40,7 +40,31 @@ export function RepositoryListItem({ repository }: RepositoryListItemProps) {
   const deleteRepoMutation = useMutation({
     mutationFn: (variables: { repositoryInstanceId: string }) =>
       deleteRepository({ data: variables }),
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: repositoryKeys.all });
+
+      // Snapshot the previous value
+      const previousRepositories = queryClient.getQueryData(repositoryKeys.all);
+
+      // Optimistically remove the repository from the list
+      queryClient.setQueryData(repositoryKeys.all, (old: any) => 
+        old ? old.filter((repo: any) => 
+          repo.repositoryInstance.id !== variables.repositoryInstanceId
+        ) : old
+      );
+
+      // Return a context object with the snapshotted value
+      return { previousRepositories };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousRepositories) {
+        queryClient.setQueryData(repositoryKeys.all, context.previousRepositories);
+      }
+    },
+    // Always refetch after error or success:
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: repositoryKeys.all });
     },
   });

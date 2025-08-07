@@ -34,10 +34,66 @@ export function AddRepositoryForm({
   const createRepoMutation = useMutation({
     mutationFn: (variables: { url: string }) =>
       createRepository({ data: variables }),
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: repositoryKeys.all });
+
+      // Snapshot the previous value
+      const previousRepositories = queryClient.getQueryData(repositoryKeys.all);
+
+      // Parse the URL to create an optimistic repository
+      // This is a simplified version - the real data will come from the server
+      const urlParts = variables.url.replace(/^https?:\/\/github\.com\//, '').split('/');
+      const [org, name] = urlParts;
+      
+      if (org && name) {
+        const optimisticRepository = {
+          repositoryInstance: {
+            id: `temp-${Date.now()}`,
+            userId: 'current-user', // Will be replaced by server
+            repositoryId: `temp-repo-${Date.now()}`,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          repository: {
+            id: `temp-repo-${Date.now()}`,
+            htmlUrl: variables.url,
+            org: org,
+            name: name,
+            description: null, // Will be filled by server
+            private: false, // Default assumption
+            provider: 'github',
+            providerId: `temp-${Date.now()}`,
+            lastSyncedAt: null,
+            deletedAt: null,
+            createdAt: new Date(),
+            primaryLanguage: null,
+            updatedAt: new Date(),
+          },
+        };
+
+        // Optimistically add the new repository to the list
+        queryClient.setQueryData(repositoryKeys.all, (old: any) => 
+          old ? [optimisticRepository, ...old] : [optimisticRepository]
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousRepositories };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousRepositories) {
+        queryClient.setQueryData(repositoryKeys.all, context.previousRepositories);
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: repositoryKeys.all });
       handleReset();
       onOpenChange(false);
+    },
+    // Always refetch after error or success:
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: repositoryKeys.all });
     },
   });
 

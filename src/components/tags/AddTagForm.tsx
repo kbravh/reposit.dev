@@ -16,10 +16,53 @@ export function AddTagForm({ isVisible, onClose }: AddTagFormProps) {
   const createTagMutation = useMutation({
     mutationFn: (variables: { title: string }) =>
       createTag({ data: variables }),
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: tagKeys.all });
+      await queryClient.cancelQueries({ queryKey: tagKeys.withCount() });
+
+      // Snapshot the previous values
+      const previousTags = queryClient.getQueryData(tagKeys.all);
+      const previousTagsWithCount = queryClient.getQueryData(tagKeys.withCount());
+
+      // Create a temporary optimistic tag
+      const optimisticTag = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        title: variables.title,
+        color: '#6366f1', // Default indigo color
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        repositoryCount: 0, // For withCount queries
+      };
+
+      // Optimistically add the new tag to all tag lists
+      queryClient.setQueryData(tagKeys.all, (old: any) => 
+        old ? [...old, optimisticTag] : [optimisticTag]
+      );
+      
+      queryClient.setQueryData(tagKeys.withCount(), (old: any) => 
+        old ? [...old, optimisticTag] : [optimisticTag]
+      );
+
+      // Return a context object with the snapshotted values
+      return { previousTags, previousTagsWithCount, optimisticTag };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousTags) {
+        queryClient.setQueryData(tagKeys.all, context.previousTags);
+      }
+      if (context?.previousTagsWithCount) {
+        queryClient.setQueryData(tagKeys.withCount(), context.previousTagsWithCount);
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.all });
       setNewTagTitle('');
       onClose();
+    },
+    // Always refetch after error or success:
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: tagKeys.all });
     },
   });
 

@@ -61,9 +61,39 @@ export function TagModal({
   const removeTagMutation = useMutation({
     mutationFn: (variables: { tagId: string; repositoryInstanceId: string }) =>
       removeTagFromRepository({ data: variables }),
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({
+        queryKey: tagKeys.forRepository(variables.repositoryInstanceId),
+      });
+
+      // Snapshot the previous value
+      const previousRepositoryTags = queryClient.getQueryData(
+        tagKeys.forRepository(variables.repositoryInstanceId)
+      );
+
+      // Optimistically remove the tag from the repository
+      queryClient.setQueryData(
+        tagKeys.forRepository(variables.repositoryInstanceId),
+        (old: any) => old ? old.filter((tag: any) => tag.id !== variables.tagId) : old
+      );
+
+      // Return a context object with the snapshotted value
+      return { previousRepositoryTags };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousRepositoryTags) {
+        queryClient.setQueryData(
+          tagKeys.forRepository(variables.repositoryInstanceId),
+          context.previousRepositoryTags
+        );
+      }
+    },
+    onSettled: (data, error, variables) => {
+      // Always refetch after error or success:
       queryClient.invalidateQueries({
-        queryKey: tagKeys.forRepository(repositoryInstanceId),
+        queryKey: tagKeys.forRepository(variables.repositoryInstanceId),
       });
     },
   });
@@ -73,9 +103,70 @@ export function TagModal({
       titles: string[];
       repositoryInstanceId: string;
     }) => createManyTags({ data: variables }),
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({
+        queryKey: tagKeys.forRepository(variables.repositoryInstanceId),
+      });
+      await queryClient.cancelQueries({ queryKey: tagKeys.all });
+
+      // Snapshot the previous values
+      const previousRepositoryTags = queryClient.getQueryData(
+        tagKeys.forRepository(variables.repositoryInstanceId)
+      );
+      const previousAllTags = queryClient.getQueryData(tagKeys.all);
+
+      // Create optimistic tags for the new titles
+      const optimisticTags = variables.titles.map((title, index) => ({
+        id: `temp-${Date.now()}-${index}`, // Temporary ID
+        title: title,
+        color: '#6366f1', // Default indigo color
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
+
+      // Optimistically add the new tags to the repository
+      queryClient.setQueryData(
+        tagKeys.forRepository(variables.repositoryInstanceId),
+        (old: any) => old ? [...old, ...optimisticTags] : optimisticTags
+      );
+
+      // Also add to the global tags list if they're new tags
+      const existingTitles = new Set(
+        (previousAllTags as any)?.map((tag: any) => tag.title) || []
+      );
+      const newTags = optimisticTags.filter(tag => !existingTitles.has(tag.title));
+      
+      if (newTags.length > 0) {
+        queryClient.setQueryData(tagKeys.all, (old: any) => 
+          old ? [...old, ...newTags] : newTags
+        );
+      }
+
+      // Return a context object with the snapshotted values
+      return { previousRepositoryTags, previousAllTags, optimisticTags };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousRepositoryTags) {
+        queryClient.setQueryData(
+          tagKeys.forRepository(variables.repositoryInstanceId),
+          context.previousRepositoryTags
+        );
+      }
+      if (context?.previousAllTags) {
+        queryClient.setQueryData(tagKeys.all, context.previousAllTags);
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.all });
       setInputValue('');
+    },
+    onSettled: (data, error, variables) => {
+      // Always refetch after error or success:
+      queryClient.invalidateQueries({ queryKey: tagKeys.all });
+      queryClient.invalidateQueries({
+        queryKey: tagKeys.forRepository(variables.repositoryInstanceId),
+      });
     },
   });
 

@@ -38,10 +38,47 @@ export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
   const deleteTagMutation = useMutation({
     mutationFn: (variables: { tagId: string }) =>
       deleteTag({ data: variables }),
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: tagKeys.all });
+      await queryClient.cancelQueries({ queryKey: tagKeys.repositoriesForTag(variables.tagId) });
+
+      // Snapshot the previous values
+      const previousTags = queryClient.getQueryData(tagKeys.all);
+      const previousTagsWithCount = queryClient.getQueryData(tagKeys.withCount());
+      const previousRepositories = queryClient.getQueryData(tagKeys.repositoriesForTag(variables.tagId));
+
+      // Optimistically remove the tag from all tag lists
+      queryClient.setQueryData(tagKeys.all, (old: any) => 
+        old ? old.filter((tag: any) => tag.id !== variables.tagId) : old
+      );
+      
+      queryClient.setQueryData(tagKeys.withCount(), (old: any) => 
+        old ? old.filter((tag: any) => tag.id !== variables.tagId) : old
+      );
+
+      // Return a context object with the snapshotted values
+      return { previousTags, previousTagsWithCount, previousRepositories };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousTags) {
+        queryClient.setQueryData(tagKeys.all, context.previousTags);
+      }
+      if (context?.previousTagsWithCount) {
+        queryClient.setQueryData(tagKeys.withCount(), context.previousTagsWithCount);
+      }
+      if (context?.previousRepositories) {
+        queryClient.setQueryData(tagKeys.repositoriesForTag(variables.tagId), context.previousRepositories);
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.all });
       setConfirmation('');
       onClose();
+    },
+    // Always refetch after error or success:
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: tagKeys.all });
     },
   });
 

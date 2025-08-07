@@ -2,6 +2,7 @@ import { Tag } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createTag } from '../../actions/tags';
+import { tagKeys } from '../../lib/query-keys';
 
 type AddTagFormProps = {
   isVisible: boolean;
@@ -16,8 +17,7 @@ export function AddTagForm({ isVisible, onClose }: AddTagFormProps) {
     mutationFn: (variables: { title: string }) =>
       createTag({ data: variables }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tags-with-count'] });
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      queryClient.invalidateQueries({ queryKey: tagKeys.all });
       setNewTagTitle('');
       onClose();
     },

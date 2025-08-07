@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { TagModal } from './TagModal';
 import { getTagsForRepository } from '../../actions/tags';
 import { useState } from 'react';
+import { tagKeys } from '../../lib/query-keys';
 
 export function RepositoryTags({
   repositoryInstanceId,
@@ -12,7 +13,7 @@ export function RepositoryTags({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: repositoryTags = [] } = useQuery({
-    queryKey: ['repository-tags', repositoryInstanceId],
+    queryKey: tagKeys.forRepository(repositoryInstanceId),
     queryFn: () => getTagsForRepository({ data: { repositoryInstanceId } }),
   });
 

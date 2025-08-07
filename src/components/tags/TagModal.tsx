@@ -19,6 +19,7 @@ import {
   removeTagFromRepository,
 } from '../../actions/tags';
 import { X } from 'lucide-react';
+import { tagKeys } from '../../lib/query-keys';
 
 export function TagModal({
   isOpen,
@@ -48,12 +49,12 @@ export function TagModal({
   }, [isOpen]);
 
   const { data: availableTags = [] } = useQuery({
-    queryKey: ['tags'],
+    queryKey: tagKeys.all,
     queryFn: () => getTags(),
   });
 
   const { data: repositoryTags = [] } = useQuery({
-    queryKey: ['repository-tags', repositoryInstanceId],
+    queryKey: tagKeys.forRepository(repositoryInstanceId),
     queryFn: () => getTagsForRepository({ data: { repositoryInstanceId } }),
   });
 
@@ -62,7 +63,7 @@ export function TagModal({
       removeTagFromRepository({ data: variables }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['repository-tags', repositoryInstanceId],
+        queryKey: tagKeys.forRepository(repositoryInstanceId),
       });
     },
   });
@@ -73,10 +74,7 @@ export function TagModal({
       repositoryInstanceId: string;
     }) => createManyTags({ data: variables }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['repository-tags', repositoryInstanceId],
-      });
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      queryClient.invalidateQueries({ queryKey: tagKeys.all });
       setInputValue('');
     },
   });

@@ -9,6 +9,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateTag } from '../../actions/tags';
 import { TAG_COLORS } from '../../utils/colors';
+import { tagKeys } from '../../lib/query-keys';
 
 type TagWithCount = {
   id: string;
@@ -36,8 +37,7 @@ export function EditTagModal({ tag, onClose }: EditTagModalProps) {
       color?: string;
     }) => updateTag({ data: variables }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tags-with-count'] });
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      queryClient.invalidateQueries({ queryKey: tagKeys.all });
       onClose();
     },
   });

@@ -2,15 +2,12 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Search, Plus, Tag } from 'lucide-react';
-import {
-  getTagsWithRepositoryCount,
-  deleteTag,
-  getRepositoriesForTag,
-} from '../../actions/tags';
+import { getTagsWithRepositoryCount, deleteTag } from '../../actions/tags';
 import { TagCard } from '../../components/tags/TagCard';
 import { AddTagForm } from '../../components/tags/AddTagForm';
 import { EditTagModal } from '../../components/tags/EditTagModal';
 import { DeleteTagModal } from '../../components/tags/DeleteTagModal';
+import { tagKeys } from '../../lib/query-keys';
 
 export const Route = createFileRoute('/_authenticated/tags')({
   component: Tags,
@@ -34,26 +31,15 @@ function Tags() {
   const queryClient = useQueryClient();
 
   const { data: tags = [], isLoading } = useQuery({
-    queryKey: ['tags-with-count'],
+    queryKey: tagKeys.withCount(),
     queryFn: () => getTagsWithRepositoryCount(),
-  });
-
-  const { data: repositoriesForDeletingTag = [] } = useQuery({
-    queryKey: ['repositories-for-tag', deletingTag?.id],
-    queryFn: () =>
-      deletingTag
-        ? getRepositoriesForTag({ data: { tagId: deletingTag.id } })
-        : [],
-    enabled: !!deletingTag,
   });
 
   const deleteTagMutation = useMutation({
     mutationFn: (variables: { tagId: string }) =>
       deleteTag({ data: variables }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tags-with-count'] });
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
-      queryClient.invalidateQueries({ queryKey: ['repository-tags'] });
+      queryClient.invalidateQueries({ queryKey: tagKeys.all });
       setDeletingTag(null);
     },
   });
@@ -162,11 +148,7 @@ function Tags() {
 
       <EditTagModal tag={editingTag} onClose={() => setEditingTag(null)} />
 
-      <DeleteTagModal
-        tag={deletingTag}
-        repositories={repositoriesForDeletingTag}
-        onClose={() => setDeletingTag(null)}
-      />
+      <DeleteTagModal tag={deletingTag} onClose={() => setDeletingTag(null)} />
     </div>
   );
 }

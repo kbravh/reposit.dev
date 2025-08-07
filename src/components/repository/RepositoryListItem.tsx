@@ -3,6 +3,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RepositoryTags } from '../tags/TagList';
 import { deleteRepository } from '../../actions/repos';
+import { repositoryKeys } from '../../lib/query-keys';
 
 type Repository = {
   repositoryInstance: {
@@ -40,7 +41,7 @@ export function RepositoryListItem({ repository }: RepositoryListItemProps) {
     mutationFn: (variables: { repositoryInstanceId: string }) =>
       deleteRepository({ data: variables }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['repositories'] });
+      queryClient.invalidateQueries({ queryKey: repositoryKeys.all });
     },
   });
   return (

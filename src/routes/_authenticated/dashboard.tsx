@@ -6,6 +6,7 @@ import { EmptyDashboardState } from '../../components/dashboard/EmptyDashboardSt
 import { QuickActions } from '../../components/ui/QuickActions';
 import { DashboardStats } from '../../components/dashboard/DashboardStats';
 import { RecentRepositories } from '../../components/dashboard/RecentRepositories';
+import { repositoryKeys, tagKeys } from '../../lib/query-keys';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: Dashboard,
@@ -13,12 +14,12 @@ export const Route = createFileRoute('/_authenticated/dashboard')({
 
 function Dashboard() {
   const { data: repositories = [], isLoading: isReposLoading } = useQuery({
-    queryKey: ['repositories'],
+    queryKey: repositoryKeys.all,
     queryFn: () => getRepositories(),
   });
 
   const { data: tags = [], isLoading: isTagsLoading } = useQuery({
-    queryKey: ['tags-with-count'],
+    queryKey: tagKeys.withCount(),
     queryFn: () => getTagsWithRepositoryCount(),
   });
 

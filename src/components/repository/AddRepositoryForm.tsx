@@ -13,6 +13,7 @@ import {
 } from '../../actions/repos';
 import type { GitHubRepository } from '../../utils/github';
 import { isValidRepositoryUrl } from '../../utils/github';
+import { repositoryKeys } from '../../lib/query-keys';
 
 interface AddRepositoryFormProps {
   isOpen: boolean;
@@ -34,7 +35,7 @@ export function AddRepositoryForm({
     mutationFn: (variables: { url: string }) =>
       createRepository({ data: variables }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['repositories'] });
+      queryClient.invalidateQueries({ queryKey: repositoryKeys.all });
       handleReset();
       onOpenChange(false);
     },

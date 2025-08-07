@@ -3,6 +3,7 @@ import { authClient } from '../lib/auth-client';
 import { useQuery } from '@tanstack/react-query';
 import { SiGithub } from '@icons-pack/react-simple-icons';
 import { Code, Tag, List, GitBranch, Search, Zap } from 'lucide-react';
+import { sessionKeys } from '../lib/query-keys';
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -10,7 +11,7 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   const { data: user } = useQuery({
-    queryKey: ['session'],
+    queryKey: sessionKeys.current(),
     queryFn: () => authClient.getSession().then(res => res.data?.user),
   });
 

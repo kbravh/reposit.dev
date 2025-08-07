@@ -6,13 +6,9 @@ import {
 } from '@headlessui/react';
 import { AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { deleteTag } from '../../actions/tags';
-
-type Repository = {
-  repositoryInstance: { id: string };
-  repository: { name: string; org: string };
-};
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { deleteTag, getRepositoriesForTag } from '../../actions/tags';
+import { tagKeys } from '../../lib/query-keys';
 
 type TagWithCount = {
   id: string;
@@ -25,25 +21,25 @@ type TagWithCount = {
 
 type DeleteTagModalProps = {
   tag: TagWithCount | null;
-  repositories: Repository[];
   onClose: () => void;
 };
 
-export function DeleteTagModal({
-  tag,
-  repositories,
-  onClose,
-}: DeleteTagModalProps) {
+export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
   const [confirmation, setConfirmation] = useState('');
   const queryClient = useQueryClient();
+
+  const { data: repositories = [] } = useQuery({
+    queryKey: tag ? tagKeys.repositoriesForTag(tag.id) : [],
+    queryFn: () =>
+      tag ? getRepositoriesForTag({ data: { tagId: tag.id } }) : [],
+    enabled: !!tag,
+  });
 
   const deleteTagMutation = useMutation({
     mutationFn: (variables: { tagId: string }) =>
       deleteTag({ data: variables }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tags-with-count'] });
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
-      queryClient.invalidateQueries({ queryKey: ['repository-tags'] });
+      queryClient.invalidateQueries({ queryKey: tagKeys.all });
       setConfirmation('');
       onClose();
     },

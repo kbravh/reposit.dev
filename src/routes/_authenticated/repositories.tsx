@@ -5,6 +5,7 @@ import { Search, Plus, Code } from 'lucide-react';
 import { getRepositories } from '../../actions/repos';
 import { RepositoryListItem } from '../../components/repository/RepositoryListItem';
 import { AddRepositoryForm } from '../../components/repository/AddRepositoryForm';
+import { repositoryKeys } from '../../lib/query-keys';
 
 export const Route = createFileRoute('/_authenticated/repositories')({
   component: Repositories,
@@ -15,7 +16,7 @@ function Repositories() {
   const [isAddingRepo, setIsAddingRepo] = useState(false);
 
   const { data: repositories = [], isLoading } = useQuery({
-    queryKey: ['repositories'],
+    queryKey: repositoryKeys.all,
     queryFn: () => getRepositories(),
   });
 

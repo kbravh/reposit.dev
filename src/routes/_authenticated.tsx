@@ -13,6 +13,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { redirect } from '@tanstack/react-router';
 import { getSession } from '../actions/auth';
+import { sessionKeys } from '../lib/query-keys';
 
 export type NavigationItem = {
   name: string;
@@ -41,7 +42,7 @@ export const Route = createFileRoute('/_authenticated')({
 
 function LoggedInLayout() {
   const { data: user, isPending } = useQuery({
-    queryKey: ['session'],
+    queryKey: sessionKeys.current(),
     queryFn: () => authClient.getSession().then(res => res.data?.user),
   });
 

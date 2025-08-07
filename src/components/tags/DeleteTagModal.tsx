@@ -6,6 +6,8 @@ import {
 } from '@headlessui/react';
 import { AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteTag } from '../../actions/tags';
 
 type Repository = {
   repositoryInstance: { id: string };
@@ -24,19 +26,28 @@ type TagWithCount = {
 type DeleteTagModalProps = {
   tag: TagWithCount | null;
   repositories: Repository[];
-  isDeleting: boolean;
-  onDelete: () => void;
   onClose: () => void;
 };
 
 export function DeleteTagModal({
   tag,
   repositories,
-  isDeleting,
-  onDelete,
   onClose,
 }: DeleteTagModalProps) {
   const [confirmation, setConfirmation] = useState('');
+  const queryClient = useQueryClient();
+
+  const deleteTagMutation = useMutation({
+    mutationFn: (variables: { tagId: string }) =>
+      deleteTag({ data: variables }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags-with-count'] });
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      queryClient.invalidateQueries({ queryKey: ['repository-tags'] });
+      setConfirmation('');
+      onClose();
+    },
+  });
 
   // Reset confirmation when tag changes or modal closes
   useEffect(() => {
@@ -47,7 +58,7 @@ export function DeleteTagModal({
 
   const handleDelete = () => {
     if (confirmation === tag.title) {
-      onDelete();
+      deleteTagMutation.mutate({ tagId: tag.id });
     }
   };
 
@@ -122,10 +133,12 @@ export function DeleteTagModal({
               <button
                 type="button"
                 onClick={handleDelete}
-                disabled={isDeleting || confirmation !== tag.title}
+                disabled={
+                  deleteTagMutation.isPending || confirmation !== tag.title
+                }
                 className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto disabled:opacity-50"
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {deleteTagMutation.isPending ? 'Deleting...' : 'Delete'}
               </button>
               <button
                 type="button"

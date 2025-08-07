@@ -6,6 +6,8 @@ import {
 } from '@headlessui/react';
 import { Edit3 } from 'lucide-react';
 import { useState, useEffect, type FormEvent } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateTag } from '../../actions/tags';
 import { TAG_COLORS } from '../../utils/colors';
 
 type TagWithCount = {
@@ -19,23 +21,26 @@ type TagWithCount = {
 
 type EditTagModalProps = {
   tag: TagWithCount | null;
-  isUpdating: boolean;
-  onUpdate: (updates: {
-    tagId: string;
-    title?: string;
-    color?: string;
-  }) => void;
   onClose: () => void;
 };
 
-export function EditTagModal({
-  tag,
-  isUpdating,
-  onUpdate,
-  onClose,
-}: EditTagModalProps) {
+export function EditTagModal({ tag, onClose }: EditTagModalProps) {
   const [title, setTitle] = useState(tag?.title || '');
   const [color, setColor] = useState(tag?.color || '');
+  const queryClient = useQueryClient();
+
+  const updateTagMutation = useMutation({
+    mutationFn: (variables: {
+      tagId: string;
+      title?: string;
+      color?: string;
+    }) => updateTag({ data: variables }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags-with-count'] });
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      onClose();
+    },
+  });
 
   // Update local state when tag changes
   useEffect(() => {
@@ -63,7 +68,7 @@ export function EditTagModal({
     }
 
     if (updates.title || updates.color) {
-      onUpdate(updates);
+      updateTagMutation.mutate(updates);
     } else {
       onClose();
     }
@@ -143,10 +148,10 @@ export function EditTagModal({
               <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                 <button
                   type="submit"
-                  disabled={isUpdating}
+                  disabled={updateTagMutation.isPending}
                   className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-indigo-500 sm:ml-3 sm:w-auto disabled:opacity-50"
                 >
-                  {isUpdating ? 'Saving...' : 'Save'}
+                  {updateTagMutation.isPending ? 'Saving...' : 'Save'}
                 </button>
                 <button
                   type="button"

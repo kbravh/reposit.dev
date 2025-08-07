@@ -1,12 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { type FormEvent } from 'react';
 import { Search, Plus, Tag } from 'lucide-react';
 import {
   getTagsWithRepositoryCount,
-  createTag,
-  updateTag,
   deleteTag,
   getRepositoriesForTag,
 } from '../../actions/tags';
@@ -31,7 +28,6 @@ type TagWithCount = {
 function Tags() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
-  const [newTagTitle, setNewTagTitle] = useState('');
   const [editingTag, setEditingTag] = useState<TagWithCount | null>(null);
   const [deletingTag, setDeletingTag] = useState<TagWithCount | null>(null);
 
@@ -51,30 +47,6 @@ function Tags() {
     enabled: !!deletingTag,
   });
 
-  const createTagMutation = useMutation({
-    mutationFn: (variables: { title: string }) =>
-      createTag({ data: variables }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tags-with-count'] });
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
-      setIsAddingTag(false);
-      setNewTagTitle('');
-    },
-  });
-
-  const updateTagMutation = useMutation({
-    mutationFn: (variables: {
-      tagId: string;
-      title?: string;
-      color?: string;
-    }) => updateTag({ data: variables }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tags-with-count'] });
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
-      setEditingTag(null);
-    },
-  });
-
   const deleteTagMutation = useMutation({
     mutationFn: (variables: { tagId: string }) =>
       deleteTag({ data: variables }),
@@ -90,31 +62,14 @@ function Tags() {
     tag.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateTag = async (e: FormEvent) => {
-    e.preventDefault();
-    const trimmedTitle = newTagTitle.trim();
-    if (trimmedTitle) {
-      createTagMutation.mutate({ title: trimmedTitle });
+  const handleDeleteTag = (tag: TagWithCount) => {
+    // If the tag has no repositories, delete directly without confirmation
+    if (tag.repositoryCount === 0) {
+      deleteTagMutation.mutate({ tagId: tag.id });
+    } else {
+      // For tags with repositories, show the confirmation modal
+      setDeletingTag(tag);
     }
-  };
-
-  const handleUpdateTag = (updates: {
-    tagId: string;
-    title?: string;
-    color?: string;
-  }) => {
-    updateTagMutation.mutate(updates);
-  };
-
-  const handleDeleteTag = () => {
-    if (deletingTag) {
-      deleteTagMutation.mutate({ tagId: deletingTag.id });
-    }
-  };
-
-  const handleCancelAdd = () => {
-    setIsAddingTag(false);
-    setNewTagTitle('');
   };
 
   return (
@@ -140,12 +95,7 @@ function Tags() {
 
       <AddTagForm
         isVisible={isAddingTag}
-        newTagTitle={newTagTitle}
-        isCreating={createTagMutation.isPending}
-        error={createTagMutation.error}
-        onSubmit={handleCreateTag}
-        onTitleChange={setNewTagTitle}
-        onCancel={handleCancelAdd}
+        onClose={() => setIsAddingTag(false)}
       />
 
       {/* Search */}
@@ -203,25 +153,18 @@ function Tags() {
                 key={tag.id}
                 tag={tag}
                 onEdit={setEditingTag}
-                onDelete={setDeletingTag}
+                onDelete={handleDeleteTag}
               />
             ))}
           </ul>
         )}
       </div>
 
-      <EditTagModal
-        tag={editingTag}
-        isUpdating={updateTagMutation.isPending}
-        onUpdate={handleUpdateTag}
-        onClose={() => setEditingTag(null)}
-      />
+      <EditTagModal tag={editingTag} onClose={() => setEditingTag(null)} />
 
       <DeleteTagModal
         tag={deletingTag}
         repositories={repositoriesForDeletingTag}
-        isDeleting={deleteTagMutation.isPending}
-        onDelete={handleDeleteTag}
         onClose={() => setDeletingTag(null)}
       />
     </div>

@@ -1,73 +1,15 @@
 import { ExternalLink, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useDeleteRepositoryMutation } from '../../hooks/repositories';
 import { RepositoryTags } from '../tags/TagList';
-import { deleteRepository } from '../../actions/repos';
-import { repositoryKeys } from '../../lib/query-keys';
-
-type Repository = {
-  repositoryInstance: {
-    id: string;
-    userId: string;
-    repositoryId: string;
-    createdAt: Date;
-    updatedAt: Date;
-  };
-  repository: {
-    id: string;
-    htmlUrl: string;
-    org: string;
-    name: string;
-    description: string | null;
-    private: boolean;
-    provider: string;
-    providerId: string;
-    lastSyncedAt: Date | null;
-    deletedAt: Date | null;
-    createdAt: Date;
-    primaryLanguage: string | null;
-    updatedAt: Date;
-  };
-};
+import type { Repository } from './types';
 
 interface RepositoryListItemProps {
   repository: Repository;
 }
 
 export function RepositoryListItem({ repository }: RepositoryListItemProps) {
-  const queryClient = useQueryClient();
-
-  const deleteRepoMutation = useMutation({
-    mutationFn: (variables: { repositoryInstanceId: string }) =>
-      deleteRepository({ data: variables }),
-    onMutate: async (variables) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries({ queryKey: repositoryKeys.all });
-
-      // Snapshot the previous value
-      const previousRepositories = queryClient.getQueryData(repositoryKeys.all);
-
-      // Optimistically remove the repository from the list
-      queryClient.setQueryData(repositoryKeys.all, (old: any) => 
-        old ? old.filter((repo: any) => 
-          repo.repositoryInstance.id !== variables.repositoryInstanceId
-        ) : old
-      );
-
-      // Return a context object with the snapshotted value
-      return { previousRepositories };
-    },
-    onError: (err, variables, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousRepositories) {
-        queryClient.setQueryData(repositoryKeys.all, context.previousRepositories);
-      }
-    },
-    // Always refetch after error or success:
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: repositoryKeys.all });
-    },
-  });
+  const deleteRepoMutation = useDeleteRepositoryMutation();
   return (
     <li className="flex flex-col gap-3 py-5 sm:flex-row sm:justify-between sm:gap-x-6">
       <div className="min-w-0 flex-auto">

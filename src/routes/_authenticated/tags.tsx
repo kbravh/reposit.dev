@@ -1,26 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Search, Plus, Tag } from 'lucide-react';
-import { getTagsWithRepositoryCount, deleteTag } from '../../actions/tags';
+import { getTagsWithRepositoryCount } from '../../actions/tags';
 import { TagCard } from '../../components/tags/TagCard';
 import { AddTagForm } from '../../components/tags/AddTagForm';
 import { EditTagModal } from '../../components/tags/EditTagModal';
 import { DeleteTagModal } from '../../components/tags/DeleteTagModal';
 import { tagKeys } from '../../lib/query-keys';
+import type { TagWithCount } from '../../components/tags/types';
+import { useDeleteTagMutation } from '../../hooks/tags';
 
 export const Route = createFileRoute('/_authenticated/tags')({
   component: Tags,
 });
-
-type TagWithCount = {
-  id: string;
-  title: string;
-  color: string;
-  createdAt: Date;
-  updatedAt: Date;
-  repositoryCount: number;
-};
 
 function Tags() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,53 +21,13 @@ function Tags() {
   const [editingTag, setEditingTag] = useState<TagWithCount | null>(null);
   const [deletingTag, setDeletingTag] = useState<TagWithCount | null>(null);
 
-  const queryClient = useQueryClient();
-
   const { data: tags = [], isLoading } = useQuery({
     queryKey: tagKeys.withCount(),
     queryFn: () => getTagsWithRepositoryCount(),
   });
 
-  const deleteTagMutation = useMutation({
-    mutationFn: (variables: { tagId: string }) =>
-      deleteTag({ data: variables }),
-    onMutate: async (variables) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries({ queryKey: tagKeys.all });
-      await queryClient.cancelQueries({ queryKey: tagKeys.withCount() });
-
-      // Snapshot the previous values
-      const previousTags = queryClient.getQueryData(tagKeys.all);
-      const previousTagsWithCount = queryClient.getQueryData(tagKeys.withCount());
-
-      // Optimistically remove the tag from all tag lists
-      queryClient.setQueryData(tagKeys.all, (old: any) => 
-        old ? old.filter((tag: any) => tag.id !== variables.tagId) : old
-      );
-      
-      queryClient.setQueryData(tagKeys.withCount(), (old: any) => 
-        old ? old.filter((tag: any) => tag.id !== variables.tagId) : old
-      );
-
-      // Return a context object with the snapshotted values
-      return { previousTags, previousTagsWithCount };
-    },
-    onError: (err, variables, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousTags) {
-        queryClient.setQueryData(tagKeys.all, context.previousTags);
-      }
-      if (context?.previousTagsWithCount) {
-        queryClient.setQueryData(tagKeys.withCount(), context.previousTagsWithCount);
-      }
-    },
-    onSuccess: () => {
-      setDeletingTag(null);
-    },
-    // Always refetch after error or success:
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.all });
-    },
+  const deleteTagMutation = useDeleteTagMutation({
+    onSuccess: () => setDeletingTag(null),
   });
 
   const filteredTags = tags.filter(tag =>

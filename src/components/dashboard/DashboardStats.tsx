@@ -1,40 +1,8 @@
 import { Link } from '@tanstack/react-router';
 import { Code, Tag, GitBranch } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
-
-type Repository = {
-  repositoryInstance: {
-    id: string;
-    userId: string;
-    repositoryId: string;
-    createdAt: Date;
-    updatedAt: Date;
-  };
-  repository: {
-    id: string;
-    htmlUrl: string;
-    org: string;
-    name: string;
-    description: string | null;
-    private: boolean;
-    provider: string;
-    providerId: string;
-    lastSyncedAt: Date | null;
-    deletedAt: Date | null;
-    createdAt: Date;
-    primaryLanguage: string | null;
-    updatedAt: Date;
-  };
-};
-
-type TagWithCount = {
-  id: string;
-  title: string;
-  color: string;
-  createdAt: Date;
-  updatedAt: Date;
-  repositoryCount: number;
-};
+import type { TagWithCount } from '../tags/types';
+import type { Repository } from '../repository/types';
 
 type StatCardProps = {
   icon: LucideIcon;

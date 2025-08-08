@@ -6,19 +6,9 @@ import {
 } from '@headlessui/react';
 import { Edit3 } from 'lucide-react';
 import { useState, useEffect, type FormEvent } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateTag } from '../../actions/tags';
 import { TAG_COLORS } from '../../utils/colors';
-import { tagKeys } from '../../lib/query-keys';
-
-type TagWithCount = {
-  id: string;
-  title: string;
-  color: string;
-  createdAt: Date;
-  updatedAt: Date;
-  repositoryCount: number;
-};
+import type { TagWithCount } from './types';
+import { useUpdateTagMutation } from '../../hooks/tags';
 
 type EditTagModalProps = {
   tag: TagWithCount | null;
@@ -28,56 +18,8 @@ type EditTagModalProps = {
 export function EditTagModal({ tag, onClose }: EditTagModalProps) {
   const [title, setTitle] = useState(tag?.title || '');
   const [color, setColor] = useState(tag?.color || '');
-  const queryClient = useQueryClient();
 
-  const updateTagMutation = useMutation({
-    mutationFn: (variables: {
-      tagId: string;
-      title?: string;
-      color?: string;
-    }) => updateTag({ data: variables }),
-    onMutate: async (variables) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries({ queryKey: tagKeys.all });
-      await queryClient.cancelQueries({ queryKey: tagKeys.withCount() });
-
-      // Snapshot the previous values
-      const previousTags = queryClient.getQueryData(tagKeys.all);
-      const previousTagsWithCount = queryClient.getQueryData(tagKeys.withCount());
-
-      // Optimistically update the tag in all tag lists
-      const updateTagInArray = (old: any) => {
-        if (!old) return old;
-        return old.map((tag: any) => 
-          tag.id === variables.tagId 
-            ? { ...tag, ...variables, updatedAt: new Date() }
-            : tag
-        );
-      };
-
-      queryClient.setQueryData(tagKeys.all, updateTagInArray);
-      queryClient.setQueryData(tagKeys.withCount(), updateTagInArray);
-
-      // Return a context object with the snapshotted values
-      return { previousTags, previousTagsWithCount };
-    },
-    onError: (err, variables, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousTags) {
-        queryClient.setQueryData(tagKeys.all, context.previousTags);
-      }
-      if (context?.previousTagsWithCount) {
-        queryClient.setQueryData(tagKeys.withCount(), context.previousTagsWithCount);
-      }
-    },
-    onSuccess: () => {
-      onClose();
-    },
-    // Always refetch after error or success:
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.all });
-    },
-  });
+  const updateTagMutation = useUpdateTagMutation({ onSuccess: onClose });
 
   // Update local state when tag changes
   useEffect(() => {

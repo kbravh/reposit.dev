@@ -5,19 +5,12 @@ import {
   DialogTitle,
 } from '@headlessui/react';
 import { AlertTriangle } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteTag, getRepositoriesForTag } from '../../actions/tags';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getRepositoriesForTag } from '../../actions/tags';
 import { tagKeys } from '../../lib/query-keys';
-
-type TagWithCount = {
-  id: string;
-  title: string;
-  color: string;
-  createdAt: Date;
-  updatedAt: Date;
-  repositoryCount: number;
-};
+import type { TagWithCount } from './types';
+import { useDeleteTagMutation } from '../../hooks/tags';
 
 type DeleteTagModalProps = {
   tag: TagWithCount | null;
@@ -26,7 +19,6 @@ type DeleteTagModalProps = {
 
 export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
   const [confirmation, setConfirmation] = useState('');
-  const queryClient = useQueryClient();
 
   const { data: repositories = [] } = useQuery({
     queryKey: tag ? tagKeys.repositoriesForTag(tag.id) : [],
@@ -35,57 +27,12 @@ export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
     enabled: !!tag,
   });
 
-  const deleteTagMutation = useMutation({
-    mutationFn: (variables: { tagId: string }) =>
-      deleteTag({ data: variables }),
-    onMutate: async (variables) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries({ queryKey: tagKeys.all });
-      await queryClient.cancelQueries({ queryKey: tagKeys.repositoriesForTag(variables.tagId) });
-
-      // Snapshot the previous values
-      const previousTags = queryClient.getQueryData(tagKeys.all);
-      const previousTagsWithCount = queryClient.getQueryData(tagKeys.withCount());
-      const previousRepositories = queryClient.getQueryData(tagKeys.repositoriesForTag(variables.tagId));
-
-      // Optimistically remove the tag from all tag lists
-      queryClient.setQueryData(tagKeys.all, (old: any) => 
-        old ? old.filter((tag: any) => tag.id !== variables.tagId) : old
-      );
-      
-      queryClient.setQueryData(tagKeys.withCount(), (old: any) => 
-        old ? old.filter((tag: any) => tag.id !== variables.tagId) : old
-      );
-
-      // Return a context object with the snapshotted values
-      return { previousTags, previousTagsWithCount, previousRepositories };
-    },
-    onError: (err, variables, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousTags) {
-        queryClient.setQueryData(tagKeys.all, context.previousTags);
-      }
-      if (context?.previousTagsWithCount) {
-        queryClient.setQueryData(tagKeys.withCount(), context.previousTagsWithCount);
-      }
-      if (context?.previousRepositories) {
-        queryClient.setQueryData(tagKeys.repositoriesForTag(variables.tagId), context.previousRepositories);
-      }
-    },
+  const deleteTagMutation = useDeleteTagMutation({
     onSuccess: () => {
       setConfirmation('');
       onClose();
     },
-    // Always refetch after error or success:
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.all });
-    },
   });
-
-  // Reset confirmation when tag changes or modal closes
-  useEffect(() => {
-    setConfirmation('');
-  }, [tag]);
 
   if (!tag) return null;
 

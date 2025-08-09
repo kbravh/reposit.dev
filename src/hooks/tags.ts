@@ -164,12 +164,12 @@ export function useCreateTagMutation(options?: { onSuccess?: () => void }) {
       };
 
       queryClient.setQueryData<BaseTag[] | undefined>(tagKeys.all, previous =>
-        previous ? [...previous, optimisticBaseTag] : [optimisticBaseTag]
+        previous ? [optimisticBaseTag, ...previous] : [optimisticBaseTag]
       );
       queryClient.setQueryData<TagWithCount[] | undefined>(
         tagKeys.withCount(),
         previous =>
-          previous ? [...previous, optimisticWithCount] : [optimisticWithCount]
+          previous ? [optimisticWithCount, ...previous] : [optimisticWithCount]
       );
 
       return { previousTags, previousTagsWithCount };
@@ -279,7 +279,7 @@ export function useCreateManyTagsForRepositoryMutation(options?: {
 
       if (newTags.length > 0) {
         queryClient.setQueryData<BaseTag[] | undefined>(tagKeys.all, old =>
-          old ? [...old, ...newTags] : newTags
+          old ? [...newTags, ...old] : newTags
         );
       }
 

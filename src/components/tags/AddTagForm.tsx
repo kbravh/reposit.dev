@@ -1,6 +1,8 @@
 import { Tag } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useCreateTagMutation } from '../../hooks/tags';
+import { useQueryClient } from '@tanstack/react-query';
+import { tagKeys } from '../../hooks/tags';
 
 type AddTagFormProps = {
   isVisible: boolean;
@@ -9,6 +11,7 @@ type AddTagFormProps = {
 
 export function AddTagForm({ isVisible, onClose }: AddTagFormProps) {
   const [newTagTitle, setNewTagTitle] = useState('');
+  const queryClient = useQueryClient();
 
   const createTagMutation = useCreateTagMutation({
     onSuccess: () => {

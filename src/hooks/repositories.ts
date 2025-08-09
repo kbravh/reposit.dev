@@ -15,69 +15,9 @@ export function useCreateRepositoryMutation(options?: {
   return useMutation({
     mutationFn: (variables: { url: string }) =>
       createRepository({ data: variables }),
-    onMutate: async variables => {
-      await queryClient.cancelQueries({ queryKey: repositoryKeys.all });
-
-      const previousRepositories = queryClient.getQueryData<
-        Repository[] | undefined
-      >(repositoryKeys.all);
-
-      // Parse the URL to create an optimistic repository
-      const urlParts = variables.url
-        .replace(/^https?:\/\/github\.com\//, '')
-        .split('/');
-      const [org, name] = urlParts;
-
-      if (org && name) {
-        const optimisticRepository: Repository = {
-          repositoryInstance: {
-            id: `temp-${Date.now()}`,
-            userId: 'current-user',
-            repositoryId: `temp-repo-${Date.now()}`,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          repository: {
-            id: `temp-repo-${Date.now()}`,
-            htmlUrl: variables.url,
-            org,
-            name,
-            description: null,
-            private: false,
-            provider: 'github',
-            providerId: `temp-${Date.now()}`,
-            lastSyncedAt: null,
-            deletedAt: null,
-            createdAt: new Date(),
-            primaryLanguage: null,
-            updatedAt: new Date(),
-          },
-        };
-
-        queryClient.setQueryData<Repository[] | undefined>(
-          repositoryKeys.all,
-          previous =>
-            previous
-              ? [optimisticRepository, ...previous]
-              : [optimisticRepository]
-        );
-      }
-
-      return { previousRepositories };
-    },
-    onError: (err, variables, context) => {
-      if (context?.previousRepositories) {
-        queryClient.setQueryData(
-          repositoryKeys.all,
-          context.previousRepositories
-        );
-      }
-    },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: repositoryKeys.all });
       options?.onSuccess?.();
-    },
-    onSettled: () => {
-      return queryClient.invalidateQueries({ queryKey: repositoryKeys.all });
     },
   });
 }

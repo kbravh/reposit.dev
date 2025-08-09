@@ -158,7 +158,7 @@ export function useCreateTagMutation(options?: { onSuccess?: () => void }) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (variables: { title: string }) =>
+    mutationFn: (variables: { title: string; color?: string }) =>
       createTag({ data: variables }),
     onMutate: async variables => {
       await queryClient.cancelQueries({ queryKey: tagKeys.all });

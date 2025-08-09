@@ -130,20 +130,20 @@ export function TagModal({
     <Dialog open={isOpen} onClose={onClose} className="relative z-10">
       <DialogBackdrop
         transition
-        className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in"
+        className="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in"
       />
 
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <DialogPanel
             transition
-            className="relative transform overflow-visible rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:min-h-96 data-closed:sm:translate-y-0 data-closed:sm:scale-95 flex flex-col"
+            className="relative transform overflow-visible rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg sm:min-h-96 data-closed:sm:translate-y-0 data-closed:sm:scale-95 flex flex-col"
           >
             <div className="flex-1 px-4 pt-5 pb-4 sm:p-6">
               <div className="mt-3 sm:mt-0">
                 <DialogTitle
                   as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                  className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100 mb-4"
                 >
                   Manage Tags
                 </DialogTitle>
@@ -154,7 +154,7 @@ export function TagModal({
                     {repositoryTags.map(tag => (
                       <span
                         key={tag.id}
-                        className="inline-flex items-center gap-x-2 rounded-md px-3 py-1.5 text-sm font-medium text-gray-900 ring-1 ring-gray-300 ring-inset"
+                        className="inline-flex items-center gap-x-2 rounded-md px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-gray-100 ring-1 ring-gray-300 dark:ring-gray-600 ring-inset"
                       >
                         <span
                           className="inline-block size-2 shrink-0 rounded-full"
@@ -194,21 +194,21 @@ export function TagModal({
                       setTimeout(() => setIsInputFocused(false), 200)
                     }
                     placeholder="Add new tag..."
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
 
                   {/* Suggestions dropdown */}
                   {isInputFocused &&
                     inputValue.trim() &&
                     suggestions.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-50 max-h-48 overflow-y-auto">
                         {suggestions.map((tag, index) => (
                           <button
                             key={tag.id}
                             type="button"
-                            className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 focus:outline-none focus:bg-gray-100 ${
+                            className={`w-full px-3 py-2 text-left text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-600 ${
                               index === selectedSuggestionIndex
-                                ? 'bg-gray-100'
+                                ? 'bg-gray-100 dark:bg-gray-600'
                                 : ''
                             }`}
                             onClick={() => handleSuggestionClick(tag)}
@@ -231,9 +231,9 @@ export function TagModal({
                           ) && (
                             <button
                               type="button"
-                              className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 focus:outline-none focus:bg-gray-100 border-t border-gray-200 ${
+                              className={`w-full px-3 py-2 text-left text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-600 border-t border-gray-200 dark:border-gray-600 ${
                                 selectedSuggestionIndex === suggestions.length
-                                  ? 'bg-gray-100'
+                                  ? 'bg-gray-100 dark:bg-gray-600'
                                   : ''
                               }`}
                               onClick={handleAddTags}
@@ -257,11 +257,11 @@ export function TagModal({
               </div>
             </div>
 
-            <div className="border-t border-gray-200 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer sm:w-auto sm:text-sm"
+                className="inline-flex w-full justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer sm:w-auto sm:text-sm"
               >
                 Done
               </button>

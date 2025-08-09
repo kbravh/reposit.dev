@@ -113,33 +113,33 @@ export function AddRepositoryForm({
       <Dialog open={isOpen} onClose={handleCancel} className="relative z-10">
         <DialogBackdrop
           transition
-          className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in"
+          className="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in"
         />
 
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <DialogPanel
               transition
-              className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in sm:my-8 sm:w-full sm:max-w-2xl sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
+              className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in sm:my-8 sm:w-full sm:max-w-2xl sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
             >
               {mode === 'input' && (
                 <>
                   <div>
-                    <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-indigo-100">
+                    <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
                       <Code
                         aria-hidden="true"
-                        className="size-6 text-indigo-600"
+                        className="size-6 text-indigo-600 dark:text-indigo-400"
                       />
                     </div>
                     <div className="mt-3 text-center sm:mt-5">
                       <DialogTitle
                         as="h3"
-                        className="font-semibold text-base text-gray-900"
+                        className="font-semibold text-base text-gray-900 dark:text-gray-100"
                       >
                         Add Repository
                       </DialogTitle>
                       <div className="mt-2">
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
                           Enter a repository URL (like
                           github.com/microsoft/TypeScript) or search for
                           repositories by name.
@@ -152,7 +152,7 @@ export function AddRepositoryForm({
                     <div>
                       <label
                         htmlFor="repo-input"
-                        className="block text-sm font-medium text-gray-700"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
                       >
                         Repository URL or search term
                       </label>
@@ -162,19 +162,19 @@ export function AddRepositoryForm({
                           name="repo-input"
                           type="text"
                           placeholder="microsoft/TypeScript or react framework"
-                          className="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                          className="col-start-1 row-start-1 block w-full rounded-md bg-white dark:bg-gray-700 py-1.5 pl-10 pr-3 text-base text-gray-900 dark:text-gray-100 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                           required
                         />
                         <Search
                           aria-hidden="true"
-                          className="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4"
+                          className="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 dark:text-gray-500 sm:size-4"
                         />
                       </div>
                     </div>
 
                     {(createRepoMutation.error || searchMutation.error) && (
                       <div className="mt-3">
-                        <p className="text-sm text-red-600">
+                        <p className="text-sm text-red-600 dark:text-red-400">
                           {createRepoMutation.error instanceof Error
                             ? createRepoMutation.error.message
                             : searchMutation.error instanceof Error
@@ -202,7 +202,7 @@ export function AddRepositoryForm({
                       <button
                         type="button"
                         onClick={handleCancel}
-                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 text-sm shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 sm:col-start-1 sm:mt-0"
                       >
                         Cancel
                       </button>
@@ -218,18 +218,18 @@ export function AddRepositoryForm({
                       <button
                         type="button"
                         onClick={handleBackToSearch}
-                        className="rounded-full bg-indigo-100 p-2 text-indigo-600 hover:bg-indigo-200"
+                        className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-800/50"
                       >
                         <ArrowLeft className="size-4" />
                       </button>
                       <div>
                         <DialogTitle
                           as="h3"
-                          className="font-semibold text-base text-gray-900"
+                          className="font-semibold text-base text-gray-900 dark:text-gray-100"
                         >
                           Search Results
                         </DialogTitle>
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
                           Found {searchResults.length} repositories for &ldquo;
                           {searchQuery}&rdquo;
                         </p>
@@ -240,13 +240,13 @@ export function AddRepositoryForm({
                   <div className="mt-5 sm:mt-6">
                     {searchResults.length === 0 ? (
                       <div className="text-center py-8">
-                        <p className="text-gray-500 text-sm">
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
                           No repositories found. Try a different search term.
                         </p>
                       </div>
                     ) : (
                       <div className="max-h-96 overflow-y-auto">
-                        <ul className="divide-y divide-gray-100">
+                        <ul className="divide-y divide-gray-100 dark:divide-gray-700">
                           {searchResults.map(repo => (
                             <li
                               key={repo.id}
@@ -254,19 +254,19 @@ export function AddRepositoryForm({
                             >
                               <div className="flex min-w-0 gap-x-4">
                                 <div className="flex-shrink-0">
-                                  <div className="size-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                    <Code className="size-5 text-gray-600" />
+                                  <div className="size-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                    <Code className="size-5 text-gray-600 dark:text-gray-400" />
                                   </div>
                                 </div>
                                 <div className="min-w-0 flex-auto">
-                                  <p className="font-semibold text-gray-900 text-sm truncate">
+                                  <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
                                     {repo.owner.login}/{repo.name}
                                   </p>
-                                  <p className="mt-1 text-gray-500 text-xs truncate">
+                                  <p className="mt-1 text-gray-500 dark:text-gray-400 text-xs truncate">
                                     {repo.description ||
                                       'No description available'}
                                   </p>
-                                  <div className="mt-1 flex items-center gap-x-4 text-xs text-gray-500">
+                                  <div className="mt-1 flex items-center gap-x-4 text-xs text-gray-500 dark:text-gray-400">
                                     {repo.language && (
                                       <span className="flex items-center gap-x-1">
                                         <div className="size-2 rounded-full bg-blue-500" />
@@ -282,7 +282,7 @@ export function AddRepositoryForm({
                                       {formatNumber(repo.forks_count || 0)}
                                     </span>
                                     {repo.private && (
-                                      <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
+                                      <span className="inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 text-xs font-medium text-yellow-800 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-400/30">
                                         Private
                                       </span>
                                     )}
@@ -307,7 +307,7 @@ export function AddRepositoryForm({
 
                     {createRepoMutation.error && (
                       <div className="mt-3">
-                        <p className="text-sm text-red-600">
+                        <p className="text-sm text-red-600 dark:text-red-400">
                           {createRepoMutation.error instanceof Error
                             ? createRepoMutation.error.message
                             : 'Failed to add repository'}
@@ -319,7 +319,7 @@ export function AddRepositoryForm({
                       <button
                         type="button"
                         onClick={handleCancel}
-                        className="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 text-sm shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
+                        className="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600"
                       >
                         Close
                       </button>

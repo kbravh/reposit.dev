@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Search, Plus, Tag } from 'lucide-react';
+import { Search, Tag, Plus } from 'lucide-react';
 import { getTagsWithRepositoryCount } from '../../actions/tags';
 import { TagCard } from '../../components/tags/TagCard';
-import { AddTagForm } from '../../components/tags/AddTagForm';
+import { AddTagModal } from '../../components/tags/AddTagModal';
 import { EditTagModal } from '../../components/tags/EditTagModal';
 import { DeleteTagModal } from '../../components/tags/DeleteTagModal';
 import { tagKeys } from '../../lib/query-keys';
@@ -48,27 +48,15 @@ function Tags() {
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-bold text-gray-900">Tags</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Tags
+          </h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             Manage your tags and organize your repositories by topics.
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
-            type="button"
-            onClick={() => setIsAddingTag(!isAddingTag)}
-            className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            <Plus className="inline-block w-4 h-4 mr-1" />
-            Add tag
-          </button>
-        </div>
+        <AddTagModal isOpen={isAddingTag} onOpenChange={setIsAddingTag} />
       </div>
-
-      <AddTagForm
-        isVisible={isAddingTag}
-        onClose={() => setIsAddingTag(false)}
-      />
 
       {/* Search */}
       <div className="mt-6">
@@ -78,11 +66,11 @@ function Tags() {
             placeholder="Search tags..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="col-start-1 row-start-1 block w-full max-w-md rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+            className="col-start-1 row-start-1 block w-full max-w-md rounded-md bg-white dark:bg-gray-700 py-1.5 pl-10 pr-3 text-base text-gray-900 dark:text-gray-100 outline outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
           />
           <Search
             aria-hidden="true"
-            className="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4"
+            className="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 dark:text-gray-500 sm:size-4"
           />
         </div>
       </div>
@@ -92,15 +80,17 @@ function Tags() {
         {isLoading ? (
           <div className="text-center py-12">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-gray-400"></div>
-            <p className="mt-2 text-sm text-gray-500">Loading tags...</p>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Loading tags...
+            </p>
           </div>
         ) : filteredTags.length === 0 ? (
           <div className="text-center py-12">
             <Tag className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-semibold text-gray-900">
+            <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
               No tags
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {searchQuery
                 ? 'No tags match your search.'
                 : 'Get started by creating a tag.'}

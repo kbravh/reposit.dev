@@ -25,7 +25,7 @@ export default function MobileSidebar({
     >
       <DialogBackdrop
         transition
-        className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-closed:opacity-0"
+        className="fixed inset-0 bg-gray-900/80 dark:bg-black/90 transition-opacity duration-300 ease-linear data-closed:opacity-0"
       />
 
       <div className="fixed inset-0 flex">

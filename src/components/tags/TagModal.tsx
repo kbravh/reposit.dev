@@ -1,4 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   useRef,
   useState,
@@ -12,14 +11,15 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import {
-  createManyTags,
-  getTags,
-  getTagsForRepository,
-  removeTagFromRepository,
-} from '../../actions/tags';
+import { getTagsForRepository, getTags } from '../../actions/tags';
 import { X } from 'lucide-react';
 import { tagKeys } from '../../lib/query-keys';
+import { useQuery } from '@tanstack/react-query';
+import {
+  useRemoveTagFromRepositoryMutation,
+  useCreateManyTagsForRepositoryMutation,
+} from '../../hooks/tags';
+import type { BaseTag } from './types';
 
 export function TagModal({
   isOpen,
@@ -33,7 +33,6 @@ export function TagModal({
   const [inputValue, setInputValue] = useState('');
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
-  const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus input when modal opens with proper timing
@@ -48,35 +47,20 @@ export function TagModal({
     }
   }, [isOpen]);
 
-  const { data: availableTags = [] } = useQuery({
+  const { data: availableTags = [] } = useQuery<BaseTag[]>({
     queryKey: tagKeys.all,
     queryFn: () => getTags(),
   });
 
-  const { data: repositoryTags = [] } = useQuery({
+  const { data: repositoryTags = [] } = useQuery<BaseTag[]>({
     queryKey: tagKeys.forRepository(repositoryInstanceId),
     queryFn: () => getTagsForRepository({ data: { repositoryInstanceId } }),
   });
 
-  const removeTagMutation = useMutation({
-    mutationFn: (variables: { tagId: string; repositoryInstanceId: string }) =>
-      removeTagFromRepository({ data: variables }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: tagKeys.forRepository(repositoryInstanceId),
-      });
-    },
-  });
+  const removeTagMutation = useRemoveTagFromRepositoryMutation();
 
-  const createTagsMutation = useMutation({
-    mutationFn: (variables: {
-      titles: string[];
-      repositoryInstanceId: string;
-    }) => createManyTags({ data: variables }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.all });
-      setInputValue('');
-    },
+  const createTagsMutation = useCreateManyTagsForRepositoryMutation({
+    onSuccess: () => setInputValue(''),
   });
 
   // Filter suggestions based on input and exclude already assigned tags

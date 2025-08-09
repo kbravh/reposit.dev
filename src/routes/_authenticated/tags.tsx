@@ -1,26 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Search, Plus, Tag } from 'lucide-react';
-import { getTagsWithRepositoryCount, deleteTag } from '../../actions/tags';
+import { getTagsWithRepositoryCount } from '../../actions/tags';
 import { TagCard } from '../../components/tags/TagCard';
 import { AddTagForm } from '../../components/tags/AddTagForm';
 import { EditTagModal } from '../../components/tags/EditTagModal';
 import { DeleteTagModal } from '../../components/tags/DeleteTagModal';
 import { tagKeys } from '../../lib/query-keys';
+import type { TagWithCount } from '../../components/tags/types';
+import { useDeleteTagMutation } from '../../hooks/tags';
 
 export const Route = createFileRoute('/_authenticated/tags')({
   component: Tags,
 });
-
-type TagWithCount = {
-  id: string;
-  title: string;
-  color: string;
-  createdAt: Date;
-  updatedAt: Date;
-  repositoryCount: number;
-};
 
 function Tags() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,20 +21,13 @@ function Tags() {
   const [editingTag, setEditingTag] = useState<TagWithCount | null>(null);
   const [deletingTag, setDeletingTag] = useState<TagWithCount | null>(null);
 
-  const queryClient = useQueryClient();
-
   const { data: tags = [], isLoading } = useQuery({
     queryKey: tagKeys.withCount(),
     queryFn: () => getTagsWithRepositoryCount(),
   });
 
-  const deleteTagMutation = useMutation({
-    mutationFn: (variables: { tagId: string }) =>
-      deleteTag({ data: variables }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.all });
-      setDeletingTag(null);
-    },
+  const deleteTagMutation = useDeleteTagMutation({
+    onSuccess: () => setDeletingTag(null),
   });
 
   const filteredTags = tags.filter(tag =>

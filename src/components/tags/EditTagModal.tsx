@@ -6,19 +6,9 @@ import {
 } from '@headlessui/react';
 import { Edit3 } from 'lucide-react';
 import { useState, useEffect, type FormEvent } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateTag } from '../../actions/tags';
 import { TAG_COLORS } from '../../utils/colors';
-import { tagKeys } from '../../lib/query-keys';
-
-type TagWithCount = {
-  id: string;
-  title: string;
-  color: string;
-  createdAt: Date;
-  updatedAt: Date;
-  repositoryCount: number;
-};
+import type { TagWithCount } from './types';
+import { useUpdateTagMutation } from '../../hooks/tags';
 
 type EditTagModalProps = {
   tag: TagWithCount | null;
@@ -28,19 +18,8 @@ type EditTagModalProps = {
 export function EditTagModal({ tag, onClose }: EditTagModalProps) {
   const [title, setTitle] = useState(tag?.title || '');
   const [color, setColor] = useState(tag?.color || '');
-  const queryClient = useQueryClient();
 
-  const updateTagMutation = useMutation({
-    mutationFn: (variables: {
-      tagId: string;
-      title?: string;
-      color?: string;
-    }) => updateTag({ data: variables }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.all });
-      onClose();
-    },
-  });
+  const updateTagMutation = useUpdateTagMutation({ onSuccess: onClose });
 
   // Update local state when tag changes
   useEffect(() => {

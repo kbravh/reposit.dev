@@ -1,14 +1,6 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { MoreHorizontal, Trash2, Tag, Edit3 } from 'lucide-react';
-
-type TagWithCount = {
-  id: string;
-  title: string;
-  color: string;
-  createdAt: Date;
-  updatedAt: Date;
-  repositoryCount: number;
-};
+import type { TagWithCount } from './types';
 
 type TagCardProps = {
   tag: TagWithCount;

@@ -4,16 +4,14 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Code, GitFork, Plus, Search, Star } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
-import {
-  createRepository,
-  searchGitHubRepositories,
-} from '../../actions/repos';
 import type { GitHubRepository } from '../../utils/github';
 import { isValidRepositoryUrl } from '../../utils/github';
-import { repositoryKeys } from '../../lib/query-keys';
+import {
+  useCreateRepositoryMutation,
+  useSearchRepositoriesMutation,
+} from '../../hooks/repositories';
 
 interface AddRepositoryFormProps {
   isOpen: boolean;
@@ -26,24 +24,20 @@ export function AddRepositoryForm({
   isOpen,
   onOpenChange,
 }: AddRepositoryFormProps) {
-  const queryClient = useQueryClient();
   const [mode, setMode] = useState<FormMode>('input');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<GitHubRepository[]>([]);
 
-  const createRepoMutation = useMutation({
-    mutationFn: (variables: { url: string }) =>
-      createRepository({ data: variables }),
+  const createRepoMutation = useCreateRepositoryMutation({
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: repositoryKeys.all });
       handleReset();
       onOpenChange(false);
     },
   });
 
-  const searchMutation = useMutation({
-    mutationFn: (variables: { query: string }) =>
-      searchGitHubRepositories({ data: variables }),
+  const searchMutation = useSearchRepositoriesMutation<{
+    items: GitHubRepository[];
+  }>({
     onSuccess: data => {
       setSearchResults(data.items);
       setMode('search-results');

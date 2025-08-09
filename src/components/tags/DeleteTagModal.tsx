@@ -5,19 +5,12 @@ import {
   DialogTitle,
 } from '@headlessui/react';
 import { AlertTriangle } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteTag, getRepositoriesForTag } from '../../actions/tags';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getRepositoriesForTag } from '../../actions/tags';
 import { tagKeys } from '../../lib/query-keys';
-
-type TagWithCount = {
-  id: string;
-  title: string;
-  color: string;
-  createdAt: Date;
-  updatedAt: Date;
-  repositoryCount: number;
-};
+import type { TagWithCount } from './types';
+import { useDeleteTagMutation } from '../../hooks/tags';
 
 type DeleteTagModalProps = {
   tag: TagWithCount | null;
@@ -26,7 +19,6 @@ type DeleteTagModalProps = {
 
 export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
   const [confirmation, setConfirmation] = useState('');
-  const queryClient = useQueryClient();
 
   const { data: repositories = [] } = useQuery({
     queryKey: tag ? tagKeys.repositoriesForTag(tag.id) : [],
@@ -35,20 +27,12 @@ export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
     enabled: !!tag,
   });
 
-  const deleteTagMutation = useMutation({
-    mutationFn: (variables: { tagId: string }) =>
-      deleteTag({ data: variables }),
+  const deleteTagMutation = useDeleteTagMutation({
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: tagKeys.all });
       setConfirmation('');
       onClose();
     },
   });
-
-  // Reset confirmation when tag changes or modal closes
-  useEffect(() => {
-    setConfirmation('');
-  }, [tag]);
 
   if (!tag) return null;
 

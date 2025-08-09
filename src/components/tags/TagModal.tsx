@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import {
   useRef,
   useState,
@@ -12,14 +11,15 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import { getTags, getTagsForRepository } from '../../actions/tags';
+import { getTagsForRepository, getTags } from '../../actions/tags';
 import { X } from 'lucide-react';
 import { tagKeys } from '../../lib/query-keys';
-import type { BaseTag } from './types';
+import { useQuery } from '@tanstack/react-query';
 import {
-  useCreateManyTagsForRepositoryMutation,
   useRemoveTagFromRepositoryMutation,
+  useCreateManyTagsForRepositoryMutation,
 } from '../../hooks/tags';
+import type { BaseTag } from './types';
 
 export function TagModal({
   isOpen,

@@ -9,6 +9,26 @@ import {
 import { tagKeys } from '../lib/query-keys';
 import type { BaseTag, TagWithCount } from '../components/tags/types';
 
+// Helper function to insert tags in alphabetical order
+function insertTagAlphabetically<T extends { title: string }>(
+  tags: T[] | undefined,
+  newTag: T
+): T[] {
+  if (!tags) return [newTag];
+
+  const insertIndex = tags.findIndex(
+    tag => tag.title.toLowerCase() > newTag.title.toLowerCase()
+  );
+
+  if (insertIndex === -1) {
+    // If no tag is alphabetically after the new tag, append it
+    return [...tags, newTag];
+  }
+
+  // Insert at the correct alphabetical position
+  return [...tags.slice(0, insertIndex), newTag, ...tags.slice(insertIndex)];
+}
+
 export function useDeleteTagMutation(options?: { onSuccess?: () => void }) {
   const queryClient = useQueryClient();
 
@@ -164,12 +184,16 @@ export function useCreateTagMutation(options?: { onSuccess?: () => void }) {
       };
 
       queryClient.setQueryData<BaseTag[] | undefined>(tagKeys.all, previous =>
-        previous ? [optimisticBaseTag, ...previous] : [optimisticBaseTag]
+        previous
+          ? insertTagAlphabetically(previous, optimisticBaseTag)
+          : [optimisticBaseTag]
       );
       queryClient.setQueryData<TagWithCount[] | undefined>(
         tagKeys.withCount(),
         previous =>
-          previous ? [optimisticWithCount, ...previous] : [optimisticWithCount]
+          previous
+            ? insertTagAlphabetically(previous, optimisticWithCount)
+            : [optimisticWithCount]
       );
 
       return { previousTags, previousTagsWithCount };
@@ -278,9 +302,14 @@ export function useCreateManyTagsForRepositoryMutation(options?: {
       );
 
       if (newTags.length > 0) {
-        queryClient.setQueryData<BaseTag[] | undefined>(tagKeys.all, old =>
-          old ? [...newTags, ...old] : newTags
-        );
+        queryClient.setQueryData<BaseTag[] | undefined>(tagKeys.all, old => {
+          if (!old) return newTags;
+          let result = [...old];
+          newTags.forEach(newTag => {
+            result = insertTagAlphabetically(result, newTag);
+          });
+          return result;
+        });
       }
 
       return { previousRepositoryTags, previousAllTags };

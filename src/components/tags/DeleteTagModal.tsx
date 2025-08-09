@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from '@headlessui/react';
 import { AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getRepositoriesForTag } from '../../actions/tags';
 import { tagKeys } from '../../lib/query-keys';
@@ -18,8 +18,6 @@ type DeleteTagModalProps = {
 };
 
 export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
-  const [confirmation, setConfirmation] = useState('');
-
   const { data: repositories = [] } = useQuery({
     queryKey: tag ? tagKeys.repositoriesForTag(tag.id) : [],
     queryFn: () =>
@@ -29,21 +27,23 @@ export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
 
   const deleteTagMutation = useDeleteTagMutation({
     onSuccess: () => {
-      setConfirmation('');
       onClose();
     },
   });
 
   if (!tag) return null;
 
-  const handleDelete = () => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const confirmation = formData.get('confirmation') as string;
+
     if (confirmation === tag.title) {
       deleteTagMutation.mutate({ tagId: tag.id });
     }
   };
 
   const handleClose = () => {
-    setConfirmation('');
     onClose();
   };
 
@@ -90,32 +90,36 @@ export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
                       </>
                     )}
                   </p>
-                  <div className="mt-4">
-                    <label
-                      htmlFor="delete-confirmation"
-                      className="block font-medium text-gray-900 dark:text-gray-100 text-sm/6"
-                    >
-                      Type &ldquo;{tag.title}&rdquo; to confirm deletion:
-                    </label>
-                    <input
-                      type="text"
-                      id="delete-confirmation"
-                      value={confirmation}
-                      onChange={e => setConfirmation(e.target.value)}
-                      className="mt-2 -outline-offset-1 focus:-outline-offset-2 block w-full rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100 outline-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:outline-red-600 sm:text-sm/6"
-                      placeholder={tag.title}
-                    />
-                  </div>
+                  <form id="delete-tag-form" onSubmit={handleSubmit}>
+                    <div className="mt-4">
+                      <label
+                        htmlFor="delete-confirmation"
+                        className="block font-medium text-gray-900 dark:text-gray-100 text-sm/6"
+                      >
+                        Type &ldquo;{tag.title}&rdquo; to confirm deletion:
+                      </label>
+                      <input
+                        type="text"
+                        id="delete-confirmation"
+                        name="confirmation"
+                        required
+                        pattern={tag.title.replace(
+                          /[.*+?^${}()|[\]\\]/g,
+                          '\\$&'
+                        )}
+                        className="mt-2 -outline-offset-1 focus:-outline-offset-2 block w-full rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100 outline-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:outline-red-600 sm:text-sm/6"
+                        placeholder={tag.title}
+                      />
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
             <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
               <button
-                type="button"
-                onClick={handleDelete}
-                disabled={
-                  deleteTagMutation.isPending || confirmation !== tag.title
-                }
+                type="submit"
+                form="delete-tag-form"
+                disabled={deleteTagMutation.isPending}
                 className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto disabled:opacity-50"
               >
                 {deleteTagMutation.isPending ? 'Deleting...' : 'Delete'}

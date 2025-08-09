@@ -171,10 +171,20 @@ export function useCreateTagMutation(options?: { onSuccess?: () => void }) {
         TagWithCount[] | undefined
       >(tagKeys.withCount());
 
+      // Check for duplicate tag titles (case-insensitive)
+      const normalizedTitle = variables.title.trim().toLowerCase();
+      const existingTag = previousTags?.find(
+        tag => tag.title.toLowerCase() === normalizedTitle
+      );
+
+      if (existingTag) {
+        throw new Error('A tag with this name already exists');
+      }
+
       const optimisticBaseTag: BaseTag = {
         id: `temp-${Date.now()}`,
         title: variables.title,
-        color: '#6366f1',
+        color: variables.color || '#6366f1',
         createdAt: new Date(),
         updatedAt: new Date(),
       };

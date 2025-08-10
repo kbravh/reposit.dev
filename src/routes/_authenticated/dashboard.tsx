@@ -54,7 +54,11 @@ function Dashboard() {
         /* Dashboard Content for Existing Users */
         <div className="space-y-8">
           {/* Stats Cards */}
-          <DashboardStats repositories={repositories} tags={tags} />
+          <DashboardStats
+            repositories={repositories}
+            tags={tags}
+            isLoading={isLoading}
+          />
 
           {/* Quick Actions */}
           <QuickActions />

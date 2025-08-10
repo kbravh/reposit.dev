@@ -13,6 +13,7 @@ type StatCardProps = {
     text: string;
   };
   footerText?: string;
+  isLoading?: boolean;
 };
 
 function StatCard({
@@ -21,6 +22,7 @@ function StatCard({
   value,
   link,
   footerText,
+  isLoading,
 }: StatCardProps) {
   return (
     <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
@@ -35,7 +37,11 @@ function StatCard({
                 {title}
               </dt>
               <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                {value}
+                {isLoading ? (
+                  <span className="inline-block h-6 w-12 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
+                ) : (
+                  value
+                )}
               </dd>
             </dl>
           </div>
@@ -43,7 +49,9 @@ function StatCard({
       </div>
       <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3">
         <div className="text-sm">
-          {link ? (
+          {isLoading ? (
+            <span className="inline-block h-4 w-20 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
+          ) : link ? (
             <Link
               to={link.to}
               className="font-medium text-cyan-700 hover:text-cyan-900 dark:text-cyan-400 dark:hover:text-cyan-300"
@@ -64,9 +72,14 @@ function StatCard({
 interface DashboardStatsProps {
   repositories: Repository[];
   tags: TagWithCount[];
+  isLoading?: boolean;
 }
 
-export function DashboardStats({ repositories, tags }: DashboardStatsProps) {
+export function DashboardStats({
+  repositories,
+  tags,
+  isLoading = false,
+}: DashboardStatsProps) {
   const uniqueLanguages = new Set(
     repositories.map(r => r.repository.primaryLanguage).filter(Boolean)
   ).size;
@@ -102,6 +115,7 @@ export function DashboardStats({ repositories, tags }: DashboardStatsProps) {
           value={stat.value}
           link={stat.link}
           footerText={stat.footerText}
+          isLoading={isLoading}
         />
       ))}
     </div>

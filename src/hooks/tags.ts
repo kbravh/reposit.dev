@@ -158,8 +158,31 @@ export function useCreateTagMutation(options?: { onSuccess?: () => void }) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (variables: { title: string; color?: string }) =>
-      createTag({ data: variables }),
+    mutationFn: (variables: { title: string; color?: string }) => {
+      // Check for duplicate in cache before making API call
+      const normalizedTitle = variables.title.toLowerCase().trim();
+
+      const existingTags = queryClient.getQueryData<BaseTag[] | undefined>(
+        tagKeys.all
+      );
+      const existingTagsWithCount = queryClient.getQueryData<
+        TagWithCount[] | undefined
+      >(tagKeys.withCount());
+
+      // Check both tag caches for duplicates
+      const isDuplicateInAllTags = existingTags?.some(
+        tag => tag.title.toLowerCase() === normalizedTitle
+      );
+      const isDuplicateInWithCount = existingTagsWithCount?.some(
+        tag => tag.title.toLowerCase() === normalizedTitle
+      );
+
+      if (isDuplicateInAllTags || isDuplicateInWithCount) {
+        throw new Error('A tag with this title already exists');
+      }
+
+      return createTag({ data: variables });
+    },
     onMutate: async variables => {
       await queryClient.cancelQueries({ queryKey: tagKeys.all });
       await queryClient.cancelQueries({ queryKey: tagKeys.withCount() });
@@ -174,7 +197,7 @@ export function useCreateTagMutation(options?: { onSuccess?: () => void }) {
       const optimisticBaseTag: BaseTag = {
         id: `temp-${Date.now()}`,
         title: variables.title,
-        color: '#6366f1',
+        color: variables.color || '#6366f1',
         createdAt: new Date(),
         updatedAt: new Date(),
       };

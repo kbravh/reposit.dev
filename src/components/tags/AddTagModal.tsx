@@ -95,7 +95,13 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                           type="text"
                           id="add-title"
                           value={title}
-                          onChange={e => setTitle(e.target.value)}
+                          onChange={e => {
+                            setTitle(e.target.value);
+                            // Clear error when user starts typing
+                            if (createTagMutation.error) {
+                              createTagMutation.reset();
+                            }
+                          }}
                           placeholder="Enter tag name..."
                           className="mt-2 -outline-offset-1 focus:-outline-offset-2 block w-full rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100 outline-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:outline-indigo-600 sm:text-sm/6"
                           required
@@ -128,9 +134,12 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                 {createTagMutation.error && (
                   <div className="mt-3">
                     <p className="text-sm text-red-600 dark:text-red-400">
-                      {createTagMutation.error instanceof Error
-                        ? createTagMutation.error.message
-                        : 'Failed to add tag'}
+                      {createTagMutation.error instanceof Error &&
+                      createTagMutation.error.message.includes('already exists')
+                        ? `A tag with the name "${title.trim()}" already exists. Please choose a different name.`
+                        : createTagMutation.error instanceof Error
+                          ? createTagMutation.error.message
+                          : 'Failed to add tag'}
                     </p>
                   </div>
                 )}

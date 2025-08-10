@@ -49,9 +49,7 @@ function StatCard({
       </div>
       <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3">
         <div className="text-sm">
-          {isLoading ? (
-            <span className="inline-block h-4 w-20 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
-          ) : link ? (
+          {link ? (
             <Link
               to={link.to}
               className="font-medium text-cyan-700 hover:text-cyan-900 dark:text-cyan-400 dark:hover:text-cyan-300"

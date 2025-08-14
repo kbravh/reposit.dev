@@ -80,7 +80,7 @@ function Home() {
               your GitHub repositories with powerful lists and intuitive
               workflows.
             </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-x-6">
               {user ? (
                 <Link
                   to="/dashboard"

@@ -17,6 +17,7 @@ interface AddTagModalProps {
 
 export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
   const [suggestedColor, setSuggestedColor] = useState<string | null>(null);
+  const [customColor, setCustomColor] = useState<string | null>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const { theme } = useThemeStore();
@@ -48,6 +49,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
 
   const handleReset = () => {
     setSuggestedColor(null);
+    setCustomColor(null);
     createTagMutation.reset();
     if (formRef.current) {
       formRef.current.reset();
@@ -67,6 +69,8 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
       ) as HTMLInputElement;
       if (radio) {
         radio.checked = true;
+        // Clear custom color since we're using a preset
+        setCustomColor(null);
       } else {
         // If it's a custom color, set the custom color input and select custom radio
         const customColorInput = formRef.current.querySelector(
@@ -78,6 +82,8 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
         if (customColorInput && customRadio) {
           customColorInput.value = suggestedColor;
           customRadio.checked = true;
+          // Set custom color to the suggested color
+          setCustomColor(suggestedColor);
         }
       }
     }
@@ -171,11 +177,11 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                         <legend className="block font-medium text-gray-900 dark:text-gray-100 text-sm/6 mb-2">
                           Color
                         </legend>
-                        <div className="grid grid-cols-6 gap-2">
+                        <div className="grid grid-cols-6 gap-2 justify-items-center">
                           {TAG_COLORS.map((tagColor, index) => (
                             <label
                               key={tagColor}
-                              className="relative cursor-pointer"
+                              className="relative cursor-pointer w-8 h-8 block"
                             >
                               <input
                                 type="radio"
@@ -194,7 +200,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                             </label>
                           ))}
                           {/* Custom color option */}
-                          <label className="relative cursor-pointer">
+                          <label className="cursor-pointer w-8 h-8 block relative">
                             <input
                               type="radio"
                               name="color"
@@ -202,9 +208,11 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                               className="sr-only peer"
                             />
                             <div
-                              className="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:border-gray-900 dark:peer-checked:border-gray-100 peer-focus:ring-2 peer-focus:ring-indigo-600 peer-focus:ring-offset-2 relative overflow-hidden cursor-pointer"
+                              className="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:border-gray-900 dark:peer-checked:border-gray-100 peer-focus:ring-2 peer-focus:ring-indigo-600 peer-focus:ring-offset-2 overflow-hidden cursor-pointer"
                               style={{
                                 background:
+                                  customColor ??
+                                  suggestedColor ??
                                   'conic-gradient(from 0deg, #ff0000 0deg, #ff8000 60deg, #ffff00 120deg, #80ff00 180deg, #00ff80 240deg, #0080ff 300deg, #8000ff 360deg)',
                               }}
                               onClick={() => colorInputRef.current?.click()}
@@ -221,7 +229,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                             type="color"
                             name="customColor"
                             defaultValue="#6366f1"
-                            onChange={() => {
+                            onChange={e => {
                               // When color is picked, select the custom radio
                               const customRadio =
                                 formRef.current?.querySelector(
@@ -230,6 +238,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                               if (customRadio) {
                                 customRadio.checked = true;
                               }
+                              setCustomColor(e.target.value);
                             }}
                             className="sr-only"
                             style={{ colorScheme: theme }}

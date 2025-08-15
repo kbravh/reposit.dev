@@ -8,26 +8,7 @@ import {
 } from '../actions/tags';
 import { tagKeys } from '../lib/query-keys';
 import type { BaseTag, TagWithCount } from '../components/tags/types';
-
-// Helper function to insert tags in alphabetical order
-function insertTagAlphabetically<T extends { title: string }>(
-  tags: T[] | undefined,
-  newTag: T
-): T[] {
-  if (!tags) return [newTag];
-
-  const insertIndex = tags.findIndex(
-    tag => tag.title.toLowerCase() > newTag.title.toLowerCase()
-  );
-
-  if (insertIndex === -1) {
-    // If no tag is alphabetically after the new tag, append it
-    return [...tags, newTag];
-  }
-
-  // Insert at the correct alphabetical position
-  return [...tags.slice(0, insertIndex), newTag, ...tags.slice(insertIndex)];
-}
+import { insertAlphabetically } from '../utils/array';
 
 export function useDeleteTagMutation(options?: { onSuccess?: () => void }) {
   const queryClient = useQueryClient();
@@ -159,7 +140,10 @@ export function useCreateTagMutation(options?: { onSuccess?: () => void }) {
 
   return useMutation({
     mutationFn: (variables: { title: string; color?: string }) => {
-      // Check for duplicate in cache before making API call
+      return createTag({ data: variables });
+    },
+    onMutate: async variables => {
+      // Check for duplicate in cache before applying optimistic update
       const normalizedTitle = variables.title.toLowerCase().trim();
 
       const existingTags = queryClient.getQueryData<BaseTag[] | undefined>(
@@ -169,21 +153,21 @@ export function useCreateTagMutation(options?: { onSuccess?: () => void }) {
         TagWithCount[] | undefined
       >(tagKeys.withCount());
 
-      // Check both tag caches for duplicates
+      // Check both tag caches for duplicates, excluding temporary tags
       const isDuplicateInAllTags = existingTags?.some(
-        tag => tag.title.toLowerCase() === normalizedTitle
+        tag =>
+          !tag.id.startsWith('temp-') &&
+          tag.title.toLowerCase() === normalizedTitle
       );
       const isDuplicateInWithCount = existingTagsWithCount?.some(
-        tag => tag.title.toLowerCase() === normalizedTitle
+        tag =>
+          !tag.id.startsWith('temp-') &&
+          tag.title.toLowerCase() === normalizedTitle
       );
 
       if (isDuplicateInAllTags || isDuplicateInWithCount) {
         throw new Error('A tag with this title already exists');
       }
-
-      return createTag({ data: variables });
-    },
-    onMutate: async variables => {
       await queryClient.cancelQueries({ queryKey: tagKeys.all });
       await queryClient.cancelQueries({ queryKey: tagKeys.withCount() });
 
@@ -208,14 +192,18 @@ export function useCreateTagMutation(options?: { onSuccess?: () => void }) {
 
       queryClient.setQueryData<BaseTag[] | undefined>(tagKeys.all, previous =>
         previous
-          ? insertTagAlphabetically(previous, optimisticBaseTag)
+          ? insertAlphabetically(previous, optimisticBaseTag, tag => tag.title)
           : [optimisticBaseTag]
       );
       queryClient.setQueryData<TagWithCount[] | undefined>(
         tagKeys.withCount(),
         previous =>
           previous
-            ? insertTagAlphabetically(previous, optimisticWithCount)
+            ? insertAlphabetically(
+                previous,
+                optimisticWithCount,
+                tag => tag.title
+              )
             : [optimisticWithCount]
       );
 
@@ -329,7 +317,7 @@ export function useCreateManyTagsForRepositoryMutation(options?: {
           if (!old) return newTags;
           let result = [...old];
           newTags.forEach(newTag => {
-            result = insertTagAlphabetically(result, newTag);
+            result = insertAlphabetically(result, newTag, tag => tag.title);
           });
           return result;
         });

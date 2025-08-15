@@ -259,9 +259,14 @@ export function AddRepositoryForm({
                                   </div>
                                 </div>
                                 <div className="min-w-0 flex-auto">
-                                  <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
+                                  <a
+                                    href={repo.html_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                  >
                                     {repo.owner.login}/{repo.name}
-                                  </p>
+                                  </a>
                                   <p className="mt-1 text-gray-500 dark:text-gray-400 text-xs truncate">
                                     {repo.description ||
                                       'No description available'}

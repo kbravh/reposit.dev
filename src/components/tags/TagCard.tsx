@@ -17,17 +17,17 @@ export function TagCard({ tag, onEdit, onDelete }: TagCardProps) {
       >
         <Tag className="h-6 w-6" />
       </div>
-      <div className="flex flex-1 items-center justify-between rounded-r-md border-gray-200 dark:border-gray-600 border-t border-r border-b bg-white dark:bg-gray-800 overflow-hidden">
+      <div className="flex flex-1 items-center justify-between rounded-r-md border-gray-200 dark:border-gray-600 border-t border-r border-b bg-white dark:bg-gray-800">
         <div className="flex-1 px-4 py-2 text-sm min-w-0">
-          <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+          <div className="font-medium text-gray-900 dark:text-gray-100">
             {tag.title}
           </div>
-          <p className="text-gray-500 dark:text-gray-400 truncate">
+          <p className="text-gray-500 dark:text-gray-400">
             {tag.repositoryCount}{' '}
             {tag.repositoryCount === 1 ? 'Repository' : 'Repositories'}
           </p>
         </div>
-        <div className="shrink-0 pr-2 relative">
+        <div className="shrink-0 pr-2 relative overflow-visible">
           <Menu as="div" className="relative">
             <MenuButton className="flex cursor-pointer items-center justify-center rounded-full size-8 bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none">
               <MoreHorizontal className="h-4 w-4" />

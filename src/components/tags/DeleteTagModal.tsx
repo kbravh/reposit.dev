@@ -86,7 +86,8 @@ export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
                         {repositories.length === 1
                           ? 'repository'
                           : 'repositories'}
-                        . It will be removed from all of them.
+                        . It will be removed
+                        {repositories.length > 1 && ' from all of them'}.
                       </>
                     )}
                   </p>

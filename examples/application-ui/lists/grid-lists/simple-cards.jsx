@@ -66,7 +66,7 @@ export default function Example() {
               <div className="shrink-0 pr-2">
                 <button
                   type="button"
-                  className="inline-flex size-8 items-center justify-center rounded-full bg-transparent bg-white text-gray-400 hover:text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="inline-flex size-8 items-center justify-center rounded-full bg-white text-gray-400 hover:text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   <span className="sr-only">Open options</span>
                   <EllipsisVerticalIcon aria-hidden="true" className="size-5" />

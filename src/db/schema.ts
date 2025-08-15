@@ -6,6 +6,7 @@ import {
   index,
 } from 'drizzle-orm/sqlite-core';
 import uniqid from 'uniqid';
+import { sql } from 'drizzle-orm';
 
 export const user = sqliteTable('user', {
   id: text('id').primaryKey(),
@@ -189,5 +190,117 @@ export const tagToRepository = sqliteTable(
       table.tagInstanceId,
       table.repositoryInstanceId
     ),
+  ]
+);
+
+export const list = sqliteTable(
+  'list',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uniqid()),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    includeMatch: text('include_match').default('any').notNull(), // 'any' | 'all'
+    excludeMatch: text('exclude_match').default('any').notNull(), // 'any' | 'all'
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  table => [
+    index('list_user_idx').on(table.userId),
+    uniqueIndex('list_user_name_unique').on(table.userId, table.name),
+  ]
+);
+
+export const listTagInclude = sqliteTable(
+  'list_tag_include',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uniqid()),
+    listId: text('list_id')
+      .notNull()
+      .references(() => list.id, { onDelete: 'cascade' }),
+    tagInstanceId: text('tag_instance_id')
+      .notNull()
+      .references(() => tagInstance.id, { onDelete: 'cascade' }),
+  },
+  table => [
+    uniqueIndex('list_tag_include_unique').on(table.listId, table.tagInstanceId),
+    index('list_tag_include_list_idx').on(table.listId),
+    index('list_tag_include_tag_idx').on(table.tagInstanceId),
+  ]
+);
+
+export const listTagExclude = sqliteTable(
+  'list_tag_exclude',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uniqid()),
+    listId: text('list_id')
+      .notNull()
+      .references(() => list.id, { onDelete: 'cascade' }),
+    tagInstanceId: text('tag_instance_id')
+      .notNull()
+      .references(() => tagInstance.id, { onDelete: 'cascade' }),
+  },
+  table => [
+    uniqueIndex('list_tag_exclude_unique').on(table.listId, table.tagInstanceId),
+    index('list_tag_exclude_list_idx').on(table.listId),
+    index('list_tag_exclude_tag_idx').on(table.tagInstanceId),
+  ]
+);
+
+export const listRepositoryInclude = sqliteTable(
+  'list_repository_include',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uniqid()),
+    listId: text('list_id')
+      .notNull()
+      .references(() => list.id, { onDelete: 'cascade' }),
+    repositoryInstanceId: text('repository_instance_id')
+      .notNull()
+      .references(() => repositoryInstance.id, { onDelete: 'cascade' }),
+  },
+  table => [
+    uniqueIndex('list_repo_include_unique').on(
+      table.listId,
+      table.repositoryInstanceId
+    ),
+    index('list_repo_include_list_idx').on(table.listId),
+    index('list_repo_include_repo_idx').on(table.repositoryInstanceId),
+  ]
+);
+
+export const listRepositoryExclude = sqliteTable(
+  'list_repository_exclude',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => uniqid()),
+    listId: text('list_id')
+      .notNull()
+      .references(() => list.id, { onDelete: 'cascade' }),
+    repositoryInstanceId: text('repository_instance_id')
+      .notNull()
+      .references(() => repositoryInstance.id, { onDelete: 'cascade' }),
+  },
+  table => [
+    uniqueIndex('list_repo_exclude_unique').on(
+      table.listId,
+      table.repositoryInstanceId
+    ),
+    index('list_repo_exclude_list_idx').on(table.listId),
+    index('list_repo_exclude_repo_idx').on(table.repositoryInstanceId),
   ]
 );

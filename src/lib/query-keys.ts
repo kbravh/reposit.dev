@@ -27,3 +27,12 @@ export const sessionKeys = {
   all: ['session'] as const,
   current: () => [...sessionKeys.all, 'current'] as const,
 } as const;
+
+export const listKeys = {
+  all: ['lists'] as const,
+  lists: () => [...listKeys.all, 'list'] as const,
+  list: (filters?: { search?: string }) => [...listKeys.lists(), filters] as const,
+  details: () => [...listKeys.all, 'detail'] as const,
+  detail: (id: string) => [...listKeys.details(), id] as const,
+  repositories: (listId: string) => [...listKeys.detail(listId), 'repositories'] as const,
+} as const;

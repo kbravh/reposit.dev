@@ -16,7 +16,6 @@ interface AddTagModalProps {
 }
 
 export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
-  const [title, setTitle] = useState('');
   const [suggestedColor, setSuggestedColor] = useState<string | null>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -48,7 +47,6 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
   };
 
   const handleReset = () => {
-    setTitle('');
     setSuggestedColor(null);
     createTagMutation.reset();
     if (formRef.current) {
@@ -59,23 +57,6 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
   const handleCancel = () => {
     onOpenChange(false);
     handleReset();
-  };
-
-  const handleColorPickerClick = () => {
-    colorInputRef.current?.click();
-  };
-
-  const handleTitleChange = (newTitle: string) => {
-    setTitle(newTitle);
-
-    // Always check for suggested colors when title changes
-    if (newTitle.trim()) {
-      const suggested = getPredefinedColor(newTitle.trim());
-      setSuggestedColor(suggested || null);
-    } else {
-      // Clear suggestion when title is empty
-      setSuggestedColor(null);
-    }
   };
 
   const handleSuggestedColorClick = () => {
@@ -153,9 +134,16 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                           type="text"
                           id="add-title"
                           name="title"
-                          value={title}
                           onChange={e => {
-                            handleTitleChange(e.target.value);
+                            // Always check for suggested colors when title changes
+                            const newTitle = e.target.value.trim();
+                            if (newTitle) {
+                              const suggested = getPredefinedColor(newTitle);
+                              setSuggestedColor(suggested || null);
+                            } else {
+                              // Clear suggestion when title is empty
+                              setSuggestedColor(null);
+                            }
                             // Clear error when user starts typing
                             if (createTagMutation.error) {
                               createTagMutation.reset();
@@ -175,10 +163,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                               className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600"
                               style={{ backgroundColor: suggestedColor }}
                             />
-                            <span>
-                              Suggested color for &ldquo;{title}&rdquo; (click
-                              to use)
-                            </span>
+                            <span>Suggested color (click to use)</span>
                           </button>
                         )}
                       </div>
@@ -222,7 +207,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                                 background:
                                   'conic-gradient(from 0deg, #ff0000 0deg, #ff8000 60deg, #ffff00 120deg, #80ff00 180deg, #00ff80 240deg, #0080ff 300deg, #8000ff 360deg)',
                               }}
-                              onClick={handleColorPickerClick}
+                              onClick={() => colorInputRef.current?.click()}
                             />
                             <Palette
                               className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-full p-0.5 border border-gray-300 dark:border-gray-600 pointer-events-none"

@@ -7,6 +7,7 @@ import { QuickActions } from '../../components/ui/QuickActions';
 import { DashboardStats } from '../../components/dashboard/DashboardStats';
 import { RecentRepositories } from '../../components/dashboard/RecentRepositories';
 import { repositoryKeys, tagKeys } from '../../lib/query-keys';
+import { Spinner } from '../../components/ui/Spinner';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: Dashboard,
@@ -25,9 +26,35 @@ function Dashboard() {
 
   const isLoading = isReposLoading || isTagsLoading;
 
+  // Determine if user is new (has no repos and no tags)
   const isNewUser =
     !isLoading && repositories.length === 0 && tags.length === 0;
-  const hasRepos = !isReposLoading && repositories.length > 0;
+
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        {/* Welcome Section - Show immediately */}
+        <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
+          <div className="md:flex md:items-center md:justify-between">
+            <div className="min-w-0 flex-1 flex flex-col gap-2">
+              <h1 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tight">
+                Welcome back!
+              </h1>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Loading your dashboard...
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Loading state */}
+        <div className="flex items-center justify-center py-12">
+          <Spinner size="lg" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -57,14 +84,16 @@ function Dashboard() {
           <DashboardStats
             repositories={repositories}
             tags={tags}
-            isLoading={isLoading}
+            isLoading={false}
           />
 
           {/* Quick Actions */}
           <QuickActions />
 
           {/* Recent Content */}
-          {hasRepos && <RecentRepositories repositories={repositories} />}
+          {repositories.length > 0 && (
+            <RecentRepositories repositories={repositories} />
+          )}
         </div>
       )}
     </div>

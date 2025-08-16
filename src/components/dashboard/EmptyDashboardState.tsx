@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Code, Tag, Users, Calendar, Plus } from 'lucide-react';
+import { Code, Tag, Users, Calendar, Plus, Folder } from 'lucide-react';
 
 const quickStartItems = [
   {
@@ -40,20 +40,10 @@ export function EmptyDashboardState() {
   return (
     <div className="text-center">
       <div className="mx-auto max-w-lg">
-        <svg
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 48 48"
-          aria-hidden="true"
+        <Folder
           className="mx-auto h-12 w-12 text-gray-400"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 11H5a2 2 0 00-2 2v8a2 2 0 002 2h14m-5-8v2m0 0v2m0-2h2m-2 0H9m18-8a2 2 0 012 2v8a2 2 0 01-2 2H27"
-          />
-        </svg>
+          aria-hidden="true"
+        />
         <h2 className="mt-2 text-base font-semibold text-gray-900">
           Let&apos;s get you started!
         </h2>

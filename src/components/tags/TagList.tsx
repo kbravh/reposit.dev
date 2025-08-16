@@ -30,6 +30,8 @@ export function RepositoryTags({
               aria-hidden="true"
               className="size-1.5"
               style={{ fill: tag.color }}
+              width="6"
+              height="6"
             >
               <circle r={3} cx={3} cy={3} />
             </svg>

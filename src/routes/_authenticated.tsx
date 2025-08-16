@@ -1,19 +1,15 @@
 import { Home, Settings, List, Code, User, Tag } from 'lucide-react';
-import { ElementType } from 'react';
-import MobileSidebar, {
-  MobileSidebarButton,
-} from '../components/layout/MobileSidebar';
+import { ElementType, lazy, Suspense, useEffect, useState } from 'react';
 import { authClient } from '../lib/auth-client';
 import {
   createFileRoute,
   Link,
   Outlet,
+  useLoaderData,
   useRouterState,
 } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
 import { redirect } from '@tanstack/react-router';
 import { getSession } from '../actions/auth';
-import { sessionKeys } from '../lib/query-keys';
 import { MatchRouteSpinner } from '../components/navigation/MatchRouteSpinner';
 
 export type NavigationItem = {
@@ -30,6 +26,15 @@ const navigation: NavigationItem[] = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
+const LazyMobileSidebar = lazy(
+  () => import('../components/layout/MobileSidebar')
+);
+const LazyMobileSidebarButton = lazy(() =>
+  import('../components/layout/MobileSidebar').then(m => ({
+    default: m.MobileSidebarButton,
+  }))
+);
+
 export const Route = createFileRoute('/_authenticated')({
   component: LoggedInLayout,
   beforeLoad: async ({ location }) => {
@@ -39,15 +44,30 @@ export const Route = createFileRoute('/_authenticated')({
       throw redirect({ to: '/login', search: { redirect: location.href } });
     }
   },
+  loader: async () => {
+    const session = await getSession();
+    return { user: session?.user ?? null };
+  },
 });
 
 function LoggedInLayout() {
-  const { data: user, isPending } = useQuery({
-    queryKey: sessionKeys.current(),
-    queryFn: () => authClient.getSession().then(res => res.data?.user),
-  });
+  const { user } = useLoaderData({ from: '/_authenticated' }) as {
+    user: { name?: string | null; image?: string | null } | null;
+  };
 
   const routerState = useRouterState();
+
+  // Render mobile-only components lazily and only on small screens
+  const [hasMounted, setHasMounted] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+    const mql = window.matchMedia('(min-width: 1024px)');
+    const handler = (e: MediaQueryListEvent) => setIsLargeScreen(e.matches);
+    setIsLargeScreen(mql.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
 
   // Get the current page name based on the route
   const getCurrentPageName = () => {
@@ -59,7 +79,11 @@ function LoggedInLayout() {
   return (
     <>
       <div>
-        <MobileSidebar navigationItems={navigation} />
+        {hasMounted && !isLargeScreen && (
+          <Suspense fallback={null}>
+            <LazyMobileSidebar navigationItems={navigation} />
+          </Suspense>
+        )}
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
           <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 dark:bg-gray-900 dark:border-white/10 px-6">
             <div className="flex h-16 shrink-0 items-center">
@@ -103,7 +127,7 @@ function LoggedInLayout() {
                     ))}
                   </ul>
                 </li>
-                {!isPending && user && (
+                {user && (
                   <li className="-mx-6 mt-auto">
                     <div className="border-t border-gray-700 pt-4">
                       <div className="flex items-center gap-x-4 px-6 py-3">
@@ -140,11 +164,15 @@ function LoggedInLayout() {
         </div>
 
         <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white dark:bg-gray-900 px-4 py-4 shadow-xs border-b border-gray-200 dark:border-white/5 sm:px-6 lg:hidden">
-          <MobileSidebarButton />
+          {hasMounted && !isLargeScreen && (
+            <Suspense fallback={null}>
+              <LazyMobileSidebarButton />
+            </Suspense>
+          )}
           <div className="flex-1 font-semibold text-sm/6 text-gray-900 dark:text-white">
             {getCurrentPageName()}
           </div>
-          {!isPending && user && (
+          {user && (
             <button
               onClick={() => authClient.signOut()}
               className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white cursor-pointer"

@@ -1,11 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Plus, Code } from 'lucide-react';
 import { getRepositories } from '../../actions/repos';
 import { RepositoryListItem } from '../../components/repository/RepositoryListItem';
-import { AddRepositoryForm } from '../../components/repository/AddRepositoryForm';
 import { repositoryKeys } from '../../lib/query-keys';
+
+const AddRepositoryForm = lazy(() =>
+  import('../../components/repository/AddRepositoryForm').then(m => ({
+    default: m.AddRepositoryForm,
+  }))
+);
 
 export const Route = createFileRoute('/_authenticated/repositories')({
   component: Repositories,
@@ -30,10 +35,16 @@ function Repositories() {
             Manage your connected repositories and track their changes.
           </p>
         </div>
-        <AddRepositoryForm
-          isOpen={isAddingRepo}
-          onOpenChange={setIsAddingRepo}
-        />
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <button
+            type="button"
+            onClick={() => setIsAddingRepo(true)}
+            className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            <Plus className="-ml-0.5 mr-1.5 h-5 w-5" />
+            Add repository
+          </button>
+        </div>
       </div>
 
       {/* Repositories List */}
@@ -76,6 +87,15 @@ function Repositories() {
           </ul>
         )}
       </div>
+
+      {isAddingRepo && (
+        <Suspense fallback={null}>
+          <AddRepositoryForm
+            isOpen={isAddingRepo}
+            onOpenChange={setIsAddingRepo}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

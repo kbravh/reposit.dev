@@ -1,15 +1,28 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Tag, Plus } from 'lucide-react';
 import { getTagsWithRepositoryCount } from '../../actions/tags';
 import { TagCard } from '../../components/tags/TagCard';
-import { AddTagModal } from '../../components/tags/AddTagModal';
-import { EditTagModal } from '../../components/tags/EditTagModal';
-import { DeleteTagModal } from '../../components/tags/DeleteTagModal';
 import { tagKeys } from '../../lib/query-keys';
 import type { TagWithCount } from '../../components/tags/types';
 import { useDeleteTagMutation } from '../../hooks/tags';
+
+const AddTagModal = lazy(() =>
+  import('../../components/tags/AddTagModal').then(m => ({
+    default: m.AddTagModal,
+  }))
+);
+const EditTagModal = lazy(() =>
+  import('../../components/tags/EditTagModal').then(m => ({
+    default: m.EditTagModal,
+  }))
+);
+const DeleteTagModal = lazy(() =>
+  import('../../components/tags/DeleteTagModal').then(m => ({
+    default: m.DeleteTagModal,
+  }))
+);
 
 export const Route = createFileRoute('/_authenticated/tags')({
   component: Tags,
@@ -50,7 +63,16 @@ function Tags() {
             Manage your tags and organize your repositories by topics.
           </p>
         </div>
-        <AddTagModal isOpen={isAddingTag} onOpenChange={setIsAddingTag} />
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <button
+            type="button"
+            onClick={() => setIsAddingTag(true)}
+            className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            <Plus className="-ml-0.5 mr-1.5 h-5 w-5" />
+            Add tag
+          </button>
+        </div>
       </div>
 
       {/* Tags Grid */}
@@ -96,9 +118,26 @@ function Tags() {
         )}
       </div>
 
-      <EditTagModal tag={editingTag} onClose={() => setEditingTag(null)} />
+      {isAddingTag && (
+        <Suspense fallback={null}>
+          <AddTagModal isOpen={isAddingTag} onOpenChange={setIsAddingTag} />
+        </Suspense>
+      )}
 
-      <DeleteTagModal tag={deletingTag} onClose={() => setDeletingTag(null)} />
+      {editingTag && (
+        <Suspense fallback={null}>
+          <EditTagModal tag={editingTag} onClose={() => setEditingTag(null)} />
+        </Suspense>
+      )}
+
+      {deletingTag && (
+        <Suspense fallback={null}>
+          <DeleteTagModal
+            tag={deletingTag}
+            onClose={() => setDeletingTag(null)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

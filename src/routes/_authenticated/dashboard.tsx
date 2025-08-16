@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import { getRepositories } from '../../actions/repos';
 import { getTagsWithRepositoryCount } from '../../actions/tags';
@@ -9,6 +9,8 @@ import { DashboardStats } from '../../components/dashboard/DashboardStats';
 import { RecentRepositories } from '../../components/dashboard/RecentRepositories';
 import { repositoryKeys, tagKeys } from '../../lib/query-keys';
 import { ReactNode } from 'react';
+import type { Repository } from '../../components/repository/types';
+import type { TagWithCount } from '../../components/tags/types';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: Dashboard,
@@ -51,16 +53,14 @@ const WelcomeSection = ({ children }: { children: ReactNode }) => (
 );
 
 function DashboardStatsSection() {
-  const { data: repositories = [] } = useQuery({
+  const { data: repositories } = useSuspenseQuery<Repository[]>({
     queryKey: repositoryKeys.all,
     queryFn: () => getRepositories(),
-    suspense: true,
     staleTime: 60_000,
   });
-  const { data: tags = [] } = useQuery({
+  const { data: tags } = useSuspenseQuery<TagWithCount[]>({
     queryKey: tagKeys.withCount(),
     queryFn: () => getTagsWithRepositoryCount(),
-    suspense: true,
     staleTime: 60_000,
   });
 
@@ -74,10 +74,9 @@ function DashboardStatsSection() {
 }
 
 function RecentRepositoriesSection() {
-  const { data: repositories = [] } = useQuery({
+  const { data: repositories } = useSuspenseQuery<Repository[]>({
     queryKey: repositoryKeys.all,
     queryFn: () => getRepositories(),
-    suspense: true,
     staleTime: 60_000,
   });
 

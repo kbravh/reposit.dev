@@ -40,9 +40,27 @@ export function NavigationLoadingIndicator() {
  * Simpler variant that just shows a top progress bar
  */
 export function NavigationProgressBar() {
-  const isNavigating = useRouterState({
-    select: state => state.status === 'pending',
+  const routerState = useRouterState({
+    select: state => ({
+      status: state.status,
+      isLoading: state.isLoading,
+      isTransitioning: state.isTransitioning,
+    }),
   });
+
+  // Only show loading indicator during actual route transitions, not initial loads
+  const isNavigating =
+    routerState.isTransitioning && routerState.status === 'pending';
+
+  // Debug logging in development
+  if (import.meta.env.DEV) {
+    console.debug('NavigationProgressBar:', {
+      status: routerState.status,
+      isLoading: routerState.isLoading,
+      isTransitioning: routerState.isTransitioning,
+      isNavigating,
+    });
+  }
 
   return (
     <div

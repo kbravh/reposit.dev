@@ -15,8 +15,8 @@ export function createRouter() {
     ),
 
     // Timing configuration for pending states
-    defaultPendingMs: 1000, // Show pending component after 1 second of loading
-    defaultPendingMinMs: 500, // Keep pending component visible for at least 500ms to avoid flashing
+    defaultPendingMs: 300, // Show pending component after 300ms of loading
+    defaultPendingMinMs: 250, // Keep pending component visible briefly to avoid flashing
 
     // Preload routes on intent (hover/touchstart) for better performance
     defaultPreload: 'intent',

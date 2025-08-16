@@ -1,9 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
-import { TagModal } from './TagModal';
+import { lazy, Suspense, useState } from 'react';
 import { getTagsForRepository } from '../../actions/tags';
-import { useState } from 'react';
 import { tagKeys } from '../../lib/query-keys';
+
+const TagModal = lazy(() =>
+  import('./TagModal').then(m => ({ default: m.TagModal }))
+);
 
 export function RepositoryTags({
   repositoryInstanceId,
@@ -47,11 +50,15 @@ export function RepositoryTags({
         </button>
       </div>
 
-      <TagModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        repositoryInstanceId={repositoryInstanceId}
-      />
+      {isModalOpen && (
+        <Suspense fallback={null}>
+          <TagModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            repositoryInstanceId={repositoryInstanceId}
+          />
+        </Suspense>
+      )}
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { Home, Settings, List, Code, User, Tag } from 'lucide-react';
+import { Home, Settings, Code, User, Tag } from 'lucide-react';
 import { ElementType, lazy, Suspense, useEffect, useState } from 'react';
 import { authClient } from '../lib/auth-client';
 import {
@@ -22,7 +22,7 @@ const navigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Repositories', href: '/repositories', icon: Code },
   { name: 'Tags', href: '/tags', icon: Tag },
-  { name: 'Lists', href: '/lists', icon: List },
+  // { name: 'Lists', href: '/lists', icon: List },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 

@@ -26,7 +26,7 @@ export function Spinner({
     <div className={cn('flex items-center gap-2', className)}>
       <div
         className={cn(
-          'animate-spin rounded-full border-2 border-solid border-current border-e-transparent',
+          'animate-spin rounded-full border-2 border-solid border-gray-300 dark:border-gray-600 border-e-transparent',
           sizeClasses[size]
         )}
         aria-hidden="true"

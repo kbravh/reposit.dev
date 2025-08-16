@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Code, Tag, Users, Calendar, Plus } from 'lucide-react';
+import { Code, Tag, Calendar, Plus, Folder } from 'lucide-react';
 
 const quickStartItems = [
   {
@@ -19,14 +19,6 @@ const quickStartItems = [
     action: 'Create Tag',
   },
   {
-    title: 'Explore Lists',
-    description: 'Create and manage lists to group related repositories.',
-    icon: Users,
-    href: '/lists',
-    background: 'bg-purple-500',
-    action: 'View Lists',
-  },
-  {
     title: 'Customize Settings',
     description: 'Personalize your experience and manage preferences.',
     icon: Calendar,
@@ -40,49 +32,39 @@ export function EmptyDashboardState() {
   return (
     <div className="text-center">
       <div className="mx-auto max-w-lg">
-        <svg
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 48 48"
-          aria-hidden="true"
+        <Folder
           className="mx-auto h-12 w-12 text-gray-400"
-          width="48"
-          height="48"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 11H5a2 2 0 00-2 2v8a2 2 0 002 2h14m-5-8v2m0 0v2m0-2h2m-2 0H9m18-8a2 2 0 012 2v8a2 2 0 01-2 2H27"
-          />
-        </svg>
-        <h2 className="mt-2 text-base font-semibold text-gray-900">
+          aria-hidden="true"
+        />
+        <h2 className="mt-2 text-base font-semibold text-gray-900 dark:text-white">
           Let&apos;s get you started!
         </h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Welcome to Reposit! Choose one of the options below to begin
           organizing your repositories.
         </p>
       </div>
 
-      <ul className="mt-8 grid grid-cols-1 gap-6 border-b border-t border-gray-200 py-6 sm:grid-cols-2">
+      <ul className="mt-8 grid grid-cols-1 gap-6 border-b border-t border-gray-200 dark:border-gray-700 py-6 sm:grid-cols-2">
         {quickStartItems.map((item, itemIdx) => (
           <li key={itemIdx} className="flow-root">
-            <div className="relative -m-2 flex items-center space-x-4 rounded-xl p-2 focus-within:ring-2 focus-within:ring-indigo-500 hover:bg-gray-50">
+            <div className="relative -m-2 flex items-center space-x-4 rounded-xl p-2 focus-within:ring-2 focus-within:ring-indigo-500 hover:bg-gray-50 dark:hover:bg-gray-800">
               <div
                 className={`${item.background} flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg`}
               >
                 <item.icon aria-hidden="true" className="h-6 w-6 text-white" />
               </div>
               <div className="text-left">
-                <h3 className="text-sm font-medium text-gray-900">
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white">
                   <Link to={item.href} className="focus:outline-none">
                     <span aria-hidden="true" className="absolute inset-0" />
                     <span>{item.title}</span>
                     <span aria-hidden="true"> →</span>
                   </Link>
                 </h3>
-                <p className="mt-1 text-sm text-gray-500">{item.description}</p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  {item.description}
+                </p>
               </div>
             </div>
           </li>

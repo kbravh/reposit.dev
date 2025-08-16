@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { Suspense } from 'react';
+import { createFileRoute, useLoaderData } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+
 import { getRepositories } from '../../actions/repos';
 import { getTagsWithRepositoryCount } from '../../actions/tags';
 import { EmptyDashboardState } from '../../components/dashboard/EmptyDashboardState';
@@ -14,25 +14,66 @@ import type { TagWithCount } from '../../components/tags/types';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: Dashboard,
+  loader: async () => {
+    // Load both repositories and tags data on the server side
+    const [repositories, tags] = await Promise.all([
+      getRepositories(),
+      getTagsWithRepositoryCount(),
+    ]);
+    return { repositories, tags };
+  },
   pendingComponent: () => <DashboardStatsSkeleton />,
 });
 
 function Dashboard() {
+  // Get server-loaded data
+  const { repositories, tags } = useLoaderData({
+    from: '/_authenticated/dashboard',
+  }) as {
+    repositories: Repository[];
+    tags: TagWithCount[];
+  };
+
+  // Ensure React Query cache is populated with server data
+  useQuery({
+    queryKey: repositoryKeys.all,
+    queryFn: () => getRepositories(),
+    initialData: repositories,
+    staleTime: 60_000,
+  });
+
+  useQuery({
+    queryKey: tagKeys.withCount(),
+    queryFn: () => getTagsWithRepositoryCount(),
+    initialData: tags,
+    staleTime: 60_000,
+  });
+
+  const isNewUser = repositories.length === 0 && tags.length === 0;
+
   return (
     <div className="space-y-8">
       <WelcomeSection>
-        {"Here's what's happening with your repositories and tags."}
+        {isNewUser
+          ? "Let's get you started with organizing your repositories."
+          : "Here's what's happening with your repositories and tags."}
       </WelcomeSection>
 
-      <Suspense fallback={<DashboardStatsSkeleton />}>
-        <DashboardStatsSection />
-      </Suspense>
-
-      <QuickActions />
-
-      <Suspense fallback={<RecentRepositoriesSkeleton />}>
-        <RecentRepositoriesSection />
-      </Suspense>
+      {isNewUser ? (
+        <EmptyDashboardState />
+      ) : (
+        <>
+          <DashboardStats
+            repositories={repositories}
+            tags={tags}
+            isLoading={false}
+          />
+          <QuickActions />
+          {repositories.length > 0 && (
+            <RecentRepositories repositories={repositories} />
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -51,38 +92,6 @@ const WelcomeSection = ({ children }: { children: ReactNode }) => (
     </div>
   </div>
 );
-
-function DashboardStatsSection() {
-  const { data: repositories } = useSuspenseQuery<Repository[]>({
-    queryKey: repositoryKeys.all,
-    queryFn: () => getRepositories(),
-    staleTime: 60_000,
-  });
-  const { data: tags } = useSuspenseQuery<TagWithCount[]>({
-    queryKey: tagKeys.withCount(),
-    queryFn: () => getTagsWithRepositoryCount(),
-    staleTime: 60_000,
-  });
-
-  const isNewUser = repositories.length === 0 && tags.length === 0;
-
-  return isNewUser ? (
-    <EmptyDashboardState />
-  ) : (
-    <DashboardStats repositories={repositories} tags={tags} isLoading={false} />
-  );
-}
-
-function RecentRepositoriesSection() {
-  const { data: repositories } = useSuspenseQuery<Repository[]>({
-    queryKey: repositoryKeys.all,
-    queryFn: () => getRepositories(),
-    staleTime: 60_000,
-  });
-
-  if (repositories.length === 0) return null;
-  return <RecentRepositories repositories={repositories} />;
-}
 
 function DashboardStatsSkeleton() {
   return (
@@ -106,23 +115,6 @@ function DashboardStatsSkeleton() {
           </div>
         </div>
       ))}
-    </div>
-  );
-}
-
-function RecentRepositoriesSkeleton() {
-  return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="h-5 w-48 rounded bg-gray-200 dark:bg-gray-700 mb-4 animate-pulse" />
-        <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <li key={i} className="py-4">
-              <div className="h-6 w-full rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
-            </li>
-          ))}
-        </ul>
-      </div>
     </div>
   );
 }

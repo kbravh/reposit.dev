@@ -1,10 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useState, lazy, Suspense } from 'react';
 import { Plus, Code } from 'lucide-react';
 import { getRepositories } from '../../actions/repos';
 import { RepositoryListItem } from '../../components/repository/RepositoryListItem';
 import { repositoryKeys } from '../../lib/query-keys';
+import type { Repository } from '../../components/repository/types';
 
 const AddRepositoryForm = lazy(() =>
   import('../../components/repository/AddRepositoryForm').then(m => ({
@@ -14,14 +15,30 @@ const AddRepositoryForm = lazy(() =>
 
 export const Route = createFileRoute('/_authenticated/repositories')({
   component: Repositories,
+  loader: async () => {
+    // Load repositories data on the server side
+    const repositories = await getRepositories();
+    return { repositories };
+  },
+  pendingComponent: () => <RepositoriesSkeleton />,
 });
 
 function Repositories() {
   const [isAddingRepo, setIsAddingRepo] = useState(false);
 
-  const { data: repositories = [], isLoading } = useQuery({
+  // Get server-loaded data
+  const { repositories: initialRepositories } = useLoaderData({
+    from: '/_authenticated/repositories',
+  }) as {
+    repositories: Repository[];
+  };
+
+  // Use server-loaded data with React Query for cache management
+  const { data: repositories = [] } = useQuery({
     queryKey: repositoryKeys.all,
     queryFn: () => getRepositories(),
+    initialData: initialRepositories,
+    staleTime: 60_000, // Cache for 1 minute
   });
 
   return (
@@ -49,14 +66,7 @@ function Repositories() {
 
       {/* Repositories List */}
       <div className="mt-8">
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-gray-400"></div>
-            <p className="mt-2 text-sm text-gray-500">
-              Loading repositories...
-            </p>
-          </div>
-        ) : repositories.length === 0 ? (
+        {repositories.length === 0 ? (
           <div className="text-center py-12">
             <Code className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-semibold text-gray-900">
@@ -96,6 +106,41 @@ function Repositories() {
           />
         </Suspense>
       )}
+    </div>
+  );
+}
+
+function RepositoriesSkeleton() {
+  return (
+    <div className="px-4 sm:px-6 lg:px-8">
+      <div className="sm:flex sm:items-center">
+        <div className="sm:flex-auto">
+          <div className="h-8 w-32 rounded bg-gray-200 dark:bg-gray-700 animate-pulse mb-2" />
+          <div className="h-4 w-80 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        </div>
+        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <div className="h-10 w-32 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <ul className="divide-y divide-gray-100 dark:divide-gray-700">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <li key={i} className="py-5 animate-pulse">
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:gap-x-6">
+                <div className="min-w-0 flex-auto">
+                  <div className="h-5 w-48 rounded bg-gray-200 dark:bg-gray-700 mb-2" />
+                  <div className="h-4 w-64 rounded bg-gray-200 dark:bg-gray-700 mb-2" />
+                  <div className="h-4 w-32 rounded bg-gray-200 dark:bg-gray-700" />
+                </div>
+                <div className="flex shrink-0 items-start">
+                  <div className="h-8 w-8 rounded bg-gray-200 dark:bg-gray-700" />
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

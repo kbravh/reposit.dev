@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { redirect } from '@tanstack/react-router';
 import { getSession } from '../actions/auth';
 import { sessionKeys } from '../lib/query-keys';
+import { MatchRouteSpinner } from '../components/navigation/MatchRouteSpinner';
 
 export type NavigationItem = {
   name: string;
@@ -77,6 +78,7 @@ function LoggedInLayout() {
                       <li key={item.name}>
                         <Link
                           to={item.href}
+                          preload="intent"
                           activeProps={{
                             className:
                               'bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
@@ -90,7 +92,12 @@ function LoggedInLayout() {
                             aria-hidden="true"
                             className="size-6 shrink-0"
                           />
-                          {item.name}
+                          <span className="flex-1">{item.name}</span>
+                          <MatchRouteSpinner
+                            to={item.href}
+                            size="sm"
+                            className="opacity-75"
+                          />
                         </Link>
                       </li>
                     ))}

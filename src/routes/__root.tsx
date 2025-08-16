@@ -11,6 +11,7 @@ import { wrapCreateRootRouteWithSentry } from '@sentry/tanstackstart-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { initializeTheme } from '../stores/themeStore';
+import { NavigationProgressBar } from '../components/navigation/NavigationLoadingIndicator';
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,8 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       </head>
       <body className="h-full">
         <QueryClientProvider client={queryClient}>
+          {/* Global navigation loading indicator */}
+          <NavigationProgressBar />
           {children}
         </QueryClientProvider>
         <Scripts />

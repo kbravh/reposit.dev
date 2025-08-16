@@ -46,6 +46,8 @@ export function EmptyDashboardState() {
           viewBox="0 0 48 48"
           aria-hidden="true"
           className="mx-auto h-12 w-12 text-gray-400"
+          width="48"
+          height="48"
         >
           <path
             strokeLinecap="round"

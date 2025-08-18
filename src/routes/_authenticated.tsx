@@ -1,5 +1,12 @@
-import { Home, Settings, Code, User, Tag } from 'lucide-react';
-import { ElementType, lazy, Suspense, useEffect, useState } from 'react';
+import { Home, Settings, Code, User, Tag, Loader2 } from 'lucide-react';
+import {
+  ElementType,
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { authClient } from '../lib/auth-client';
 import {
   createFileRoute,
@@ -7,6 +14,7 @@ import {
   Outlet,
   useLoaderData,
   useRouterState,
+  useRouter,
 } from '@tanstack/react-router';
 import { redirect } from '@tanstack/react-router';
 import { getSession } from '../actions/auth';
@@ -55,11 +63,13 @@ function LoggedInLayout() {
     user: { name?: string | null; image?: string | null } | null;
   };
 
+  const router = useRouter();
   const routerState = useRouterState();
 
   // Render mobile-only components lazily and only on small screens
   const [hasMounted, setHasMounted] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   useEffect(() => {
     setHasMounted(true);
     const mql = window.matchMedia('(min-width: 1024px)');
@@ -75,6 +85,20 @@ function LoggedInLayout() {
     const currentNav = navigation.find(item => item.href === pathname);
     return currentNav?.name || 'Dashboard';
   };
+
+  const handleSignOut = useCallback(() => {
+    setIsSigningOut(true);
+    authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.navigate({ to: '/' });
+        },
+        onError: () => {
+          setIsSigningOut(false);
+        },
+      },
+    });
+  }, [router]);
 
   return (
     <>
@@ -150,9 +174,13 @@ function LoggedInLayout() {
                         </div>
                       </div>
                       <button
-                        onClick={() => authClient.signOut()}
-                        className="w-full text-left px-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 cursor-pointer"
+                        onClick={handleSignOut}
+                        disabled={isSigningOut}
+                        className="w-full text-left px-6 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
+                        {isSigningOut && (
+                          <Loader2 className="size-4 animate-spin" />
+                        )}
                         Sign out
                       </button>
                     </div>
@@ -174,9 +202,11 @@ function LoggedInLayout() {
           </div>
           {user && (
             <button
-              onClick={() => authClient.signOut()}
-              className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white cursor-pointer"
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+              className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
+              {isSigningOut && <Loader2 className="size-4 animate-spin" />}
               Sign out
             </button>
           )}

@@ -1,8 +1,15 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { getSession } from '../actions/auth';
 import { SiGithub } from '@icons-pack/react-simple-icons';
 import { Code, Tag, List, GitBranch, Search, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/')({
+  beforeLoad: async () => {
+    const session = await getSession();
+    if (session) {
+      throw redirect({ to: '/dashboard' });
+    }
+  },
   component: Home,
 });
 

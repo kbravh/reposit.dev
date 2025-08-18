@@ -1,8 +1,10 @@
-import { createFileRoute, redirect, useRouter } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { authClient } from '../lib/auth-client';
 import { SiGithub } from '@icons-pack/react-simple-icons';
 import { getSession } from '../actions/auth';
 import { z } from 'zod';
+import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional(),
@@ -37,21 +39,19 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const { redirect } = Route.useSearch();
-  const router = useRouter();
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   const handleGitHubSignIn = async () => {
+    setIsSigningIn(true);
     await authClient.signIn.social(
       {
         provider: 'github',
+        callbackURL: validateRedirectUrl(redirect),
       },
       {
-        onSuccess: () => {
-          // Redirect to the intended destination or dashboard
-          // Use validation function to prevent open redirect vulnerabilities
-          router.navigate({ to: validateRedirectUrl(redirect) });
-        },
         onError: ctx => {
           console.error('GitHub sign-in failed', ctx.error);
+          setIsSigningIn(false);
           // TODO: Handle error - maybe show a toast or redirect to an error page
         },
       }
@@ -77,11 +77,16 @@ function LoginPage() {
         <div>
           <button
             type="button"
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-400 transition-colors duration-200"
+            disabled={isSigningIn}
+            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-400 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleGitHubSignIn}
           >
-            <SiGithub className="size-5 mr-2" />
-            Sign in with GitHub
+            {isSigningIn ? (
+              <Loader2 className="size-5 mr-2 animate-spin" />
+            ) : (
+              <SiGithub className="size-5 mr-2" />
+            )}
+            {isSigningIn ? 'Signing in...' : 'Sign in with GitHub'}
           </button>
         </div>
       </div>

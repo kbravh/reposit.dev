@@ -52,16 +52,6 @@ export function NavigationProgressBar() {
   const isNavigating =
     routerState.isTransitioning && routerState.status === 'pending';
 
-  // Debug logging in development
-  if (import.meta.env.DEV) {
-    console.debug('NavigationProgressBar:', {
-      status: routerState.status,
-      isLoading: routerState.isLoading,
-      isTransitioning: routerState.isTransitioning,
-      isNavigating,
-    });
-  }
-
   return (
     <div
       className={`fixed top-0 left-0 right-0 h-1 z-50 transition-all duration-300 ${

@@ -1,20 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { authClient } from '../lib/auth-client';
-import { useQuery } from '@tanstack/react-query';
 import { SiGithub } from '@icons-pack/react-simple-icons';
 import { Code, Tag, List, GitBranch, Search, Zap } from 'lucide-react';
-import { sessionKeys } from '../lib/query-keys';
 
 export const Route = createFileRoute('/')({
   component: Home,
 });
 
 function Home() {
-  const { data: user } = useQuery({
-    queryKey: sessionKeys.current(),
-    queryFn: () => authClient.getSession().then(res => res.data?.user),
-  });
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -38,33 +30,18 @@ function Home() {
             </div>
 
             <div className="flex items-center space-x-4">
-              {user ? (
-                <Link
-                  to="/dashboard"
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
-                >
-                  Dashboard
-                </Link>
-              ) : (
-                <>
-                  <button
-                    onClick={() =>
-                      authClient.signIn.social({ provider: 'github' })
-                    }
-                    className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium cursor-pointer"
-                  >
-                    Sign in
-                  </button>
-                  <button
-                    onClick={() =>
-                      authClient.signIn.social({ provider: 'github' })
-                    }
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 cursor-pointer"
-                  >
-                    Get started
-                  </button>
-                </>
-              )}
+              <Link
+                to="/login"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/login"
+                className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+              >
+                Sign up
+              </Link>
             </div>
           </div>
         </div>
@@ -83,24 +60,13 @@ function Home() {
               workflows.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-x-6">
-              {user ? (
-                <Link
-                  to="/dashboard"
-                  className="bg-indigo-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 rounded-md flex items-center gap-2"
-                >
-                  Go to Dashboard
-                </Link>
-              ) : (
-                <button
-                  onClick={() =>
-                    authClient.signIn.social({ provider: 'github' })
-                  }
-                  className="bg-indigo-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 rounded-md flex items-center gap-2 cursor-pointer"
-                >
-                  <SiGithub className="h-5 w-5" />
-                  Sign up with GitHub
-                </button>
-              )}
+              <Link
+                to="/login"
+                className="bg-indigo-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 rounded-md flex items-center gap-2"
+              >
+                <SiGithub className="h-5 w-5" />
+                Sign up with GitHub
+              </Link>
               <a
                 href="#features"
                 className="text-lg font-semibold leading-6 text-gray-900"
@@ -219,24 +185,13 @@ function Home() {
               and productive.
             </p>
             <div className="mt-8">
-              {user ? (
-                <Link
-                  to="/dashboard"
-                  className="bg-white px-6 py-3 text-lg font-semibold text-indigo-600 shadow-sm hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded-md flex items-center gap-2 mx-auto"
-                >
-                  Go to Dashboard
-                </Link>
-              ) : (
-                <button
-                  onClick={() =>
-                    authClient.signIn.social({ provider: 'github' })
-                  }
-                  className="bg-white px-6 py-3 text-lg font-semibold text-indigo-600 shadow-sm hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded-md flex items-center gap-2 mx-auto cursor-pointer"
-                >
-                  <SiGithub className="h-5 w-5" />
-                  Get started with GitHub
-                </button>
-              )}
+              <Link
+                to="/login"
+                className="bg-white px-6 py-3 text-lg font-semibold text-indigo-600 shadow-sm hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded-md flex items-center gap-2 mx-auto"
+              >
+                <SiGithub className="h-5 w-5" />
+                Get started with GitHub
+              </Link>
             </div>
           </div>
         </div>

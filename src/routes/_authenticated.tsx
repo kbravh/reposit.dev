@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { redirect } from '@tanstack/react-router';
 import { getSession } from '../actions/auth';
 import { sessionKeys } from '../lib/query-keys';
+import { MatchRouteSpinner } from '../components/navigation/MatchRouteSpinner';
 
 export type NavigationItem = {
   name: string;
@@ -60,7 +61,7 @@ function LoggedInLayout() {
       <div>
         <MobileSidebar navigationItems={navigation} />
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-black/10 px-6 ring-1 ring-white/5">
+          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 dark:bg-gray-900 dark:border-white/10 px-6">
             <div className="flex h-16 shrink-0 items-center">
               {/* TODO: Add logo */}
               <img
@@ -77,20 +78,26 @@ function LoggedInLayout() {
                       <li key={item.name}>
                         <Link
                           to={item.href}
+                          preload="intent"
                           activeProps={{
                             className:
-                              'bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
+                              'bg-gray-50 text-indigo-600 dark:bg-gray-800 dark:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
                           }}
                           inactiveProps={{
                             className:
-                              'text-gray-400 hover:bg-gray-800 hover:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
+                              'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
                           }}
                         >
                           <item.icon
                             aria-hidden="true"
                             className="size-6 shrink-0"
                           />
-                          {item.name}
+                          <span className="flex-1">{item.name}</span>
+                          <MatchRouteSpinner
+                            to={item.href}
+                            size="sm"
+                            className="opacity-75"
+                          />
                         </Link>
                       </li>
                     ))}
@@ -132,15 +139,15 @@ function LoggedInLayout() {
           </div>
         </div>
 
-        <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 dark:bg-gray-800 px-4 py-4 shadow-xs border-b border-white/5 dark:border-gray-700 sm:px-6 lg:hidden">
+        <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white dark:bg-gray-900 px-4 py-4 shadow-xs border-b border-gray-200 dark:border-white/5 sm:px-6 lg:hidden">
           <MobileSidebarButton />
-          <div className="flex-1 font-semibold text-sm/6 text-white">
+          <div className="flex-1 font-semibold text-sm/6 text-gray-900 dark:text-white">
             {getCurrentPageName()}
           </div>
           {!isPending && user && (
             <button
               onClick={() => authClient.signOut()}
-              className="text-sm text-gray-400 hover:text-white cursor-pointer"
+              className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white cursor-pointer"
             >
               Sign out
             </button>
@@ -148,7 +155,7 @@ function LoggedInLayout() {
         </div>
 
         <main className="py-10 lg:pl-72">
-          <div className="px-4 sm:px-6 lg:px-8">
+          <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <Outlet />
           </div>
         </main>

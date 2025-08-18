@@ -32,27 +32,8 @@ export const createTag = createServerFn({
     }) => {
       const userId = session.userId;
 
-      // Check if tag with this title already exists for this user
-      const [existingTag] = await db
-        .select()
-        .from(tagInstance)
-        .where(
-          and(eq(tagInstance.title, title), eq(tagInstance.userId, userId))
-        )
-        .limit(1);
-
-      if (existingTag) {
-        // If tag exists and we have a repository to associate, just create the association
-        if (repositoryInstanceId) {
-          await db.insert(tagToRepository).values({
-            tagInstanceId: existingTag.id,
-            repositoryInstanceId,
-          });
-        }
-        return existingTag;
-      }
-
-      const newTag = await db.transaction(async tx => {
+      return await db.transaction(async tx => {
+        // Upsert the tag
         const [tag] = await tx
           .insert(tagInstance)
           .values({
@@ -61,17 +42,28 @@ export const createTag = createServerFn({
             color:
               color || getPredefinedColor(title) || getHashedTagColor(title),
           })
+          .onConflictDoUpdate({
+            target: [tagInstance.userId, tagInstance.title],
+            set: {
+              color: sql.raw(`excluded.${tagInstance.color.name}`),
+              updatedAt: sql.raw(`excluded.${tagInstance.updatedAt.name}`),
+            },
+          })
           .returning();
 
+        // Create the tag-to-repository relationship if a repository was specified
         if (repositoryInstanceId) {
-          await tx.insert(tagToRepository).values({
-            tagInstanceId: tag.id,
-            repositoryInstanceId,
-          });
+          await tx
+            .insert(tagToRepository)
+            .values({
+              tagInstanceId: tag.id,
+              repositoryInstanceId,
+            })
+            .onConflictDoNothing(); // Don't error if relationship already exists
         }
+
         return tag;
       });
-      return newTag;
     }
   );
 

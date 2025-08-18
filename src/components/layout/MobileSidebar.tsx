@@ -41,12 +41,15 @@ export default function MobileSidebar({
                 className="-m-2.5 p-2.5"
               >
                 <span className="sr-only">Close sidebar</span>
-                <X aria-hidden="true" className="size-6 text-white" />
+                <X
+                  aria-hidden="true"
+                  className="size-6 text-gray-700 dark:text-white"
+                />
               </button>
             </div>
           </TransitionChild>
 
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 dark:bg-black/10 px-6 pb-2 ring-1 ring-white/10 dark:ring-white/5">
+          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-gray-900 px-6 pb-2 ring-1 ring-gray-200 dark:ring-white/10">
             <div className="flex h-16 shrink-0 items-center">
               {/* TODO: Add logo */}
               <img
@@ -66,11 +69,11 @@ export default function MobileSidebar({
                           onClick={() => setSidebarOpen(false)}
                           activeProps={{
                             className:
-                              'bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
+                              'bg-gray-50 text-indigo-600 dark:bg-gray-800 dark:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
                           }}
                           inactiveProps={{
                             className:
-                              'text-gray-400 hover:bg-gray-800 hover:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
+                              'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
                           }}
                         >
                           <item.icon
@@ -98,7 +101,7 @@ export function MobileSidebarButton() {
     <button
       type="button"
       onClick={() => setSidebarOpen(true)}
-      className="-m-2.5 p-2.5 text-gray-400 hover:text-white lg:hidden"
+      className="-m-2.5 p-2.5 text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white lg:hidden"
     >
       <span className="sr-only">Open sidebar</span>
       <Menu aria-hidden="true" className="size-6" />

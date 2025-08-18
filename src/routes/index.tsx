@@ -27,6 +27,8 @@ function Home() {
                 className="h-8 w-8 text-indigo-600"
                 viewBox="0 0 24 24"
                 fill="currentColor"
+                width="24"
+                height="24"
               >
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
@@ -80,7 +82,7 @@ function Home() {
               your GitHub repositories with powerful lists and intuitive
               workflows.
             </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-x-6">
               {user ? (
                 <Link
                   to="/dashboard"
@@ -248,6 +250,8 @@ function Home() {
               className="h-6 w-6 text-indigo-600"
               viewBox="0 0 24 24"
               fill="currentColor"
+              width="24"
+              height="24"
             >
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>

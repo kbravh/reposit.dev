@@ -4,10 +4,11 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import { Tag, Plus } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { Tag, Plus, Palette } from 'lucide-react';
+import { useState, type FormEvent, useRef } from 'react';
 import { useCreateTagMutation } from '../../hooks/tags';
-import { TAG_COLORS } from '../../utils/colors';
+import { TAG_COLORS, getPredefinedColor } from '../../utils/colors';
+import { useThemeStore } from '../../stores/themeStore';
 
 interface AddTagModalProps {
   isOpen: boolean;
@@ -15,8 +16,11 @@ interface AddTagModalProps {
 }
 
 export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
-  const [title, setTitle] = useState('');
-  const [color, setColor] = useState(TAG_COLORS[0] as string);
+  const [suggestedColor, setSuggestedColor] = useState<string | null>(null);
+  const [customColor, setCustomColor] = useState<string | null>(null);
+  const colorInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const { theme } = useThemeStore();
 
   const createTagMutation = useCreateTagMutation({
     onSuccess: () => {
@@ -27,23 +31,62 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const trimmedTitle = title.trim();
+    const formData = new FormData(e.currentTarget);
+    const title = formData.get('title') as string;
+    const colorSelection = formData.get('color') as string;
+    const customColor = formData.get('customColor') as string;
+
+    const trimmedTitle = title?.trim();
     if (trimmedTitle) {
-      // Clear input immediately on submission
-      setTitle('');
-      createTagMutation.mutate({ title: trimmedTitle, color });
+      const finalColor =
+        colorSelection === 'custom' ? customColor : colorSelection;
+      createTagMutation.mutate({
+        title: trimmedTitle,
+        color: finalColor || TAG_COLORS[0],
+      });
     }
   };
 
   const handleReset = () => {
-    setTitle('');
-    setColor(TAG_COLORS[0] as string);
+    setSuggestedColor(null);
+    setCustomColor(null);
     createTagMutation.reset();
+    if (formRef.current) {
+      formRef.current.reset();
+    }
   };
 
   const handleCancel = () => {
     onOpenChange(false);
     handleReset();
+  };
+
+  const handleSuggestedColorClick = () => {
+    if (suggestedColor && formRef.current) {
+      // Find and check the radio button that matches the suggested color
+      const radio = formRef.current.querySelector(
+        `input[name="color"][value="${suggestedColor}"]`
+      ) as HTMLInputElement;
+      if (radio) {
+        radio.checked = true;
+        // Clear custom color since we're using a preset
+        setCustomColor(null);
+      } else {
+        // If it's a custom color, set the custom color input and select custom radio
+        const customColorInput = formRef.current.querySelector(
+          'input[name="customColor"]'
+        ) as HTMLInputElement;
+        const customRadio = formRef.current.querySelector(
+          'input[name="color"][value="custom"]'
+        ) as HTMLInputElement;
+        if (customColorInput && customRadio) {
+          customColorInput.value = suggestedColor;
+          customRadio.checked = true;
+          // Set custom color to the suggested color
+          setCustomColor(suggestedColor);
+        }
+      }
+    }
   };
 
   return (
@@ -73,7 +116,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
               transition
               className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pt-5 pb-4 text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in sm:my-8 sm:w-full sm:max-w-2xl sm:p-6 data-closed:sm:translate-y-0 data-closed:sm:scale-95"
             >
-              <form onSubmit={handleSubmit}>
+              <form ref={formRef} onSubmit={handleSubmit}>
                 <div>
                   <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
                     <Tag className="size-6 text-indigo-600 dark:text-indigo-400" />
@@ -96,9 +139,17 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                         <input
                           type="text"
                           id="add-title"
-                          value={title}
+                          name="title"
                           onChange={e => {
-                            setTitle(e.target.value);
+                            // Always check for suggested colors when title changes
+                            const newTitle = e.target.value.trim();
+                            if (newTitle) {
+                              const suggested = getPredefinedColor(newTitle);
+                              setSuggestedColor(suggested || null);
+                            } else {
+                              // Clear suggestion when title is empty
+                              setSuggestedColor(null);
+                            }
                             // Clear error when user starts typing
                             if (createTagMutation.error) {
                               createTagMutation.reset();
@@ -108,27 +159,93 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                           className="mt-2 -outline-offset-1 focus:-outline-offset-2 block w-full rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100 outline-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:outline-indigo-600 sm:text-sm/6"
                           required
                         />
-                      </div>
-                      <div>
-                        <label className="block font-medium text-gray-900 dark:text-gray-100 text-sm/6 mb-2">
-                          Color
-                        </label>
-                        <div className="grid grid-cols-6 gap-2">
-                          {TAG_COLORS.map(tagColor => (
-                            <button
-                              key={tagColor}
-                              type="button"
-                              onClick={() => setColor(tagColor as string)}
-                              className={`w-8 h-8 rounded-full border-2 ${
-                                color === tagColor
-                                  ? 'border-gray-900 dark:border-gray-100'
-                                  : 'border-gray-300 dark:border-gray-600'
-                              }`}
-                              style={{ backgroundColor: tagColor }}
+                        {suggestedColor && (
+                          <button
+                            type="button"
+                            onClick={handleSuggestedColorClick}
+                            className="mt-2 flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                          >
+                            <div
+                              className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600"
+                              style={{ backgroundColor: suggestedColor }}
                             />
-                          ))}
-                        </div>
+                            <span>Suggested color (click to use)</span>
+                          </button>
+                        )}
                       </div>
+                      <fieldset>
+                        <legend className="block font-medium text-gray-900 dark:text-gray-100 text-sm/6 mb-2">
+                          Color
+                        </legend>
+                        <div className="grid grid-cols-6 gap-2 justify-items-center">
+                          {TAG_COLORS.map((tagColor, index) => (
+                            <label
+                              key={tagColor}
+                              className="relative cursor-pointer w-8 h-8 block"
+                            >
+                              <input
+                                type="radio"
+                                name="color"
+                                value={tagColor}
+                                defaultChecked={index === 0}
+                                className="sr-only peer"
+                              />
+                              <div
+                                className="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:border-gray-900 dark:peer-checked:border-gray-100 peer-focus:ring-2 peer-focus:ring-indigo-600 peer-focus:ring-offset-2"
+                                style={{ backgroundColor: tagColor }}
+                              />
+                              <span className="sr-only">
+                                Select {tagColor} color
+                              </span>
+                            </label>
+                          ))}
+                          {/* Custom color option */}
+                          <label className="cursor-pointer w-8 h-8 block relative">
+                            <input
+                              type="radio"
+                              name="color"
+                              value="custom"
+                              className="sr-only peer"
+                            />
+                            <div
+                              className="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:border-gray-900 dark:peer-checked:border-gray-100 peer-focus:ring-2 peer-focus:ring-indigo-600 peer-focus:ring-offset-2 overflow-hidden cursor-pointer"
+                              style={{
+                                background:
+                                  customColor ??
+                                  suggestedColor ??
+                                  'conic-gradient(from 0deg, #ff0000 0deg, #ff8000 60deg, #ffff00 120deg, #80ff00 180deg, #00ff80 240deg, #0080ff 300deg, #8000ff 360deg)',
+                              }}
+                              onClick={() => colorInputRef.current?.click()}
+                            />
+                            <Palette
+                              className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 rounded-full p-0.5 border border-gray-300 dark:border-gray-600 pointer-events-none"
+                              strokeWidth={1.5}
+                            />
+                            <span className="sr-only">Select custom color</span>
+                          </label>
+                          {/* Hidden color picker and custom color value */}
+                          <input
+                            ref={colorInputRef}
+                            type="color"
+                            name="customColor"
+                            defaultValue="#6366f1"
+                            onChange={e => {
+                              // When color is picked, select the custom radio
+                              const customRadio =
+                                formRef.current?.querySelector(
+                                  'input[name="color"][value="custom"]'
+                                ) as HTMLInputElement;
+                              if (customRadio) {
+                                customRadio.checked = true;
+                              }
+                              setCustomColor(e.target.value);
+                            }}
+                            className="sr-only"
+                            style={{ colorScheme: theme }}
+                            aria-label="Custom color picker"
+                          />
+                        </div>
+                      </fieldset>
                     </div>
                   </div>
                 </div>

@@ -1,5 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
+
 import { getRepositories } from '../../actions/repos';
 import { getTagsWithRepositoryCount } from '../../actions/tags';
 import { EmptyDashboardState } from '../../components/dashboard/EmptyDashboardState';
@@ -7,42 +8,48 @@ import { QuickActions } from '../../components/ui/QuickActions';
 import { DashboardStats } from '../../components/dashboard/DashboardStats';
 import { RecentRepositories } from '../../components/dashboard/RecentRepositories';
 import { repositoryKeys, tagKeys } from '../../lib/query-keys';
-import { Spinner } from '../../components/ui/Spinner';
 import { ReactNode } from 'react';
+import type { Repository } from '../../components/repository/types';
+import type { TagWithCount } from '../../components/tags/types';
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
   component: Dashboard,
+  loader: async () => {
+    // Load both repositories and tags data on the server side
+    const [repositories, tags] = await Promise.all([
+      getRepositories(),
+      getTagsWithRepositoryCount(),
+    ]);
+    return { repositories, tags };
+  },
+  pendingComponent: () => <DashboardStatsSkeleton />,
 });
 
 function Dashboard() {
-  const { data: repositories = [], isLoading: isReposLoading } = useQuery({
+  // Get server-loaded data
+  const { repositories, tags } = useLoaderData({
+    from: '/_authenticated/dashboard',
+  }) as {
+    repositories: Repository[];
+    tags: TagWithCount[];
+  };
+
+  // Ensure React Query cache is populated with server data
+  useQuery({
     queryKey: repositoryKeys.all,
     queryFn: () => getRepositories(),
+    initialData: repositories,
+    staleTime: 60_000,
   });
 
-  const { data: tags = [], isLoading: isTagsLoading } = useQuery({
+  useQuery({
     queryKey: tagKeys.withCount(),
     queryFn: () => getTagsWithRepositoryCount(),
+    initialData: tags,
+    staleTime: 60_000,
   });
 
-  const isLoading = isReposLoading || isTagsLoading;
-
-  // Show loading state while data is being fetched
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <WelcomeSection>Loading your dashboard...</WelcomeSection>
-
-        <div className="flex items-center justify-center py-12">
-          <Spinner size="lg" />
-        </div>
-      </div>
-    );
-  }
-
-  // Determine if user is new (has no repos and no tags)
-  const isNewUser =
-    !isLoading && repositories.length === 0 && tags.length === 0;
+  const isNewUser = repositories.length === 0 && tags.length === 0;
 
   return (
     <div className="space-y-8">
@@ -53,26 +60,19 @@ function Dashboard() {
       </WelcomeSection>
 
       {isNewUser ? (
-        /* Empty State for New Users */
         <EmptyDashboardState />
       ) : (
-        /* Dashboard Content for Existing Users */
-        <div className="space-y-8">
-          {/* Stats Cards */}
+        <>
           <DashboardStats
             repositories={repositories}
             tags={tags}
             isLoading={false}
           />
-
-          {/* Quick Actions */}
           <QuickActions />
-
-          {/* Recent Content */}
           {repositories.length > 0 && (
             <RecentRepositories repositories={repositories} />
           )}
-        </div>
+        </>
       )}
     </div>
   );
@@ -92,3 +92,29 @@ const WelcomeSection = ({ children }: { children: ReactNode }) => (
     </div>
   </div>
 );
+
+function DashboardStatsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div
+          key={i}
+          className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg"
+        >
+          <div className="p-5 animate-pulse">
+            <div className="flex items-center gap-4">
+              <div className="h-6 w-6 rounded bg-gray-200 dark:bg-gray-700" />
+              <div className="flex-1">
+                <div className="h-3 w-24 rounded bg-gray-200 dark:bg-gray-700 mb-2" />
+                <div className="h-4 w-16 rounded bg-gray-200 dark:bg-gray-700" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3">
+            <div className="h-3 w-20 rounded bg-gray-200 dark:bg-gray-600" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

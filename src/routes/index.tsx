@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { getSession } from '../actions/auth';
 import { SiGithub } from '@icons-pack/react-simple-icons';
-import { Code, Tag, List, GitBranch, Search, Zap } from 'lucide-react';
+import { Tag, GitBranch } from 'lucide-react';
 
 export const Route = createFileRoute('/')({
   beforeLoad: async () => {
@@ -90,7 +90,7 @@ function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Everything you need to manage repositories
+              Everything you need to keep track of your repositories
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
               Powerful features designed for developers who want to stay
@@ -107,8 +107,8 @@ function Home() {
                 Easy Repository Adding
               </h3>
               <p className="mt-2 text-gray-600">
-                Add repositories to your collection by URL or org/name. Keep
-                track of projects that inspire you.
+                Add repositories to your collection. Keep track of projects that
+                inspire you.
               </p>
             </div>
 
@@ -125,7 +125,7 @@ function Home() {
               </p>
             </div>
 
-            <div className="text-center">
+            {/* <div className="text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-indigo-600">
                 <List className="h-6 w-6 text-white" />
               </div>
@@ -136,9 +136,9 @@ function Home() {
                 Create powerful lists using tag filters. Include or exclude tags
                 to build collections that update automatically.
               </p>
-            </div>
+            </div> */}
 
-            <div className="text-center">
+            {/* <div className="text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-indigo-600">
                 <Zap className="h-6 w-6 text-white" />
               </div>
@@ -149,22 +149,9 @@ function Home() {
                 Power user features with keyboard shortcuts for common tasks.
                 Navigate and manage repositories lightning-fast.
               </p>
-            </div>
+            </div> */}
 
-            <div className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-indigo-600">
-                <Code className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="mt-6 text-lg font-semibold text-gray-900">
-                Language Intelligence
-              </h3>
-              <p className="mt-2 text-gray-600">
-                Automatic language detection and color coding using
-                GitHub&apos;s official language color scheme.
-              </p>
-            </div>
-
-            <div className="text-center">
+            {/* <div className="text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-indigo-600">
                 <Search className="h-6 w-6 text-white" />
               </div>
@@ -175,7 +162,7 @@ function Home() {
                 Perfect for teams managing multiple repositories. Keep everyone
                 organized and on the same page.
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>

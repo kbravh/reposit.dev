@@ -191,3 +191,87 @@ export const tagToRepository = sqliteTable(
     ),
   ]
 );
+
+export const lists = sqliteTable('list', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id),
+  name: text('name').notNull(),
+  description: text('description'),
+  visibility: text('visibility', { enum: ['private', 'public', 'unlisted'] })
+    .notNull()
+    .default('private'),
+  shareToken: text('share_token').unique(),
+  startWithAll: integer('start_with_all', { mode: 'boolean' })
+    .notNull()
+    .default(false),
+  defaultSortPrimary: text('default_sort_primary', {
+    enum: ['name', 'org', 'stars'],
+  })
+    .notNull()
+    .default('name'),
+  defaultSortPrimaryDir: text('default_sort_primary_dir', {
+    enum: ['asc', 'desc'],
+  })
+    .notNull()
+    .default('asc'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+});
+
+export const listFilterGroups = sqliteTable('list_filter_group', {
+  id: text('id').primaryKey(),
+  listId: text('list_id')
+    .notNull()
+    .references(() => lists.id),
+  parentGroupId: text('parent_group_id').references(() => listFilterGroups.id),
+  operator: text('operator', { enum: ['AND', 'OR'] }).notNull(),
+  position: integer('position').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+});
+
+export const listFilterTagClauses = sqliteTable(
+  'list_filter_tag_clause',
+  {
+    id: text('id').primaryKey(),
+    groupId: text('group_id')
+      .notNull()
+      .references(() => listFilterGroups.id),
+    mode: text('mode', { enum: ['INCLUDE', 'EXCLUDE'] }).notNull(),
+    tagInstanceId: text('tag_instance_id')
+      .notNull()
+      .references(() => tagInstance.id),
+    position: integer('position').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  },
+  table => [index('list_filter_tag_clause_group_id_idx').on(table.groupId)]
+);
+
+export const listRepoOverrides = sqliteTable(
+  'list_repo_override',
+  {
+    id: text('id').primaryKey(),
+    listId: text('list_id')
+      .notNull()
+      .references(() => lists.id),
+    repositoryInstanceId: text('repository_instance_id')
+      .notNull()
+      .references(() => repositoryInstance.id),
+    action: text('action', { enum: ['INCLUDE', 'EXCLUDE'] }).notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  },
+  table => [
+    uniqueIndex('list_repo_override_list_id_repository_instance_id_unique').on(
+      table.listId,
+      table.repositoryInstanceId
+    ),
+    index('list_repo_override_list_id_idx').on(table.listId),
+    index('list_repo_override_repository_instance_id_idx').on(
+      table.repositoryInstanceId
+    ),
+  ]
+);

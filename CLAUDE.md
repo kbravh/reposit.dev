@@ -69,6 +69,7 @@ src/
 ```
 
 **Key Files**:
+
 - `src/db/schema.ts`: Database schema
 - `src/lib/query-keys.ts`: Centralized query keys
 - `src/actions/middleware/auth.ts`: Session validation
@@ -104,6 +105,7 @@ npm run test:run         # CI mode
 ## Code Conventions
 
 **File Naming**:
+
 - Components: PascalCase (`AddTagModal.tsx`)
 - Utilities/Hooks: camelCase (`useCreateTagMutation.ts`)
 - Constants: UPPER_SNAKE_CASE (`TAG_COLORS`)
@@ -112,10 +114,15 @@ npm run test:run         # CI mode
 **Import Order**: External deps → Internal imports → Types
 
 **Server Functions Pattern**:
+
 ```typescript
 export const actionName = createServerFn({ method: 'POST' })
-  .validator(z.object({ /* schema */ }))
-  .middleware([authMiddleware])  // All data operations use this
+  .validator(
+    z.object({
+      /* schema */
+    })
+  )
+  .middleware([authMiddleware]) // All data operations use this
   .handler(async ({ data, context: { session } }) => {
     // session.userId available here
   });
@@ -202,6 +209,7 @@ tagToRepository: {
 ```
 
 **Key Patterns**:
+
 - **User Isolation**: ALL queries MUST filter by `session.userId`
 - **Soft Deletes**: `deletedAt` on repositories
 - **Cascade Deletes**: FK constraints handle cleanup
@@ -214,12 +222,14 @@ tagToRepository: {
 RPC-style endpoints using `createServerFn` (TanStack Start pattern).
 
 **Authentication** (`src/actions/auth.ts`):
+
 ```typescript
 getSession(): Promise<{ session, user } | null>
 requireAuth(): Promise<{ session }>  // Throws if not authenticated
 ```
 
 **Repository** (`src/actions/repos.ts`):
+
 ```typescript
 createRepository({ url }): Promise<RepositoryInstance>
 getRepositories(): Promise<RepositoryInstance[]>
@@ -230,6 +240,7 @@ searchGitHubRepositories({ query }): Promise<GitHubRepo[]>  // No auth required
 ```
 
 **Tag** (`src/actions/tags.ts`):
+
 ```typescript
 createTag({ title, color?, repositoryInstanceId? }): Promise<TagInstance>
 getTags(): Promise<TagInstance[]>
@@ -253,6 +264,7 @@ getTagsWithRepositoryCount(): Promise<{ tag, count }[]>
 **Protected Routes**: `_authenticated/` layout checks session in `beforeLoad`, redirects to login if missing
 
 **Authorization Pattern**: `authMiddleware` validates session on ALL server functions
+
 ```typescript
 .middleware([authMiddleware])
 .handler(async ({ context: { session } }) => {
@@ -268,18 +280,21 @@ getTagsWithRepositoryCount(): Promise<{ tag, count }[]>
 ## Key Patterns
 
 **Query Keys** (`src/lib/query-keys.ts`): Hierarchical factory pattern
+
 ```typescript
 tagKeys = { all: ['tags'], withCount: () => [...tagKeys.all, 'with-count'], ... }
 repositoryKeys = { all: ['repositories'], lists: () => [...repositoryKeys.all, 'list'], ... }
 ```
 
 **Auto-Coloring** (`src/utils/colors.ts`): Tags colored by priority:
+
 1. Brand colors (exact match: "React" → React blue)
 2. GitHub language colors (case-insensitive)
 3. Language aliases ("js" → "JavaScript")
 4. Hash-based fallback (deterministic from title)
 
 **GitHub API** (`src/utils/github.ts`):
+
 - `parseRepositoryUrl(url)` - Extract owner/name from GitHub URL
 - `fetchRepositoryFromGitHub(owner, repo)` - Fetch repo data from GitHub API
 
@@ -290,12 +305,14 @@ repositoryKeys = { all: ['repositories'], lists: () => [...repositoryKeys.all, '
 ## Deployment
 
 **Environment Variables** (required):
+
 ```
 DATABASE_URL, DATABASE_AUTH_TOKEN, BETTER_AUTH_URL, BETTER_AUTH_SECRET,
 GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SENTRY_AUTH_TOKEN
 ```
 
 **CI/CD** (GitHub Actions):
+
 - **PRs**: Lint, format, type check, test
 - **Main branch**: Quality checks → Tests → Build → `db:push` → Coolify deployment
 

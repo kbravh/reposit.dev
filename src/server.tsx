@@ -8,12 +8,13 @@ import * as Sentry from '@sentry/tanstackstart-react';
 // Verify that the environment variables are set
 import './env';
 
-// eslint-disable-next-line react-refresh/only-export-components
-export default createStartHandler(
-  defineHandlerCallback(ctx => {
-    return Sentry.wrapStreamHandlerWithSentry(defaultStreamHandler)(ctx);
-  })
-);
+const customHandler = defineHandlerCallback(ctx => {
+  return Sentry.wrapStreamHandlerWithSentry(defaultStreamHandler)(ctx);
+});
+
+export const fetch = createStartHandler(customHandler);
+
+export default { fetch };
 
 Sentry.init({
   dsn: 'https://bf06560f5ce6237f676e09fdcefd114a@o296138.ingest.us.sentry.io/4509703861764096',

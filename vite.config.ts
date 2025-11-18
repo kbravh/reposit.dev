@@ -12,15 +12,7 @@ export default wrapVinxiConfigWithSentry(
     server: {
       port: 3000,
     },
-    plugins: [
-      tsConfigPaths(),
-      tanstackStart({
-        customViteReactPlugin: true,
-        target: 'node-server',
-      }),
-      react(),
-      tailwindcss(),
-    ],
+    plugins: [tsConfigPaths(), tanstackStart(), react(), tailwindcss()],
     test: {
       environment: 'jsdom',
       setupFiles: [],

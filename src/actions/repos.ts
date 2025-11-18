@@ -13,7 +13,7 @@ import { eq, and, desc } from 'drizzle-orm';
 export const createRepository = createServerFn({
   method: 'POST',
 })
-  .validator(z.object({ url: z.string() }))
+  .inputValidator(z.object({ url: z.string() }))
   .middleware([authMiddleware])
   .handler(async ({ data: { url }, context: { session } }) => {
     const repoDetails = await getRepositoryDetails(url);
@@ -76,7 +76,7 @@ export const getRepositories = createServerFn({
 export const getRepository = createServerFn({
   method: 'GET',
 })
-  .validator(
+  .inputValidator(
     z.object({
       repositoryInstanceId: z.string(),
     })
@@ -106,7 +106,7 @@ export const getRepository = createServerFn({
   });
 
 export const deleteRepository = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       repositoryInstanceId: z.string(),
     })
@@ -139,7 +139,7 @@ export const deleteRepository = createServerFn()
   });
 
 export const syncRepository = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       repositoryInstanceId: z.string(),
     })
@@ -193,7 +193,7 @@ export const syncRepository = createServerFn()
 export const searchGitHubRepositories = createServerFn({
   method: 'POST',
 })
-  .validator(z.object({ query: z.string() }))
+  .inputValidator(z.object({ query: z.string() }))
   .handler(async ({ data: { query } }) => {
     return await searchRepositories(query, 25);
   });

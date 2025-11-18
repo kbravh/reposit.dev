@@ -25,6 +25,7 @@ export default wrapVinxiConfigWithSentry(
       environment: 'jsdom',
       setupFiles: [],
       passWithNoTests: true,
+      exclude: ['e2e/**', 'node_modules/**'],
       coverage: {
         enabled: true,
         include: ['src/**/*.{ts,tsx}'],

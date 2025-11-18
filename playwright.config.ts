@@ -34,5 +34,7 @@ export default defineConfig({
     url: 'http://localhost:3000',
     // eslint-disable-next-line no-undef
     reuseExistingServer: !process.env.CI,
+    // eslint-disable-next-line no-undef
+    env: process.env,
   },
 });

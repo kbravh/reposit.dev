@@ -14,7 +14,7 @@ import { getPredefinedColor, getHashedTagColor } from '../utils/colors';
 export const createTag = createServerFn({
   method: 'POST',
 })
-  .validator(
+  .inputValidator(
     z.object({
       title: z
         .string()
@@ -85,7 +85,7 @@ export const getTags = createServerFn({
 export const getTag = createServerFn({
   method: 'GET',
 })
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
     })
@@ -106,7 +106,7 @@ export const getTag = createServerFn({
   });
 
 export const updateTag = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
       title: z
@@ -159,7 +159,7 @@ export const updateTag = createServerFn()
   });
 
 export const deleteTag = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
     })
@@ -187,7 +187,7 @@ export const deleteTag = createServerFn()
 export const addTagToRepository = createServerFn({
   method: 'POST',
 })
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
       repositoryInstanceId: z.string(),
@@ -237,7 +237,7 @@ export const addTagToRepository = createServerFn({
   );
 
 export const removeTagFromRepository = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
       repositoryInstanceId: z.string(),
@@ -290,7 +290,7 @@ export const removeTagFromRepository = createServerFn()
 export const getRepositoriesForTag = createServerFn({
   method: 'GET',
 })
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
     })
@@ -334,7 +334,7 @@ export const getRepositoriesForTag = createServerFn({
 export const getTagsForRepository = createServerFn({
   method: 'GET',
 })
-  .validator(
+  .inputValidator(
     z.object({
       repositoryInstanceId: z.string(),
     })
@@ -378,7 +378,7 @@ export const getTagsForRepository = createServerFn({
 export const createManyTags = createServerFn({
   method: 'POST',
 })
-  .validator(
+  .inputValidator(
     z.object({
       titles: z.array(
         z

@@ -1,5 +1,5 @@
 import { StartClient } from '@tanstack/react-start/client';
-import { StrictMode, startTransition } from 'react';
+import { StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 
 import * as Sentry from '@sentry/tanstackstart-react';
@@ -12,11 +12,9 @@ Sentry.init({
   environment: import.meta.env.MODE,
 });
 
-startTransition(() => {
-  hydrateRoot(
-    document,
-    <StrictMode>
-      <StartClient />
-    </StrictMode>
-  );
-});
+hydrateRoot(
+  document,
+  <StrictMode>
+    <StartClient />
+  </StrictMode>
+);

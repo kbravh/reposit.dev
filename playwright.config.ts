@@ -30,7 +30,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: './scripts/dev-test.sh',
+    command: 'npm run dev',
     url: 'http://localhost:3000',
     // eslint-disable-next-line no-undef
     reuseExistingServer: !process.env.CI,

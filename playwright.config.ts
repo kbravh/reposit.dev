@@ -34,5 +34,21 @@ export default defineConfig({
     url: 'http://localhost:3000',
     // eslint-disable-next-line no-undef
     reuseExistingServer: !process.env.CI,
+    env: {
+      // eslint-disable-next-line no-undef
+      DATABASE_URL: process.env.DATABASE_URL || '',
+      // eslint-disable-next-line no-undef
+      DATABASE_AUTH_TOKEN: process.env.DATABASE_AUTH_TOKEN || '',
+      // eslint-disable-next-line no-undef
+      BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || '',
+      // eslint-disable-next-line no-undef
+      BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || '',
+      // eslint-disable-next-line no-undef
+      GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || '',
+      // eslint-disable-next-line no-undef
+      GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || '',
+      // eslint-disable-next-line no-undef
+      SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN || '',
+    },
   },
 });

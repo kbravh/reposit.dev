@@ -1,6 +1,3 @@
-'use server';
-
-import 'dotenv/config';
 import { z } from 'zod';
 
 const envSchema = z.object({
@@ -13,19 +10,25 @@ const envSchema = z.object({
   SENTRY_AUTH_TOKEN: z.string(),
 });
 
-// eslint-disable-next-line no-undef
-const _env = envSchema.safeParse(process.env);
-
-// eslint-disable-next-line no-undef
-if (!_env.success && !process.env.CI) {
-  console.error(z.prettifyError(_env.error));
-  throw new Error('Invalid environment variables');
-}
+let _env: z.infer<typeof envSchema> | null = null;
 
 export const getEnv = () => {
-  if (!_env.data) {
-    throw new Error('Environment variables are not set.');
+  if (!_env) {
+    // eslint-disable-next-line no-undef
+    const parsed = envSchema.safeParse(process.env);
+
+    // eslint-disable-next-line no-undef
+    if (!parsed.success && !process.env.CI) {
+      console.error(z.prettifyError(parsed.error));
+      throw new Error('Invalid environment variables');
+    }
+
+    if (!parsed.data) {
+      throw new Error('Environment variables are not set.');
+    }
+
+    _env = parsed.data;
   }
 
-  return _env.data;
+  return _env;
 };

@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
-import { db } from '../db';
+import { getDb } from '../db';
 import {
   tagInstance,
   tagToRepository,
@@ -14,7 +14,7 @@ import { getPredefinedColor, getHashedTagColor } from '../utils/colors';
 export const createTag = createServerFn({
   method: 'POST',
 })
-  .validator(
+  .inputValidator(
     z.object({
       title: z
         .string()
@@ -32,7 +32,7 @@ export const createTag = createServerFn({
     }) => {
       const userId = session.userId;
 
-      return await db.transaction(async tx => {
+      return await getDb().transaction(async tx => {
         // Upsert the tag
         const [tag] = await tx
           .insert(tagInstance)
@@ -73,7 +73,7 @@ export const getTags = createServerFn({
   .middleware([authMiddleware])
   .handler(async ({ context: { session } }) => {
     const userId = session.userId;
-    const tags = await db
+    const tags = await getDb()
       .select()
       .from(tagInstance)
       .where(eq(tagInstance.userId, userId))
@@ -85,7 +85,7 @@ export const getTags = createServerFn({
 export const getTag = createServerFn({
   method: 'GET',
 })
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
     })
@@ -93,7 +93,7 @@ export const getTag = createServerFn({
   .middleware([authMiddleware])
   .handler(async ({ data: { tagId }, context: { session } }) => {
     const userId = session.userId;
-    const [tag] = await db
+    const [tag] = await getDb()
       .select()
       .from(tagInstance)
       .where(and(eq(tagInstance.id, tagId), eq(tagInstance.userId, userId)));
@@ -106,7 +106,7 @@ export const getTag = createServerFn({
   });
 
 export const updateTag = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
       title: z
@@ -121,7 +121,7 @@ export const updateTag = createServerFn()
     const userId = session.userId;
 
     // First verify the tag belongs to the user
-    const [existingTag] = await db
+    const [existingTag] = await getDb()
       .select()
       .from(tagInstance)
       .where(and(eq(tagInstance.id, tagId), eq(tagInstance.userId, userId)));
@@ -132,7 +132,7 @@ export const updateTag = createServerFn()
 
     // If updating title, check for duplicates
     if (title && title !== existingTag.title) {
-      const [duplicateTag] = await db
+      const [duplicateTag] = await getDb()
         .select()
         .from(tagInstance)
         .where(
@@ -145,7 +145,7 @@ export const updateTag = createServerFn()
       }
     }
 
-    const [updatedTag] = await db
+    const [updatedTag] = await getDb()
       .update(tagInstance)
       .set({
         title: title ?? existingTag.title,
@@ -159,7 +159,7 @@ export const updateTag = createServerFn()
   });
 
 export const deleteTag = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
     })
@@ -169,7 +169,7 @@ export const deleteTag = createServerFn()
     const userId = session.userId;
 
     // First verify the tag belongs to the user
-    const [existingTag] = await db
+    const [existingTag] = await getDb()
       .select()
       .from(tagInstance)
       .where(and(eq(tagInstance.id, tagId), eq(tagInstance.userId, userId)));
@@ -179,7 +179,7 @@ export const deleteTag = createServerFn()
     }
 
     // Delete the tag (cascade will handle tagToRepository relationships)
-    await db.delete(tagInstance).where(eq(tagInstance.id, tagId));
+    await getDb().delete(tagInstance).where(eq(tagInstance.id, tagId));
 
     return { success: true };
   });
@@ -187,7 +187,7 @@ export const deleteTag = createServerFn()
 export const addTagToRepository = createServerFn({
   method: 'POST',
 })
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
       repositoryInstanceId: z.string(),
@@ -199,7 +199,7 @@ export const addTagToRepository = createServerFn({
       const userId = session.userId;
 
       // Verify the tag belongs to the user
-      const [tag] = await db
+      const [tag] = await getDb()
         .select()
         .from(tagInstance)
         .where(and(eq(tagInstance.id, tagId), eq(tagInstance.userId, userId)));
@@ -209,7 +209,7 @@ export const addTagToRepository = createServerFn({
       }
 
       // Verify the repository instance belongs to the user
-      const [repositoryInst] = await db
+      const [repositoryInst] = await getDb()
         .select()
         .from(repositoryInstance)
         .where(
@@ -224,7 +224,7 @@ export const addTagToRepository = createServerFn({
       }
 
       // Add the relationship
-      const [tagToRepo] = await db
+      const [tagToRepo] = await getDb()
         .insert(tagToRepository)
         .values({
           tagInstanceId: tagId,
@@ -237,7 +237,7 @@ export const addTagToRepository = createServerFn({
   );
 
 export const removeTagFromRepository = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
       repositoryInstanceId: z.string(),
@@ -249,7 +249,7 @@ export const removeTagFromRepository = createServerFn()
       const userId = session.userId;
 
       // Verify the tag belongs to the user
-      const [tag] = await db
+      const [tag] = await getDb()
         .select()
         .from(tagInstance)
         .where(and(eq(tagInstance.id, tagId), eq(tagInstance.userId, userId)));
@@ -259,7 +259,7 @@ export const removeTagFromRepository = createServerFn()
       }
 
       // Verify the repository instance belongs to the user
-      const [repositoryInst] = await db
+      const [repositoryInst] = await getDb()
         .select()
         .from(repositoryInstance)
         .where(
@@ -274,7 +274,7 @@ export const removeTagFromRepository = createServerFn()
       }
 
       // Remove the relationship
-      await db
+      await getDb()
         .delete(tagToRepository)
         .where(
           and(
@@ -290,7 +290,7 @@ export const removeTagFromRepository = createServerFn()
 export const getRepositoriesForTag = createServerFn({
   method: 'GET',
 })
-  .validator(
+  .inputValidator(
     z.object({
       tagId: z.string(),
     })
@@ -300,7 +300,7 @@ export const getRepositoriesForTag = createServerFn({
     const userId = session.userId;
 
     // Verify the tag belongs to the user
-    const [tag] = await db
+    const [tag] = await getDb()
       .select()
       .from(tagInstance)
       .where(and(eq(tagInstance.id, tagId), eq(tagInstance.userId, userId)));
@@ -310,7 +310,7 @@ export const getRepositoriesForTag = createServerFn({
     }
 
     // Get repositories for this tag
-    const repositories = await db
+    const repositories = await getDb()
       .select({
         repositoryInstance: repositoryInstance,
         repository: repository,
@@ -334,7 +334,7 @@ export const getRepositoriesForTag = createServerFn({
 export const getTagsForRepository = createServerFn({
   method: 'GET',
 })
-  .validator(
+  .inputValidator(
     z.object({
       repositoryInstanceId: z.string(),
     })
@@ -344,7 +344,7 @@ export const getTagsForRepository = createServerFn({
     const userId = session.userId;
 
     // Verify the repository instance belongs to the user
-    const [repositoryInst] = await db
+    const [repositoryInst] = await getDb()
       .select()
       .from(repositoryInstance)
       .where(
@@ -359,7 +359,7 @@ export const getTagsForRepository = createServerFn({
     }
 
     // Get tags for this repository
-    const tags = await db
+    const tags = await getDb()
       .select({
         tagInstance: tagInstance,
       })
@@ -378,7 +378,7 @@ export const getTagsForRepository = createServerFn({
 export const createManyTags = createServerFn({
   method: 'POST',
 })
-  .validator(
+  .inputValidator(
     z.object({
       titles: z.array(
         z
@@ -398,7 +398,7 @@ export const createManyTags = createServerFn({
       const userId = session.userId;
 
       // Verify the repository instance belongs to the user
-      const [repositoryInst] = await db
+      const [repositoryInst] = await getDb()
         .select()
         .from(repositoryInstance)
         .where(
@@ -415,7 +415,7 @@ export const createManyTags = createServerFn({
       const uniqueTitles = [...new Set(titles)]; // Remove duplicates
 
       // Bulk upsert all tags using onConflictDoUpdate
-      const allTags = await db
+      const allTags = await getDb()
         .insert(tagInstance)
         .values(
           uniqueTitles.map(title => ({
@@ -435,7 +435,7 @@ export const createManyTags = createServerFn({
 
       // Bulk upsert tag-to-repository relationships
       if (allTags.length > 0) {
-        await db
+        await getDb()
           .insert(tagToRepository)
           .values(
             allTags.map(tag => ({
@@ -457,7 +457,7 @@ export const getTagsWithRepositoryCount = createServerFn({
   .handler(async ({ context: { session } }) => {
     const userId = session.userId;
 
-    const tagsWithCount = await db
+    const tagsWithCount = await getDb()
       .select({
         id: tagInstance.id,
         title: tagInstance.title,

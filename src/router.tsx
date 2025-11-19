@@ -1,9 +1,12 @@
-import { createRouter as createTanStackRouter } from '@tanstack/react-router';
+import { QueryClient } from '@tanstack/react-query';
+import { createRouter } from '@tanstack/react-router';
+import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query';
 import { routeTree } from './routeTree.gen';
 import { Spinner } from './components/ui/Spinner';
 
-export function createRouter() {
-  const router = createTanStackRouter({
+export function getRouter() {
+  const queryClient = new QueryClient();
+  const router = createRouter({
     routeTree,
     scrollRestoration: true,
 
@@ -20,6 +23,14 @@ export function createRouter() {
 
     // Preload routes on intent (hover/touchstart) for better performance
     defaultPreload: 'intent',
+  });
+
+  setupRouterSsrQueryIntegration({
+    router,
+    queryClient,
+    // optional:
+    // handleRedirects: true,
+    wrapQueryClient: false, // wrapping manually
   });
 
   return router;

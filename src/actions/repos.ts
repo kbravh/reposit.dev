@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
-import { db } from '../db';
+import { getDb } from '../db';
 import { repository, repositoryInstance } from '../db/schema';
 import { authMiddleware } from './middleware/auth';
 import {
@@ -13,11 +13,11 @@ import { eq, and, desc } from 'drizzle-orm';
 export const createRepository = createServerFn({
   method: 'POST',
 })
-  .validator(z.object({ url: z.string() }))
+  .inputValidator(z.object({ url: z.string() }))
   .middleware([authMiddleware])
   .handler(async ({ data: { url }, context: { session } }) => {
     const repoDetails = await getRepositoryDetails(url);
-    return await db.transaction(async tx => {
+    return await getDb().transaction(async tx => {
       let repoRecord = (
         await tx
           .select()
@@ -60,7 +60,7 @@ export const getRepositories = createServerFn({
   .middleware([authMiddleware])
   .handler(async ({ context: { session } }) => {
     const userId = session.userId;
-    const repositories = await db
+    const repositories = await getDb()
       .select({
         repositoryInstance: repositoryInstance,
         repository: repository,
@@ -76,7 +76,7 @@ export const getRepositories = createServerFn({
 export const getRepository = createServerFn({
   method: 'GET',
 })
-  .validator(
+  .inputValidator(
     z.object({
       repositoryInstanceId: z.string(),
     })
@@ -84,7 +84,7 @@ export const getRepository = createServerFn({
   .middleware([authMiddleware])
   .handler(async ({ data: { repositoryInstanceId }, context: { session } }) => {
     const userId = session.userId;
-    const [repo] = await db
+    const [repo] = await getDb()
       .select({
         repositoryInstance: repositoryInstance,
         repository: repository,
@@ -106,7 +106,7 @@ export const getRepository = createServerFn({
   });
 
 export const deleteRepository = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       repositoryInstanceId: z.string(),
     })
@@ -116,7 +116,7 @@ export const deleteRepository = createServerFn()
     const userId = session.userId;
 
     // First verify the repository instance belongs to the user
-    const [repoInstance] = await db
+    const [repoInstance] = await getDb()
       .select()
       .from(repositoryInstance)
       .where(
@@ -131,7 +131,7 @@ export const deleteRepository = createServerFn()
     }
 
     // Delete the repository instance (this removes the user's connection to the repo)
-    await db
+    await getDb()
       .delete(repositoryInstance)
       .where(eq(repositoryInstance.id, repositoryInstanceId));
 
@@ -139,7 +139,7 @@ export const deleteRepository = createServerFn()
   });
 
 export const syncRepository = createServerFn()
-  .validator(
+  .inputValidator(
     z.object({
       repositoryInstanceId: z.string(),
     })
@@ -149,7 +149,7 @@ export const syncRepository = createServerFn()
     const userId = session.userId;
 
     // First verify the repository instance belongs to the user
-    const [repoInstance] = await db
+    const [repoInstance] = await getDb()
       .select({
         repositoryInstance: repositoryInstance,
         repository: repository,
@@ -174,7 +174,7 @@ export const syncRepository = createServerFn()
     );
 
     // Update the repository with latest details
-    const [updatedRepo] = await db
+    const [updatedRepo] = await getDb()
       .update(repository)
       .set({
         name: repoDetails.name,
@@ -193,7 +193,7 @@ export const syncRepository = createServerFn()
 export const searchGitHubRepositories = createServerFn({
   method: 'POST',
 })
-  .validator(z.object({ query: z.string() }))
+  .inputValidator(z.object({ query: z.string() }))
   .handler(async ({ data: { query } }) => {
     return await searchRepositories(query, 25);
   });

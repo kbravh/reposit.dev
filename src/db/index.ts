@@ -2,11 +2,19 @@ import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { getEnv } from '../env';
 
-const env = getEnv();
+let _db: ReturnType<typeof drizzle> | null = null;
 
-const client = createClient({
-  url: env.DATABASE_URL,
-  authToken: env.DATABASE_AUTH_TOKEN,
-});
+export const getDb = () => {
+  if (!_db) {
+    const env = getEnv();
 
-export const db = drizzle({ client });
+    const client = createClient({
+      url: env.DATABASE_URL,
+      authToken: env.DATABASE_AUTH_TOKEN,
+    });
+
+    _db = drizzle({ client });
+  }
+
+  return _db;
+};

@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
-import { db } from '../db';
+import { getDb } from '../db';
 import { repository, repositoryInstance } from '../db/schema';
 import { authMiddleware } from './middleware/auth';
 import {
@@ -17,7 +17,7 @@ export const createRepository = createServerFn({
   .middleware([authMiddleware])
   .handler(async ({ data: { url }, context: { session } }) => {
     const repoDetails = await getRepositoryDetails(url);
-    return await db.transaction(async tx => {
+    return await getDb().transaction(async tx => {
       let repoRecord = (
         await tx
           .select()
@@ -60,7 +60,7 @@ export const getRepositories = createServerFn({
   .middleware([authMiddleware])
   .handler(async ({ context: { session } }) => {
     const userId = session.userId;
-    const repositories = await db
+    const repositories = await getDb()
       .select({
         repositoryInstance: repositoryInstance,
         repository: repository,
@@ -84,7 +84,7 @@ export const getRepository = createServerFn({
   .middleware([authMiddleware])
   .handler(async ({ data: { repositoryInstanceId }, context: { session } }) => {
     const userId = session.userId;
-    const [repo] = await db
+    const [repo] = await getDb()
       .select({
         repositoryInstance: repositoryInstance,
         repository: repository,
@@ -116,7 +116,7 @@ export const deleteRepository = createServerFn()
     const userId = session.userId;
 
     // First verify the repository instance belongs to the user
-    const [repoInstance] = await db
+    const [repoInstance] = await getDb()
       .select()
       .from(repositoryInstance)
       .where(
@@ -131,7 +131,7 @@ export const deleteRepository = createServerFn()
     }
 
     // Delete the repository instance (this removes the user's connection to the repo)
-    await db
+    await getDb()
       .delete(repositoryInstance)
       .where(eq(repositoryInstance.id, repositoryInstanceId));
 
@@ -149,7 +149,7 @@ export const syncRepository = createServerFn()
     const userId = session.userId;
 
     // First verify the repository instance belongs to the user
-    const [repoInstance] = await db
+    const [repoInstance] = await getDb()
       .select({
         repositoryInstance: repositoryInstance,
         repository: repository,
@@ -174,7 +174,7 @@ export const syncRepository = createServerFn()
     );
 
     // Update the repository with latest details
-    const [updatedRepo] = await db
+    const [updatedRepo] = await getDb()
       .update(repository)
       .set({
         name: repoDetails.name,

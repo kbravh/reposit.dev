@@ -9,6 +9,8 @@ export default function ThemeToggle() {
 
   // Ensure component is mounted before rendering to avoid hydration issues
   useEffect(() => {
+    // Valid pattern for client-only hydration check
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

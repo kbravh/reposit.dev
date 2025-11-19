@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from '@headlessui/react';
 import { Edit3 } from 'lucide-react';
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { TAG_COLORS } from '../../utils/colors';
 import type { TagWithCount } from './types';
 import { useUpdateTagMutation } from '../../hooks/tags';
@@ -20,14 +20,6 @@ export function EditTagModal({ tag, onClose }: EditTagModalProps) {
   const [color, setColor] = useState(tag?.color || '');
 
   const updateTagMutation = useUpdateTagMutation({ onSuccess: onClose });
-
-  // Update local state when tag changes
-  useEffect(() => {
-    if (tag) {
-      setTitle(tag.title);
-      setColor(tag.color);
-    }
-  }, [tag]);
 
   if (!tag) return null;
 
@@ -60,7 +52,12 @@ export function EditTagModal({ tag, onClose }: EditTagModalProps) {
   };
 
   return (
-    <Dialog open={!!tag} onClose={handleClose} className="relative z-10">
+    <Dialog
+      key={tag?.id}
+      open={!!tag}
+      onClose={handleClose}
+      className="relative z-10"
+    >
       <DialogBackdrop
         transition
         className="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in"

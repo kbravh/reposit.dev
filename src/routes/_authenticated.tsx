@@ -71,6 +71,8 @@ function LoggedInLayout() {
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   useEffect(() => {
+    // Valid pattern for client-only setup
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasMounted(true);
     const mql = window.matchMedia('(min-width: 1024px)');
     const handler = (e: MediaQueryListEvent) => setIsLargeScreen(e.matches);

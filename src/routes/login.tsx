@@ -59,35 +59,81 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <img
-            className="mx-auto h-12 w-auto"
-            src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-            alt="Reposit"
-          />
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Welcome to Reposit - manage your repositories with ease
-          </p>
-        </div>
-        <div>
-          <button
-            type="button"
-            disabled={isSigningIn}
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-400 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleGitHubSignIn}
-          >
-            {isSigningIn ? (
-              <Loader2 className="size-5 mr-2 animate-spin" />
-            ) : (
-              <SiGithub className="size-5 mr-2" />
-            )}
-            {isSigningIn ? 'Signing in...' : 'Sign in with GitHub'}
-          </button>
+    <div className="min-h-screen bg-gray-950">
+      {/* Subtle grid background - matching landing page */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, #fff 1px, transparent 1px),
+              linear-gradient(to bottom, #fff 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+          }}
+        />
+      </div>
+
+      <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md">
+          {/* Card container with matching border style */}
+          <div className="relative">
+            {/* Decorative elements - matching landing page aesthetic */}
+            <div className="absolute -top-8 -right-8 h-32 w-32 bg-indigo-500/10 rounded-full blur-2xl opacity-50" />
+            <div className="absolute -bottom-8 -left-8 h-32 w-32 bg-violet-500/10 rounded-full blur-2xl opacity-50" />
+
+            <div className="relative rounded-lg border border-white/10 bg-gray-900 px-8 py-10 shadow-lg">
+              <div className="text-center">
+                {/* Reposit Logo - matching landing page */}
+                <div className="flex justify-center">
+                  <svg
+                    className="h-12 w-12 text-indigo-400"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    width="24"
+                    height="24"
+                  >
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                </div>
+
+                <h1 className="mt-6 text-3xl font-bold tracking-tight text-white">
+                  Welcome to Reposit
+                </h1>
+                <p className="mt-3 text-base text-gray-400">
+                  Sign in with GitHub to start organizing your repositories
+                </p>
+              </div>
+
+              <div className="mt-8">
+                <button
+                  type="button"
+                  disabled={isSigningIn}
+                  className="group relative w-full flex justify-center items-center gap-2 bg-white text-gray-900 px-6 py-3.5 text-base font-semibold rounded-md border border-white shadow-sm hover:bg-gray-100 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:shadow-sm"
+                  onClick={handleGitHubSignIn}
+                >
+                  {isSigningIn ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Signing in...</span>
+                    </>
+                  ) : (
+                    <>
+                      <SiGithub className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                      <span>Sign in with GitHub</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-xs text-gray-500">
+                  By signing in, you agree to organize your repositories with
+                  the same care you put into your code
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

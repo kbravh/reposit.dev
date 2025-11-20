@@ -102,7 +102,7 @@ export function AddRepositoryForm({
         <button
           type="button"
           onClick={() => onOpenChange(true)}
-          className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="block rounded-md bg-teal-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
         >
           <Plus className="inline-block w-4 h-4 mr-1" />
           Add repository
@@ -125,10 +125,10 @@ export function AddRepositoryForm({
               {mode === 'input' && (
                 <>
                   <div>
-                    <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+                    <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/30">
                       <Code
                         aria-hidden="true"
-                        className="size-6 text-indigo-600 dark:text-indigo-400"
+                        className="size-6 text-teal-600 dark:text-teal-400"
                       />
                     </div>
                     <div className="mt-3 text-center sm:mt-5">
@@ -162,7 +162,7 @@ export function AddRepositoryForm({
                           name="repo-input"
                           type="text"
                           placeholder="microsoft/TypeScript or react framework"
-                          className="col-start-1 row-start-1 block w-full rounded-md bg-white dark:bg-gray-700 py-1.5 pl-10 pr-3 text-base text-gray-900 dark:text-gray-100 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                          className="col-start-1 row-start-1 block w-full rounded-md bg-white dark:bg-gray-700 py-1.5 pl-10 pr-3 text-base text-gray-900 dark:text-gray-100 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-teal-600 sm:text-sm/6"
                           required
                         />
                         <Search
@@ -191,7 +191,7 @@ export function AddRepositoryForm({
                           createRepoMutation.isPending ||
                           searchMutation.isPending
                         }
-                        className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2 disabled:opacity-50 sm:col-start-2"
+                        className="inline-flex w-full justify-center rounded-md bg-teal-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 disabled:opacity-50 sm:col-start-2"
                       >
                         {createRepoMutation.isPending
                           ? 'Adding...'
@@ -218,7 +218,7 @@ export function AddRepositoryForm({
                       <button
                         type="button"
                         onClick={handleBackToSearch}
-                        className="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-800/50"
+                        className="rounded-full bg-teal-100 dark:bg-teal-900/30 p-2 text-teal-600 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-800/50"
                       >
                         <ArrowLeft className="size-4" />
                       </button>
@@ -263,7 +263,7 @@ export function AddRepositoryForm({
                                     href={repo.html_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                    className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
                                   >
                                     {repo.owner.login}/{repo.name}
                                   </a>
@@ -298,7 +298,7 @@ export function AddRepositoryForm({
                                 type="button"
                                 onClick={() => handleSelectRepository(repo)}
                                 disabled={createRepoMutation.isPending}
-                                className="rounded-md bg-indigo-600 px-3 py-1.5 font-semibold text-white text-xs shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2 disabled:opacity-50"
+                                className="rounded-md bg-teal-600 px-3 py-1.5 font-semibold text-white text-xs shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 disabled:opacity-50"
                               >
                                 {createRepoMutation.isPending
                                   ? 'Adding...'

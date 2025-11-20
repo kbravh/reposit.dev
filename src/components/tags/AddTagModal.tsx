@@ -96,7 +96,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
         <button
           type="button"
           onClick={() => onOpenChange(true)}
-          className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="block rounded-md bg-teal-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
         >
           <Plus className="inline-block w-4 h-4 mr-1" />
           Add tag
@@ -118,8 +118,8 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
             >
               <form ref={formRef} onSubmit={handleSubmit}>
                 <div>
-                  <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-                    <Tag className="size-6 text-indigo-600 dark:text-indigo-400" />
+                  <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/30">
+                    <Tag className="size-6 text-teal-600 dark:text-teal-400" />
                   </div>
                   <div className="mt-3 text-center sm:mt-5">
                     <DialogTitle
@@ -156,7 +156,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                             }
                           }}
                           placeholder="Enter tag name..."
-                          className="mt-2 -outline-offset-1 focus:-outline-offset-2 block w-full rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100 outline-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:outline-indigo-600 sm:text-sm/6"
+                          className="mt-2 -outline-offset-1 focus:-outline-offset-2 block w-full rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100 outline-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:outline-teal-600 sm:text-sm/6"
                           required
                         />
                         {suggestedColor && (
@@ -191,7 +191,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                                 className="sr-only peer"
                               />
                               <div
-                                className="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:border-gray-900 dark:peer-checked:border-gray-100 peer-focus:ring-2 peer-focus:ring-indigo-600 peer-focus:ring-offset-2"
+                                className="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:border-gray-900 dark:peer-checked:border-gray-100 peer-focus:ring-2 peer-focus:ring-teal-600 peer-focus:ring-offset-2"
                                 style={{ backgroundColor: tagColor }}
                               />
                               <span className="sr-only">
@@ -208,7 +208,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                               className="sr-only peer"
                             />
                             <div
-                              className="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:border-gray-900 dark:peer-checked:border-gray-100 peer-focus:ring-2 peer-focus:ring-indigo-600 peer-focus:ring-offset-2 overflow-hidden cursor-pointer"
+                              className="w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600 peer-checked:border-gray-900 dark:peer-checked:border-gray-100 peer-focus:ring-2 peer-focus:ring-teal-600 peer-focus:ring-offset-2 overflow-hidden cursor-pointer"
                               style={{
                                 background:
                                   customColor ??
@@ -228,7 +228,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                             ref={colorInputRef}
                             type="color"
                             name="customColor"
-                            defaultValue="#6366f1"
+                            defaultValue="#14b8a6"
                             onChange={e => {
                               // When color is picked, select the custom radio
                               const customRadio =
@@ -267,7 +267,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                   <button
                     type="submit"
                     disabled={createTagMutation.isPending}
-                    className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2 disabled:opacity-50 sm:col-start-2"
+                    className="inline-flex w-full justify-center rounded-md bg-teal-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 disabled:opacity-50 sm:col-start-2"
                   >
                     {createTagMutation.isPending ? 'Adding...' : 'Add Tag'}
                   </button>

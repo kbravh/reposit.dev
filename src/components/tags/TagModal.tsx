@@ -171,7 +171,7 @@ export function TagModal({
                   <div className="relative">
                     <ComboboxInput
                       ref={inputRef}
-                      className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
                       onChange={event => setQuery(event.target.value)}
                       onBlur={() => setQuery('')}
                       displayValue={() => ''}
@@ -184,7 +184,7 @@ export function TagModal({
                           <ComboboxOption
                             key={tag.id}
                             value={tag}
-                            className="group relative cursor-default select-none py-2 px-3 text-gray-900 dark:text-gray-100 data-focus:bg-indigo-600 data-focus:text-white"
+                            className="group relative cursor-default select-none py-2 px-3 text-gray-900 dark:text-gray-100 data-focus:bg-teal-600 data-focus:text-white"
                           >
                             <div className="flex items-center gap-2">
                               <span
@@ -200,7 +200,7 @@ export function TagModal({
                         {createNewTagOption && (
                           <ComboboxOption
                             value={createNewTagOption}
-                            className="group relative cursor-default select-none py-2 px-3 text-gray-900 dark:text-gray-100 data-focus:bg-indigo-600 data-focus:text-white border-t border-gray-200 dark:border-gray-600"
+                            className="group relative cursor-default select-none py-2 px-3 text-gray-900 dark:text-gray-100 data-focus:bg-teal-600 data-focus:text-white border-t border-gray-200 dark:border-gray-600"
                           >
                             <div className="flex items-center gap-2">
                               <span
@@ -224,7 +224,7 @@ export function TagModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex w-full justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer sm:w-auto sm:text-sm"
+                className="inline-flex w-full justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 cursor-pointer sm:w-auto sm:text-sm"
               >
                 Done
               </button>

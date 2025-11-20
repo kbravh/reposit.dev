@@ -48,7 +48,7 @@ export function EmptyDashboardState() {
       <ul className="mt-8 grid grid-cols-1 gap-6 border-b border-t border-gray-200 dark:border-gray-700 py-6 sm:grid-cols-2">
         {quickStartItems.map((item, itemIdx) => (
           <li key={itemIdx} className="flow-root">
-            <div className="relative -m-2 flex items-center space-x-4 rounded-xl p-2 focus-within:ring-2 focus-within:ring-indigo-500 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div className="relative -m-2 flex items-center space-x-4 rounded-xl p-2 focus-within:ring-2 focus-within:ring-teal-500 hover:bg-gray-50 dark:hover:bg-gray-800">
               <div
                 className={`${item.background} flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg`}
               >
@@ -74,7 +74,7 @@ export function EmptyDashboardState() {
       <div className="mt-6">
         <Link
           to="/repositories"
-          className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="inline-flex items-center rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Your First Repository

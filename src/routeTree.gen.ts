@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthenticatedTagsRouteImport } from './routes/_authenticated/tags'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRepositoriesRouteImport } from './routes/_authenticated/repositories'
@@ -30,6 +31,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedTagsRoute = AuthenticatedTagsRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/repositories': typeof AuthenticatedRepositoriesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/tags': typeof AuthenticatedTagsRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/repositories': typeof AuthenticatedRepositoriesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/tags': typeof AuthenticatedTagsRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/_authenticated/repositories': typeof AuthenticatedRepositoriesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/tags': typeof AuthenticatedTagsRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/repositories'
     | '/settings'
     | '/tags'
+    | '/api/health'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/repositories'
     | '/settings'
     | '/tags'
+    | '/api/health'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/_authenticated/repositories'
     | '/_authenticated/settings'
     | '/_authenticated/tags'
+    | '/api/health'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -123,6 +135,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -147,6 +160,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/tags': {
@@ -209,6 +229,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiHealthRoute: ApiHealthRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

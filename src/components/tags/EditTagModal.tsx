@@ -71,8 +71,8 @@ export function EditTagModal({ tag, onClose }: EditTagModalProps) {
           >
             <form onSubmit={handleSubmit}>
               <div className="sm:flex sm:items-start">
-                <div className="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 sm:mx-0 sm:size-10">
-                  <Edit3 className="size-6 text-indigo-600 dark:text-indigo-400" />
+                <div className="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/30 sm:mx-0 sm:size-10">
+                  <Edit3 className="size-6 text-teal-600 dark:text-teal-400" />
                 </div>
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
                   <DialogTitle
@@ -94,7 +94,7 @@ export function EditTagModal({ tag, onClose }: EditTagModalProps) {
                         id="edit-title"
                         value={title}
                         onChange={e => setTitle(e.target.value)}
-                        className="mt-2 -outline-offset-1 focus:-outline-offset-2 block w-full rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100 outline-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:outline-indigo-600 sm:text-sm/6"
+                        className="mt-2 -outline-offset-1 focus:-outline-offset-2 block w-full rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100 outline-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:outline-teal-600 sm:text-sm/6"
                         required
                       />
                     </div>
@@ -125,7 +125,7 @@ export function EditTagModal({ tag, onClose }: EditTagModalProps) {
                 <button
                   type="submit"
                   disabled={updateTagMutation.isPending}
-                  className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-indigo-500 sm:ml-3 sm:w-auto disabled:opacity-50"
+                  className="inline-flex w-full justify-center rounded-md bg-teal-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-teal-500 sm:ml-3 sm:w-auto disabled:opacity-50"
                 >
                   {updateTagMutation.isPending ? 'Saving...' : 'Save'}
                 </button>

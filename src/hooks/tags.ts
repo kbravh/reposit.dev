@@ -181,7 +181,7 @@ export function useCreateTagMutation(options?: { onSuccess?: () => void }) {
       const optimisticBaseTag: BaseTag = {
         id: `temp-${Date.now()}`,
         title: variables.title,
-        color: variables.color || '#6366f1',
+        color: variables.color || '#14b8a6',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -294,7 +294,7 @@ export function useCreateManyTagsForRepositoryMutation(options?: {
         (title, index) => ({
           id: `temp-${Date.now()}-${index}`,
           title,
-          color: '#6366f1',
+          color: '#14b8a6',
           createdAt: new Date(),
           updatedAt: new Date(),
         })

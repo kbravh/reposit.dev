@@ -21,7 +21,7 @@ export function NavigationLoadingIndicator() {
       }`}
     >
       {/* Top progress bar */}
-      <div className="h-1 bg-indigo-600 animate-pulse" />
+      <div className="h-1 bg-teal-600 animate-pulse" />
 
       {/* Optional: Content area with spinner */}
       <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 py-2 px-4">
@@ -58,7 +58,7 @@ export function NavigationProgressBar() {
         isNavigating ? 'opacity-100' : 'opacity-0'
       }`}
     >
-      <div className="h-full bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-pulse" />
+      <div className="h-full bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-600 animate-pulse" />
     </div>
   );
 }

@@ -21,6 +21,8 @@ export const TAG_COLORS = [
   '#3b82f6', // blue-500
   '#0284c7', // sky-600
   '#ec4899', // pink-500
+  '#6366f1', // indigo-500 
+  '#a855f7', // purple-500
 ] as const;
 
 // Brand and application colors for popular tags (imported from data file)

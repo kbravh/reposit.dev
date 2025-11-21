@@ -10,6 +10,12 @@ import {
 import { authMiddleware } from './middleware/auth';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { getPredefinedColor, getHashedTagColor } from '../utils/colors';
+import {
+  getRepositoryTopicsByPath,
+  getRepositoryReadme,
+} from '../utils/github';
+import Anthropic from '@anthropic-ai/sdk';
+import { getEnv } from '../env';
 
 export const createTag = createServerFn({
   method: 'POST',
@@ -479,4 +485,222 @@ export const getTagsWithRepositoryCount = createServerFn({
       .orderBy(desc(tagInstance.createdAt));
 
     return tagsWithCount;
+  });
+
+/**
+ * Suggest tags for a repository based on GitHub topics.
+ * Returns existing tags that match and suggests new tags to create.
+ */
+export const suggestTagsForRepository = createServerFn({
+  method: 'POST',
+})
+  .inputValidator(
+    z.object({
+      repositoryInstanceId: z.string(),
+    })
+  )
+  .middleware([authMiddleware])
+  .handler(async ({ data: { repositoryInstanceId }, context: { session } }) => {
+    const userId = session.userId;
+
+    // Get the repository details
+    const [repoInstance] = await getDb()
+      .select({
+        repositoryInstance: repositoryInstance,
+        repository: repository,
+      })
+      .from(repositoryInstance)
+      .innerJoin(repository, eq(repositoryInstance.repositoryId, repository.id))
+      .where(
+        and(
+          eq(repositoryInstance.id, repositoryInstanceId),
+          eq(repositoryInstance.userId, userId)
+        )
+      );
+
+    if (!repoInstance) {
+      throw new Error('Repository not found');
+    }
+
+    // Fetch GitHub topics for this repository
+    const topics = await getRepositoryTopicsByPath(
+      repoInstance.repository.org,
+      repoInstance.repository.name
+    );
+
+    // Also include the primary language as a potential tag
+    const potentialTags = [...topics];
+    if (repoInstance.repository.primaryLanguage) {
+      potentialTags.push(repoInstance.repository.primaryLanguage.toLowerCase());
+    }
+
+    // Get user's existing tags
+    const userTags = await getDb()
+      .select()
+      .from(tagInstance)
+      .where(eq(tagInstance.userId, userId));
+
+    // Create a map for case-insensitive lookup
+    const userTagMap = new Map(
+      userTags.map(tag => [tag.title.toLowerCase(), tag])
+    );
+
+    // Separate into existing tags and new suggestions
+    const existingTagMatches: typeof userTags = [];
+    const suggestedNewTags: string[] = [];
+    const seenTitles = new Set<string>();
+
+    for (const topic of potentialTags) {
+      const normalizedTopic = topic.toLowerCase().trim();
+      if (seenTitles.has(normalizedTopic)) continue;
+      seenTitles.add(normalizedTopic);
+
+      const existingTag = userTagMap.get(normalizedTopic);
+      if (existingTag) {
+        existingTagMatches.push(existingTag);
+      } else {
+        suggestedNewTags.push(normalizedTopic);
+      }
+    }
+
+    return {
+      existingTags: existingTagMatches,
+      suggestedNewTags,
+      githubTopics: topics,
+    };
+  });
+
+/**
+ * AI-enhanced tag suggestions based on repository README and description.
+ * Uses Claude to analyze content and suggest relevant tags from user's existing tags
+ * or recommend new ones.
+ */
+export const getAiTagSuggestions = createServerFn({
+  method: 'POST',
+})
+  .inputValidator(
+    z.object({
+      repositoryInstanceId: z.string(),
+    })
+  )
+  .middleware([authMiddleware])
+  .handler(async ({ data: { repositoryInstanceId }, context: { session } }) => {
+    const userId = session.userId;
+
+    // Get the repository details
+    const [repoInstance] = await getDb()
+      .select({
+        repositoryInstance: repositoryInstance,
+        repository: repository,
+      })
+      .from(repositoryInstance)
+      .innerJoin(repository, eq(repositoryInstance.repositoryId, repository.id))
+      .where(
+        and(
+          eq(repositoryInstance.id, repositoryInstanceId),
+          eq(repositoryInstance.userId, userId)
+        )
+      );
+
+    if (!repoInstance) {
+      throw new Error('Repository not found');
+    }
+
+    // Get user's existing tags
+    const userTags = await getDb()
+      .select()
+      .from(tagInstance)
+      .where(eq(tagInstance.userId, userId));
+
+    const existingTagTitles = userTags.map(t => t.title);
+
+    // Fetch README content
+    const readme = await getRepositoryReadme(
+      repoInstance.repository.org,
+      repoInstance.repository.name
+    );
+
+    // If no README and no description, return empty
+    if (!readme && !repoInstance.repository.description) {
+      return {
+        existingTags: [],
+        suggestedNewTags: [],
+        aiGenerated: true,
+      };
+    }
+
+    // Check if API key is configured
+    const apiKey = getEnv().ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      throw new Error(
+        'AI tag suggestions are not configured. Please set ANTHROPIC_API_KEY.'
+      );
+    }
+
+    const anthropic = new Anthropic({ apiKey });
+
+    const prompt = `You are a helpful assistant that suggests tags for organizing code repositories.
+
+Given a repository's README and description, suggest relevant tags for categorizing it.
+The user already has these tags: ${existingTagTitles.length > 0 ? existingTagTitles.join(', ') : '(no existing tags)'}
+
+Repository: ${repoInstance.repository.org}/${repoInstance.repository.name}
+Description: ${repoInstance.repository.description || 'No description'}
+Primary Language: ${repoInstance.repository.primaryLanguage || 'Unknown'}
+
+README (truncated):
+${readme || 'No README available'}
+
+Instructions:
+1. Prioritize suggesting tags from the user's existing tags that are relevant
+2. Only suggest new tags if they would be very useful and aren't covered by existing tags
+3. Keep tag names lowercase, concise (1-3 words), and use hyphens for multi-word tags
+4. Focus on: programming languages, frameworks, libraries, project types, domains
+5. Return at most 8 tags total
+
+Respond with ONLY a JSON object in this exact format (no markdown, no explanation):
+{"existingTags": ["tag1", "tag2"], "newTags": ["tag3", "tag4"]}`;
+
+    try {
+      const message = await anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 256,
+        messages: [{ role: 'user', content: prompt }],
+      });
+
+      // Extract the text content from the response
+      const textContent = message.content.find(block => block.type === 'text');
+      if (!textContent || textContent.type !== 'text') {
+        throw new Error('No text response from AI');
+      }
+
+      // Parse the JSON response
+      const responseText = textContent.text.trim();
+      const parsed = JSON.parse(responseText) as {
+        existingTags: string[];
+        newTags: string[];
+      };
+
+      // Map existing tag titles back to full tag objects
+      const userTagMap = new Map(
+        userTags.map(tag => [tag.title.toLowerCase(), tag])
+      );
+
+      const matchedExistingTags = (parsed.existingTags || [])
+        .map(title => userTagMap.get(title.toLowerCase()))
+        .filter((tag): tag is NonNullable<typeof tag> => tag !== undefined);
+
+      const suggestedNewTags = (parsed.newTags || []).map(t =>
+        t.toLowerCase().trim()
+      );
+
+      return {
+        existingTags: matchedExistingTags,
+        suggestedNewTags,
+        aiGenerated: true,
+      };
+    } catch (error) {
+      console.error('AI tag suggestion error:', error);
+      throw new Error('Failed to generate AI tag suggestions');
+    }
   });

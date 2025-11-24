@@ -1,11 +1,11 @@
 import { createServerFn } from '@tanstack/react-start';
 import { getAuth } from '../lib/auth';
 import { getRequest } from '@tanstack/react-start/server';
-import * as Sentry from '@sentry/node';
 
 export const getSession = createServerFn({
   method: 'GET',
 }).handler(async () => {
+  const Sentry = await import('@sentry/node');
   try {
     Sentry.addBreadcrumb({
       category: 'auth',
@@ -42,6 +42,7 @@ export const getSession = createServerFn({
 export const requireAuth = createServerFn({
   method: 'GET',
 }).handler(async () => {
+  const Sentry = await import('@sentry/node');
   try {
     Sentry.addBreadcrumb({
       category: 'auth',

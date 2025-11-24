@@ -4,11 +4,6 @@ import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query
 import { routeTree } from './routeTree.gen';
 import { Spinner } from './components/ui/Spinner';
 
-// Initialize server-side Sentry monitoring
-if (typeof window === 'undefined') {
-  import('./sentry.server');
-}
-
 export function getRouter() {
   const queryClient = new QueryClient();
   const router = createRouter({

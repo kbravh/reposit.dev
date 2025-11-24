@@ -1,14 +1,13 @@
-import * as Sentry from '@sentry/node';
-
 /**
  * Logs a breadcrumb for tracking operations
  */
-export function logBreadcrumb(params: {
+export async function logBreadcrumb(params: {
   category: string;
   message: string;
   level?: 'fatal' | 'error' | 'warning' | 'log' | 'info' | 'debug';
   data?: Record<string, unknown>;
 }) {
+  const Sentry = await import('@sentry/node');
   Sentry.addBreadcrumb({
     category: params.category,
     message: params.message,
@@ -20,7 +19,7 @@ export function logBreadcrumb(params: {
 /**
  * Captures an exception with context
  */
-export function captureError(
+export async function captureError(
   error: unknown,
   context: {
     action: string;
@@ -30,6 +29,7 @@ export function captureError(
     level?: 'fatal' | 'error' | 'warning';
   }
 ) {
+  const Sentry = await import('@sentry/node');
   Sentry.captureException(error, {
     tags: {
       action: context.action,
@@ -44,11 +44,12 @@ export function captureError(
 /**
  * Sets user context for Sentry
  */
-export function setUserContext(user: {
+export async function setUserContext(user: {
   id: string;
   email: string;
   username?: string | null;
 }) {
+  const Sentry = await import('@sentry/node');
   Sentry.setUser({
     id: user.id,
     email: user.email,

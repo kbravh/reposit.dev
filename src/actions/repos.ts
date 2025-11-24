@@ -9,7 +9,6 @@ import {
   searchRepositories,
 } from '../utils/github';
 import { eq, and, desc } from 'drizzle-orm';
-import * as Sentry from '@sentry/node';
 
 export const createRepository = createServerFn({
   method: 'POST',
@@ -17,6 +16,7 @@ export const createRepository = createServerFn({
   .inputValidator(z.object({ url: z.string() }))
   .middleware([authMiddleware])
   .handler(async ({ data: { url }, context: { session } }) => {
+    const Sentry = await import('@sentry/node');
     try {
       const repoDetails = await getRepositoryDetails(url);
       return await getDb().transaction(async tx => {
@@ -68,6 +68,7 @@ export const getRepositories = createServerFn({
 })
   .middleware([authMiddleware])
   .handler(async ({ context: { session } }) => {
+    const Sentry = await import('@sentry/node');
     try {
       const userId = session.userId;
       const repositories = await getDb()
@@ -102,6 +103,7 @@ export const getRepository = createServerFn({
   )
   .middleware([authMiddleware])
   .handler(async ({ data: { repositoryInstanceId }, context: { session } }) => {
+    const Sentry = await import('@sentry/node');
     try {
       const userId = session.userId;
       const [repo] = await getDb()
@@ -143,6 +145,7 @@ export const deleteRepository = createServerFn()
   )
   .middleware([authMiddleware])
   .handler(async ({ data: { repositoryInstanceId }, context: { session } }) => {
+    const Sentry = await import('@sentry/node');
     try {
       const userId = session.userId;
 
@@ -184,6 +187,7 @@ export const syncRepository = createServerFn()
   )
   .middleware([authMiddleware])
   .handler(async ({ data: { repositoryInstanceId }, context: { session } }) => {
+    const Sentry = await import('@sentry/node');
     try {
       const userId = session.userId;
 
@@ -244,6 +248,7 @@ export const searchGitHubRepositories = createServerFn({
 })
   .inputValidator(z.object({ query: z.string() }))
   .handler(async ({ data: { query } }) => {
+    const Sentry = await import('@sentry/node');
     try {
       return await searchRepositories(query, 25);
     } catch (error) {

@@ -10,6 +10,7 @@ import {
 import { authMiddleware } from './middleware/auth';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { getPredefinedColor, getHashedTagColor } from '../utils/colors';
+import * as Sentry from '@sentry/node';
 
 export const createTag = createServerFn({
   method: 'POST',
@@ -30,40 +31,48 @@ export const createTag = createServerFn({
       data: { title, repositoryInstanceId, color },
       context: { session },
     }) => {
-      const userId = session.userId;
+      try {
+        const userId = session.userId;
 
-      return await getDb().transaction(async tx => {
-        // Upsert the tag
-        const [tag] = await tx
-          .insert(tagInstance)
-          .values({
-            title,
-            userId,
-            color:
-              color || getPredefinedColor(title) || getHashedTagColor(title),
-          })
-          .onConflictDoUpdate({
-            target: [tagInstance.userId, tagInstance.title],
-            set: {
-              color: sql.raw(`excluded.${tagInstance.color.name}`),
-              updatedAt: sql.raw(`excluded.${tagInstance.updatedAt.name}`),
-            },
-          })
-          .returning();
-
-        // Create the tag-to-repository relationship if a repository was specified
-        if (repositoryInstanceId) {
-          await tx
-            .insert(tagToRepository)
+        return await getDb().transaction(async tx => {
+          // Upsert the tag
+          const [tag] = await tx
+            .insert(tagInstance)
             .values({
-              tagInstanceId: tag.id,
-              repositoryInstanceId,
+              title,
+              userId,
+              color:
+                color || getPredefinedColor(title) || getHashedTagColor(title),
             })
-            .onConflictDoNothing(); // Don't error if relationship already exists
-        }
+            .onConflictDoUpdate({
+              target: [tagInstance.userId, tagInstance.title],
+              set: {
+                color: sql.raw(`excluded.${tagInstance.color.name}`),
+                updatedAt: sql.raw(`excluded.${tagInstance.updatedAt.name}`),
+              },
+            })
+            .returning();
 
-        return tag;
-      });
+          // Create the tag-to-repository relationship if a repository was specified
+          if (repositoryInstanceId) {
+            await tx
+              .insert(tagToRepository)
+              .values({
+                tagInstanceId: tag.id,
+                repositoryInstanceId,
+              })
+              .onConflictDoNothing(); // Don't error if relationship already exists
+          }
+
+          return tag;
+        });
+      } catch (error) {
+        Sentry.captureException(error, {
+          tags: { action: 'createTag', userId: session.userId },
+          extra: { title, repositoryInstanceId },
+        });
+        throw error;
+      }
     }
   );
 
@@ -166,22 +175,30 @@ export const deleteTag = createServerFn()
   )
   .middleware([authMiddleware])
   .handler(async ({ data: { tagId }, context: { session } }) => {
-    const userId = session.userId;
+    try {
+      const userId = session.userId;
 
-    // First verify the tag belongs to the user
-    const [existingTag] = await getDb()
-      .select()
-      .from(tagInstance)
-      .where(and(eq(tagInstance.id, tagId), eq(tagInstance.userId, userId)));
+      // First verify the tag belongs to the user
+      const [existingTag] = await getDb()
+        .select()
+        .from(tagInstance)
+        .where(and(eq(tagInstance.id, tagId), eq(tagInstance.userId, userId)));
 
-    if (!existingTag) {
-      throw new Error('Tag not found');
+      if (!existingTag) {
+        throw new Error('Tag not found');
+      }
+
+      // Delete the tag (cascade will handle tagToRepository relationships)
+      await getDb().delete(tagInstance).where(eq(tagInstance.id, tagId));
+
+      return { success: true };
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { action: 'deleteTag', userId: session.userId },
+        extra: { tagId },
+      });
+      throw error;
     }
-
-    // Delete the tag (cascade will handle tagToRepository relationships)
-    await getDb().delete(tagInstance).where(eq(tagInstance.id, tagId));
-
-    return { success: true };
   });
 
 export const addTagToRepository = createServerFn({
@@ -395,58 +412,66 @@ export const createManyTags = createServerFn({
       data: { titles, repositoryInstanceId },
       context: { session },
     }) => {
-      const userId = session.userId;
+      try {
+        const userId = session.userId;
 
-      // Verify the repository instance belongs to the user
-      const [repositoryInst] = await getDb()
-        .select()
-        .from(repositoryInstance)
-        .where(
-          and(
-            eq(repositoryInstance.id, repositoryInstanceId),
-            eq(repositoryInstance.userId, userId)
-          )
-        );
+        // Verify the repository instance belongs to the user
+        const [repositoryInst] = await getDb()
+          .select()
+          .from(repositoryInstance)
+          .where(
+            and(
+              eq(repositoryInstance.id, repositoryInstanceId),
+              eq(repositoryInstance.userId, userId)
+            )
+          );
 
-      if (!repositoryInst) {
-        throw new Error('Repository not found');
-      }
+        if (!repositoryInst) {
+          throw new Error('Repository not found');
+        }
 
-      const uniqueTitles = [...new Set(titles)]; // Remove duplicates
+        const uniqueTitles = [...new Set(titles)]; // Remove duplicates
 
-      // Bulk upsert all tags using onConflictDoUpdate
-      const allTags = await getDb()
-        .insert(tagInstance)
-        .values(
-          uniqueTitles.map(title => ({
-            title,
-            userId,
-            color: getPredefinedColor(title) || getHashedTagColor(title),
-          }))
-        )
-        .onConflictDoUpdate({
-          target: [tagInstance.userId, tagInstance.title],
-          set: {
-            color: sql.raw(`excluded.${tagInstance.color.name}`),
-            updatedAt: sql.raw(`excluded.${tagInstance.updatedAt.name}`),
-          },
-        })
-        .returning();
-
-      // Bulk upsert tag-to-repository relationships
-      if (allTags.length > 0) {
-        await getDb()
-          .insert(tagToRepository)
+        // Bulk upsert all tags using onConflictDoUpdate
+        const allTags = await getDb()
+          .insert(tagInstance)
           .values(
-            allTags.map(tag => ({
-              tagInstanceId: tag.id,
-              repositoryInstanceId,
+            uniqueTitles.map(title => ({
+              title,
+              userId,
+              color: getPredefinedColor(title) || getHashedTagColor(title),
             }))
           )
-          .onConflictDoNothing(); // Using onConflictDoNothing since we just want to create relationships that don't exist
-      }
+          .onConflictDoUpdate({
+            target: [tagInstance.userId, tagInstance.title],
+            set: {
+              color: sql.raw(`excluded.${tagInstance.color.name}`),
+              updatedAt: sql.raw(`excluded.${tagInstance.updatedAt.name}`),
+            },
+          })
+          .returning();
 
-      return allTags;
+        // Bulk upsert tag-to-repository relationships
+        if (allTags.length > 0) {
+          await getDb()
+            .insert(tagToRepository)
+            .values(
+              allTags.map(tag => ({
+                tagInstanceId: tag.id,
+                repositoryInstanceId,
+              }))
+            )
+            .onConflictDoNothing(); // Using onConflictDoNothing since we just want to create relationships that don't exist
+        }
+
+        return allTags;
+      } catch (error) {
+        Sentry.captureException(error, {
+          tags: { action: 'createManyTags', userId: session.userId },
+          extra: { tagCount: titles.length, repositoryInstanceId },
+        });
+        throw error;
+      }
     }
   );
 

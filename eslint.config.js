@@ -22,7 +22,7 @@ export default [
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 'latest',
-      globals: globals.browser,
+      globals: { ...globals.browser, ...globals.node },
       parser: tsParser,
       parserOptions: {
         ecmaVersion: 'latest',

@@ -14,10 +14,8 @@ let _env: z.infer<typeof envSchema> | null = null;
 
 export const getEnv = () => {
   if (!_env) {
-    // eslint-disable-next-line no-undef
     const parsed = envSchema.safeParse(process.env);
 
-    // eslint-disable-next-line no-undef
     if (!parsed.success && !process.env.CI) {
       console.error(z.prettifyError(parsed.error));
       throw new Error('Invalid environment variables');

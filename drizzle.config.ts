@@ -5,9 +5,8 @@ export default defineConfig({
   schema: './src/db/schema.ts',
   dialect: 'turso',
   dbCredentials: {
-    // eslint-disable-next-line no-undef
     url: process.env.DATABASE_URL!,
-    // eslint-disable-next-line no-undef
+
     authToken: process.env.DATABASE_AUTH_TOKEN!,
   },
 });

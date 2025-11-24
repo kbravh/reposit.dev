@@ -10,11 +10,11 @@ config({ path: '.env.test' });
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
-  // eslint-disable-next-line no-undef
+
   forbidOnly: !!process.env.CI,
-  // eslint-disable-next-line no-undef
+
   retries: process.env.CI ? 2 : 0,
-  // eslint-disable-next-line no-undef
+
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
@@ -32,7 +32,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
-    // eslint-disable-next-line no-undef
+
     reuseExistingServer: !process.env.CI,
   },
 });

@@ -10,7 +10,6 @@ import {
 import { authMiddleware } from './middleware/auth';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { getPredefinedColor, getHashedTagColor } from '../utils/colors';
-import * as Sentry from '@sentry/node';
 
 export const createTag = createServerFn({
   method: 'POST',
@@ -31,6 +30,7 @@ export const createTag = createServerFn({
       data: { title, repositoryInstanceId, color },
       context: { session },
     }) => {
+      const Sentry = await import('@sentry/node');
       try {
         const userId = session.userId;
 
@@ -175,6 +175,7 @@ export const deleteTag = createServerFn()
   )
   .middleware([authMiddleware])
   .handler(async ({ data: { tagId }, context: { session } }) => {
+    const Sentry = await import('@sentry/node');
     try {
       const userId = session.userId;
 
@@ -412,6 +413,7 @@ export const createManyTags = createServerFn({
       data: { titles, repositoryInstanceId },
       context: { session },
     }) => {
+      const Sentry = await import('@sentry/node');
       try {
         const userId = session.userId;
 

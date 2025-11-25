@@ -10,6 +10,7 @@ coverage/
 
 .env*
 !.env.test
+!.env.example
 
 local.db
 test.db

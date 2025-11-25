@@ -8,6 +8,8 @@ const envSchema = z.object({
   GITHUB_CLIENT_ID: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
   SENTRY_AUTH_TOKEN: z.string(),
+  LAUNCHDARKLY_CLIENT_SIDE_ID: z.string(),
+  LAUNCHDARKLY_SDK_KEY: z.string(),
 });
 
 let _env: z.infer<typeof envSchema> | null = null;

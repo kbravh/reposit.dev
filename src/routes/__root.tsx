@@ -12,6 +12,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { initializeTheme } from '../stores/themeStore';
 import { NavigationProgressBar } from '../components/navigation/NavigationLoadingIndicator';
+import { LaunchDarklyProvider } from '../components/providers/LaunchDarklyProvider';
+import { getLaunchDarklyClientId } from '../actions/launchdarkly';
 
 const queryClient = new QueryClient();
 
@@ -31,11 +33,17 @@ export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
   }),
+  beforeLoad: async () => {
+    const ldClientId = await getLaunchDarklyClientId();
+    return { ldClientId };
+  },
   component: RootComponent,
   notFoundComponent: () => <div>Not found</div>,
 });
 
 function RootComponent() {
+  const { ldClientId } = Route.useRouteContext();
+
   useEffect(() => {
     // Initialize theme from localStorage after component mounts
     initializeTheme();
@@ -43,7 +51,9 @@ function RootComponent() {
 
   return (
     <RootDocument>
-      <Outlet />
+      <LaunchDarklyProvider clientSideId={ldClientId}>
+        <Outlet />
+      </LaunchDarklyProvider>
     </RootDocument>
   );
 }

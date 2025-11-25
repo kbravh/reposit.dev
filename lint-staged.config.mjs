@@ -1,5 +1,5 @@
 // @ts-check
-/** @type {import('lint-staged').Config} */
+/** @type {import('lint-staged').Configuration} */
 const config = {
   '!(*.{js,jsx,ts,tsx})': 'prettier --write',
   '*.{js,jsx,ts,tsx}': ['eslint --fix', 'prettier --write'],

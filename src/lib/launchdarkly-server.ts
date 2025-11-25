@@ -30,6 +30,7 @@ export async function closeLaunchDarklyClient(): Promise<void> {
 }
 
 export interface LDUser {
+  kind?: 'user';
   key: string;
   email?: string;
   name?: string;
@@ -43,7 +44,11 @@ export async function getFeatureFlag(
   defaultValue: boolean = false
 ): Promise<boolean> {
   const client = await getLaunchDarklyClient();
-  return await client.variation(flagKey, user, defaultValue);
+  return await client.variation(
+    flagKey,
+    { kind: 'user', ...user },
+    defaultValue
+  );
 }
 
 export async function getFeatureFlagDetail<T>(
@@ -52,10 +57,14 @@ export async function getFeatureFlagDetail<T>(
   defaultValue: T
 ): Promise<ld.LDEvaluationDetail> {
   const client = await getLaunchDarklyClient();
-  return await client.variationDetail(flagKey, user, defaultValue);
+  return await client.variationDetail(
+    flagKey,
+    { kind: 'user', ...user },
+    defaultValue
+  );
 }
 
 export async function getAllFlags(user: LDUser): Promise<ld.LDFlagSet> {
   const client = await getLaunchDarklyClient();
-  return await client.allFlagsState(user);
+  return await client.allFlagsState({ kind: 'user', ...user });
 }

@@ -11,9 +11,8 @@ function LaunchDarklyProviderInner({
   children,
   clientSideId,
 }: LaunchDarklyProviderProps) {
-  const [LDProvider, setLDProvider] = useState<ComponentType<{
-    children: ReactNode;
-  }> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [LDProvider, setLDProvider] = useState<ComponentType<any> | null>(null);
 
   useEffect(() => {
     async function setupLaunchDarkly() {
@@ -39,7 +38,7 @@ function LaunchDarklyProviderInner({
           bootstrap: 'localStorage',
           streaming: true,
         },
-      })(({ children }) => <>{children}</>);
+      })(({ children }: { children: ReactNode }) => <>{children}</>);
 
       setLDProvider(() => Provider);
     }

@@ -17,6 +17,7 @@ LAUNCHDARKLY_SDK_KEY=your-sdk-key-here
 ```
 
 You can find these values in your LaunchDarkly project settings:
+
 - **Client-Side ID**: Account Settings → Projects → Your Project → Client-side ID
 - **SDK Key**: Account Settings → Projects → Your Project → SDK key (server-side)
 
@@ -86,7 +87,7 @@ export const myServerAction = createServerFn({ method: 'GET' }).handler(
     const allFlags = await getAllFlags(user);
 
     return { isFeatureEnabled, allFlags };
-  },
+  }
 );
 ```
 
@@ -127,10 +128,10 @@ const variant = useFeatureFlag<string>('feature-variant', 'control');
 const limit = useFeatureFlag<number>('rate-limit', 100);
 
 // JSON flag
-const config = useFeatureFlag<{ theme: string; layout: string }>(
-  'ui-config',
-  { theme: 'light', layout: 'grid' }
-);
+const config = useFeatureFlag<{ theme: string; layout: string }>('ui-config', {
+  theme: 'light',
+  layout: 'grid',
+});
 ```
 
 ## Best Practices

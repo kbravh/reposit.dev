@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ComponentType, type ReactNode, useEffect, useState } from 'react';
 import { withLDProvider, type LDContext } from 'launchdarkly-react-client-sdk';
 import { getSession } from '../../actions/auth';
 
@@ -11,7 +11,7 @@ function LaunchDarklyProviderInner({
   children,
   clientSideId,
 }: LaunchDarklyProviderProps) {
-  const [LDProvider, setLDProvider] = useState<React.ComponentType<{
+  const [LDProvider, setLDProvider] = useState<ComponentType<{
     children: ReactNode;
   }> | null>(null);
 
@@ -58,13 +58,8 @@ export function LaunchDarklyProvider({
   children,
   clientSideId,
 }: LaunchDarklyProviderProps) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  if (!isClient) {
+  // Only render provider on client-side to avoid SSR issues
+  if (typeof window === 'undefined') {
     return <>{children}</>;
   }
 

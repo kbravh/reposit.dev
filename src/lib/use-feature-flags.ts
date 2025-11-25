@@ -14,7 +14,7 @@ export function useFeatureFlags(): FeatureFlags {
 
 export function useFeatureFlag<T = boolean>(
   flagKey: string,
-  defaultValue: T,
+  defaultValue: T
 ): T {
   const flags = useFlags();
   return (flags[flagKey] as T) ?? defaultValue;

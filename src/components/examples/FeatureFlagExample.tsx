@@ -27,8 +27,8 @@ export function FeatureFlagExample() {
       <div className="text-xs text-gray-500 dark:text-gray-400">
         <p>To test this:</p>
         <ol className="ml-4 mt-1 list-decimal space-y-1">
-          <li>Create a flag called "example-feature" in LaunchDarkly</li>
-          <li>Create a multivariate flag called "example-variant"</li>
+          <li>Create a flag called &ldquo;example-feature&rdquo; in LaunchDarkly</li>
+          <li>Create a multivariate flag called &ldquo;example-variant&rdquo;</li>
           <li>Toggle the flags on/off to see changes in real-time</li>
         </ol>
       </div>

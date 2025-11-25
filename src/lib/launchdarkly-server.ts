@@ -34,22 +34,22 @@ export interface LDUser {
   email?: string;
   name?: string;
   anonymous?: boolean;
-  custom?: Record<string, any>;
+  custom?: Record<string, unknown>;
 }
 
 export async function getFeatureFlag(
   flagKey: string,
   user: LDUser,
-  defaultValue: boolean = false,
+  defaultValue: boolean = false
 ): Promise<boolean> {
   const client = await getLaunchDarklyClient();
   return await client.variation(flagKey, user, defaultValue);
 }
 
-export async function getFeatureFlagDetail(
+export async function getFeatureFlagDetail<T>(
   flagKey: string,
   user: LDUser,
-  defaultValue: any,
+  defaultValue: T
 ): Promise<ld.LDEvaluationDetail> {
   const client = await getLaunchDarklyClient();
   return await client.variationDetail(flagKey, user, defaultValue);

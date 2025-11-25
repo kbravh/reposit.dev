@@ -39,6 +39,9 @@ examples/
 .prettierignore
 .gitignore
 
+# Environment files
+.env*
+
 # Docker
 Dockerfile
 .dockerignore

@@ -109,7 +109,7 @@ function LoginPage() {
                 <button
                   type="button"
                   disabled={isSigningIn}
-                  className="group relative w-full flex justify-center items-center gap-2 bg-white text-gray-900 px-6 py-3.5 text-base font-semibold rounded-md border border-white shadow-sm hover:bg-gray-100 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:shadow-sm"
+                  className="group relative w-full cursor-pointer flex justify-center items-center gap-2 bg-white text-gray-900 px-6 py-3.5 text-base font-semibold rounded-md border border-white shadow-sm hover:bg-gray-100 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:shadow-sm"
                   onClick={handleGitHubSignIn}
                 >
                   {isSigningIn ? (

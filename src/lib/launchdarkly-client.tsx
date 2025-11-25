@@ -1,5 +1,7 @@
-import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk';
-import type { LDContext } from 'launchdarkly-react-client-sdk';
+import {
+  asyncWithLDProvider,
+  type LDContext,
+} from 'launchdarkly-react-client-sdk';
 
 export interface LaunchDarklyConfig {
   clientSideId: string;

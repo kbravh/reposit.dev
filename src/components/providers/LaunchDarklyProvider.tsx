@@ -58,11 +58,6 @@ export function LaunchDarklyProvider({
   children,
   clientSideId,
 }: LaunchDarklyProviderProps) {
-  // Only render provider on client-side to avoid SSR issues
-  if (typeof window === 'undefined') {
-    return <>{children}</>;
-  }
-
   return (
     <LaunchDarklyProviderInner clientSideId={clientSideId}>
       {children}

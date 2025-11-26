@@ -30,6 +30,7 @@ import {
   type TagSuggestions,
 } from '../../hooks/tags';
 import { getPredefinedColor, getHashedTagColor } from '../../utils/colors';
+import { useFeatureFlag } from '../../lib/use-feature-flags';
 
 interface AddRepositoryFormProps {
   isOpen: boolean;
@@ -52,6 +53,13 @@ export function AddRepositoryForm({
     null
   );
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+
+  // Feature flags
+  const autoTagSuggestionsEnabled = useFeatureFlag(
+    'auto-tag-suggestions',
+    false
+  );
+  const aiTagSuggestionsEnabled = useFeatureFlag('ai-tag-suggestions', false);
 
   const suggestTagsMutation = useSuggestTagsForRepositoryMutation({
     onSuccess: data => {
@@ -89,10 +97,16 @@ export function AddRepositoryForm({
 
   const createRepoMutation = useCreateRepositoryMutation({
     onSuccess: data => {
-      setCreatedRepoInstanceId(data.id);
-      setMode('tag-suggestions');
-      // Fetch tag suggestions for the newly created repository
-      suggestTagsMutation.mutate({ repositoryInstanceId: data.id });
+      if (autoTagSuggestionsEnabled) {
+        setCreatedRepoInstanceId(data.id);
+        setMode('tag-suggestions');
+        // Fetch tag suggestions for the newly created repository
+        suggestTagsMutation.mutate({ repositoryInstanceId: data.id });
+      } else {
+        // Skip tag suggestions if feature flag is disabled
+        handleReset();
+        onOpenChange(false);
+      }
     },
   });
 
@@ -554,24 +568,26 @@ export function AddRepositoryForm({
                         <p className="mt-3 text-gray-500 dark:text-gray-400 text-sm">
                           No tag suggestions found for this repository.
                         </p>
-                        <button
-                          type="button"
-                          onClick={handleGetAiSuggestions}
-                          disabled={aiSuggestionsMutation.isPending}
-                          className="mt-4 inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-purple-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-                        >
-                          {aiSuggestionsMutation.isPending ? (
-                            <>
-                              <Loader2 className="size-4 animate-spin" />
-                              Analyzing with AI...
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="size-4" />
-                              Get AI suggestions
-                            </>
-                          )}
-                        </button>
+                        {aiTagSuggestionsEnabled && (
+                          <button
+                            type="button"
+                            onClick={handleGetAiSuggestions}
+                            disabled={aiSuggestionsMutation.isPending}
+                            className="mt-4 inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-purple-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+                          >
+                            {aiSuggestionsMutation.isPending ? (
+                              <>
+                                <Loader2 className="size-4 animate-spin" />
+                                Analyzing with AI...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="size-4" />
+                                Get AI suggestions
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
                     )}
 
@@ -589,7 +605,8 @@ export function AddRepositoryForm({
                     )}
 
                     {/* AI suggestions button - shown when there are some suggestions but user wants more */}
-                    {tagSuggestions &&
+                    {aiTagSuggestionsEnabled &&
+                      tagSuggestions &&
                       (tagSuggestions.existingTags.length > 0 ||
                         tagSuggestions.suggestedNewTags.length > 0) &&
                       !aiSuggestionsMutation.isPending && (

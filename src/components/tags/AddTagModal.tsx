@@ -96,7 +96,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
         <button
           type="button"
           onClick={() => onOpenChange(true)}
-          className="block rounded-md bg-teal-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+          className="block rounded-md bg-teal-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 cursor-pointer"
         >
           <Plus className="inline-block w-4 h-4 mr-1" />
           Add tag
@@ -163,7 +163,7 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                           <button
                             type="button"
                             onClick={handleSuggestedColorClick}
-                            className="mt-2 flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                            className="mt-2 flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors cursor-pointer"
                           >
                             <div
                               className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600"
@@ -267,14 +267,14 @@ export function AddTagModal({ isOpen, onOpenChange }: AddTagModalProps) {
                   <button
                     type="submit"
                     disabled={createTagMutation.isPending}
-                    className="inline-flex w-full justify-center rounded-md bg-teal-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 disabled:opacity-50 sm:col-start-2"
+                    className="inline-flex w-full justify-center rounded-md bg-teal-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer sm:col-start-2"
                   >
                     {createTagMutation.isPending ? 'Adding...' : 'Add Tag'}
                   </button>
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 sm:col-start-1 sm:mt-0"
+                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer sm:col-start-1 sm:mt-0"
                   >
                     Cancel
                   </button>

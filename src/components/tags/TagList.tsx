@@ -43,7 +43,7 @@ export function RepositoryTags({
         ))}
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center gap-1 rounded-full border border-dashed border-gray-300 dark:border-gray-600 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+          className="inline-flex items-center gap-1 rounded-full border border-dashed border-gray-300 dark:border-gray-600 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
         >
           <Plus className="h-3 w-3" />
           {repositoryTags.length === 0 ? 'Add tags' : 'Edit'}

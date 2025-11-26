@@ -40,7 +40,7 @@ export function RepositoryListItem({ repository }: RepositoryListItemProps) {
       </div>
       <div className="flex shrink-0 items-start justify-end sm:items-center">
         <Menu as="div" className="relative flex-none">
-          <MenuButton className="relative block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
+          <MenuButton className="relative block text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer">
             <span className="-inset-2.5 absolute" />
             <span className="sr-only">Open options</span>
             <MoreHorizontal aria-hidden="true" className="size-5" />
@@ -57,7 +57,7 @@ export function RepositoryListItem({ repository }: RepositoryListItemProps) {
                   });
                 }}
                 disabled={deleteRepoMutation.isPending}
-                className="flex w-full items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 data-focus:bg-gray-50 dark:data-focus:bg-gray-700 data-focus:outline-hidden disabled:opacity-50"
+                className="flex w-full items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 data-focus:bg-gray-50 dark:data-focus:bg-gray-700 data-focus:outline-hidden disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <Trash2 className="mr-3 h-4 w-4" />
                 Remove repository

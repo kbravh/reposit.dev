@@ -3,7 +3,9 @@ import {
   createManyTags,
   createTag,
   deleteTag,
+  getAiTagSuggestions,
   removeTagFromRepository,
+  suggestTagsForRepository,
   updateTag,
 } from '../actions/tags';
 import { tagKeys } from '../lib/query-keys';
@@ -346,6 +348,42 @@ export function useCreateManyTagsForRepositoryMutation(options?: {
           queryKey: tagKeys.forRepository(variables.repositoryInstanceId),
         }),
       ]);
+    },
+  });
+}
+
+export type TagSuggestions = {
+  existingTags: BaseTag[];
+  suggestedNewTags: string[];
+  githubTopics: string[];
+};
+
+export function useSuggestTagsForRepositoryMutation(options?: {
+  onSuccess?: (data: TagSuggestions) => void;
+}) {
+  return useMutation({
+    mutationFn: (variables: { repositoryInstanceId: string }) =>
+      suggestTagsForRepository({ data: variables }),
+    onSuccess: data => {
+      options?.onSuccess?.(data as TagSuggestions);
+    },
+  });
+}
+
+export type AiTagSuggestions = {
+  existingTags: BaseTag[];
+  suggestedNewTags: string[];
+  aiGenerated: boolean;
+};
+
+export function useAiTagSuggestionsMutation(options?: {
+  onSuccess?: (data: AiTagSuggestions) => void;
+}) {
+  return useMutation({
+    mutationFn: (variables: { repositoryInstanceId: string }) =>
+      getAiTagSuggestions({ data: variables }),
+    onSuccess: data => {
+      options?.onSuccess?.(data as AiTagSuggestions);
     },
   });
 }

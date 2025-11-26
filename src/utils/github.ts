@@ -38,6 +38,7 @@ const GitHubRepositorySchema = z.object({
   language: z.string().nullable().optional(),
   stargazers_count: z.number().optional(),
   forks_count: z.number().optional(),
+  topics: z.array(z.string()).optional().default([]),
   owner: z.object({
     login: z.string(),
   }),
@@ -151,4 +152,72 @@ export const getRepositoryDetailsFromProviderId = async (
   const data = await response.json();
   const parsedData = GitHubRepositorySchema.parse(data);
   return parsedData;
+};
+
+/**
+ * Get repository topics from GitHub API
+ * Topics are user-defined tags on GitHub repositories
+ */
+export const getRepositoryTopics = async (url: string): Promise<string[]> => {
+  const { org, repo } = parseRepositoryUrl(url);
+  const response = await fetch(`https://api.github.com/repos/${org}/${repo}`);
+
+  if (!response.ok) {
+    // Return empty array on error - topics are optional
+    return [];
+  }
+
+  const data = await response.json();
+  const parsedData = GitHubRepositorySchema.parse(data);
+  return parsedData.topics || [];
+};
+
+/**
+ * Get repository topics by org/repo path
+ */
+export const getRepositoryTopicsByPath = async (
+  org: string,
+  repoName: string
+): Promise<string[]> => {
+  const response = await fetch(
+    `https://api.github.com/repos/${org}/${repoName}`
+  );
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = await response.json();
+  const parsedData = GitHubRepositorySchema.parse(data);
+  return parsedData.topics || [];
+};
+
+/**
+ * Get repository README content from GitHub
+ * Returns the raw README content or null if not found
+ */
+export const getRepositoryReadme = async (
+  org: string,
+  repoName: string
+): Promise<string | null> => {
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${org}/${repoName}/readme`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.raw+json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const content = await response.text();
+    // Limit to first 8000 characters to avoid token limits
+    return content.slice(0, 8000);
+  } catch {
+    return null;
+  }
 };

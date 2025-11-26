@@ -9,16 +9,16 @@ const envSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string(),
   SENTRY_AUTH_TOKEN: z.string(),
   ANTHROPIC_API_KEY: z.string().optional(),
+  LAUNCHDARKLY_CLIENT_SIDE_ID: z.string(),
+  LAUNCHDARKLY_SDK_KEY: z.string(),
 });
 
 let _env: z.infer<typeof envSchema> | null = null;
 
 export const getEnv = () => {
   if (!_env) {
-    // eslint-disable-next-line no-undef
     const parsed = envSchema.safeParse(process.env);
 
-    // eslint-disable-next-line no-undef
     if (!parsed.success && !process.env.CI) {
       console.error(z.prettifyError(parsed.error));
       throw new Error('Invalid environment variables');

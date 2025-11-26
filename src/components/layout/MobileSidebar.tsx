@@ -54,7 +54,7 @@ export default function MobileSidebar({
               {/* TODO: Add logo */}
               <img
                 alt="Reposit"
-                src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
+                src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=teal&shade=500"
                 className="h-8 w-auto"
               />
             </div>
@@ -69,11 +69,11 @@ export default function MobileSidebar({
                           onClick={() => setSidebarOpen(false)}
                           activeProps={{
                             className:
-                              'bg-gray-50 text-indigo-600 dark:bg-gray-800 dark:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
+                              'bg-gray-50 text-teal-600 dark:bg-gray-800 dark:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
                           }}
                           inactiveProps={{
                             className:
-                              'text-gray-700 hover:bg-gray-50 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
+                              'text-gray-700 hover:bg-gray-50 hover:text-teal-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white group flex gap-x-3 rounded-md p-2 font-semibold text-sm/6',
                           }}
                         >
                           <item.icon

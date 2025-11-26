@@ -47,7 +47,7 @@ function Home() {
             <div className="flex items-center gap-2">
               {/* Logo SVG */}
               <svg
-                className="h-8 w-8 text-indigo-400"
+                className="h-8 w-8 text-teal-400"
                 viewBox="0 0 24 24"
                 fill="currentColor"
                 width="24"
@@ -81,8 +81,8 @@ function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-6">
-              <Sparkles className="h-5 w-5 text-indigo-400" />
-              <span className="text-sm font-medium text-indigo-400 tracking-wide uppercase">
+              <Sparkles className="h-5 w-5 text-teal-400" />
+              <span className="text-sm font-medium text-teal-400 tracking-wide uppercase">
                 Repository Organization Made Simple
               </span>
             </div>
@@ -91,7 +91,7 @@ function Home() {
               <span className="relative">
                 <span className="relative z-10">repositories</span>
                 <span
-                  className="absolute bottom-2 left-0 right-0 h-3 bg-indigo-500/30 -rotate-1"
+                  className="absolute bottom-2 left-0 right-0 h-3 bg-teal-500/30 -rotate-1"
                   aria-hidden="true"
                 />
               </span>
@@ -202,7 +202,7 @@ function Home() {
             {/* Feature 3 */}
             <div className="relative group">
               <div className="h-full p-8 bg-gray-800 rounded-lg border border-white/10 shadow-xs hover:shadow-md hover:border-white/20 transition-all">
-                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-gradient-to-br from-teal-500 to-teal-600 shadow-sm">
                   <Sparkles className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="mt-6 text-lg font-semibold text-white">
@@ -233,8 +233,8 @@ function Home() {
               </p>
               <div className="mt-8 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/20 mt-0.5">
-                    <div className="h-2 w-2 rounded-full bg-indigo-400" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-500/20 mt-0.5">
+                    <div className="h-2 w-2 rounded-full bg-teal-400" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-white">
@@ -259,8 +259,8 @@ function Home() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-violet-500/20 mt-0.5">
-                    <div className="h-2 w-2 rounded-full bg-violet-400" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500/20 mt-0.5">
+                    <div className="h-2 w-2 rounded-full bg-cyan-400" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-white">
@@ -329,7 +329,7 @@ function Home() {
                 </div>
               </div>
               {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 h-24 w-24 bg-indigo-500/10 rounded-full blur-2xl opacity-50" />
+              <div className="absolute -top-4 -right-4 h-24 w-24 bg-teal-500/10 rounded-full blur-2xl opacity-50" />
               <div className="absolute -bottom-4 -left-4 h-32 w-32 bg-emerald-500/10 rounded-full blur-2xl opacity-50" />
             </div>
           </div>
@@ -365,7 +365,7 @@ function Home() {
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center gap-2">
             <svg
-              className="h-6 w-6 text-indigo-400"
+              className="h-6 w-6 text-teal-400"
               viewBox="0 0 24 24"
               fill="currentColor"
               width="24"

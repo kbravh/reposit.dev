@@ -79,15 +79,15 @@ function LoginPage() {
           {/* Card container with matching border style */}
           <div className="relative">
             {/* Decorative elements - matching landing page aesthetic */}
-            <div className="absolute -top-8 -right-8 h-32 w-32 bg-indigo-500/10 rounded-full blur-2xl opacity-50" />
-            <div className="absolute -bottom-8 -left-8 h-32 w-32 bg-violet-500/10 rounded-full blur-2xl opacity-50" />
+            <div className="absolute -top-8 -right-8 h-32 w-32 bg-teal-500/10 rounded-full blur-2xl opacity-50" />
+            <div className="absolute -bottom-8 -left-8 h-32 w-32 bg-cyan-500/10 rounded-full blur-2xl opacity-50" />
 
             <div className="relative rounded-lg border border-white/10 bg-gray-900 px-8 py-10 shadow-lg">
               <div className="text-center">
                 {/* Reposit Logo - matching landing page */}
                 <div className="flex justify-center">
                   <svg
-                    className="h-12 w-12 text-indigo-400"
+                    className="h-12 w-12 text-teal-400"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                     width="24"
@@ -109,7 +109,7 @@ function LoginPage() {
                 <button
                   type="button"
                   disabled={isSigningIn}
-                  className="group relative w-full flex justify-center items-center gap-2 bg-white text-gray-900 px-6 py-3.5 text-base font-semibold rounded-md border border-white shadow-sm hover:bg-gray-100 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:shadow-sm"
+                  className="group relative w-full cursor-pointer flex justify-center items-center gap-2 bg-white text-gray-900 px-6 py-3.5 text-base font-semibold rounded-md border border-white shadow-sm hover:bg-gray-100 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:shadow-sm"
                   onClick={handleGitHubSignIn}
                 >
                   {isSigningIn ? (

@@ -11,7 +11,7 @@ export function QuickActions() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Link
             to="/repositories"
-            className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-600"
+            className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-teal-500 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-600"
           >
             <div>
               <span className="rounded-lg inline-flex p-3 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 ring-4 ring-white dark:ring-gray-700">
@@ -37,7 +37,7 @@ export function QuickActions() {
 
           <Link
             to="/tags"
-            className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-600"
+            className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-teal-500 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-600"
           >
             <div>
               <span className="rounded-lg inline-flex p-3 bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-400 ring-4 ring-white dark:ring-gray-700">
@@ -63,10 +63,10 @@ export function QuickActions() {
 
           <Link
             to="/settings"
-            className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-600"
+            className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-teal-500 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-600"
           >
             <div>
-              <span className="rounded-lg inline-flex p-3 bg-purple-50 dark:bg-purple-900/50 text-purple-700 dark:text-purple-400 ring-4 ring-white dark:ring-gray-700">
+              <span className="rounded-lg inline-flex p-3 bg-cyan-50 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-400 ring-4 ring-white dark:ring-gray-700">
                 <Calendar className="h-6 w-6" />
               </span>
             </div>

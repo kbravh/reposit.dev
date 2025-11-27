@@ -1,5 +1,5 @@
-import { type ComponentType, type ReactNode, useEffect, useState } from 'react';
-import { withLDProvider, type LDContext } from 'launchdarkly-react-client-sdk';
+import { type ReactNode, useEffect } from 'react';
+import { LDProvider, useLDClient } from 'launchdarkly-react-client-sdk';
 import { getSession } from '../../actions/auth';
 
 interface LaunchDarklyProviderProps {
@@ -7,50 +7,39 @@ interface LaunchDarklyProviderProps {
   clientSideId: string;
 }
 
-function LaunchDarklyProviderInner({
+function LaunchDarklyIdentifier({
   children,
   clientSideId,
-}: LaunchDarklyProviderProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [LDProvider, setLDProvider] = useState<ComponentType<any> | null>(null);
+}: {
+  children: ReactNode;
+  clientSideId: string;
+}) {
+  const ldClient = useLDClient();
 
   useEffect(() => {
-    async function setupLaunchDarkly() {
-      const session = await getSession();
+    if (!ldClient) return;
 
-      const context: LDContext = session?.user
-        ? {
-            kind: 'user',
-            key: session.user.id,
-            email: session.user.email,
-            name: session.user.name,
-          }
-        : {
-            kind: 'user',
-            anonymous: true,
-            key: 'anonymous',
-          };
-
-      const Provider = withLDProvider({
-        clientSideID: clientSideId,
-        context,
-        options: {
-          bootstrap: 'localStorage',
-          streaming: true,
-        },
-      })(({ children }: { children: ReactNode }) => <>{children}</>);
-
-      setLDProvider(() => Provider);
+    if (clientSideId) {
+      ldClient.track(clientSideId);
     }
 
-    setupLaunchDarkly();
-  }, [clientSideId]);
+    async function identifyUser() {
+      const session = await getSession();
 
-  if (!LDProvider) {
-    return <>{children}</>;
-  }
+      if (session?.user && ldClient) {
+        await ldClient.identify({
+          kind: 'user',
+          key: session.user.id,
+          email: session.user.email,
+          name: session.user.name,
+        });
+      }
+    }
 
-  return <LDProvider>{children}</LDProvider>;
+    identifyUser();
+  }, [ldClient, clientSideId]);
+
+  return <>{children}</>;
 }
 
 export function LaunchDarklyProvider({
@@ -58,8 +47,13 @@ export function LaunchDarklyProvider({
   clientSideId,
 }: LaunchDarklyProviderProps) {
   return (
-    <LaunchDarklyProviderInner clientSideId={clientSideId}>
-      {children}
-    </LaunchDarklyProviderInner>
+    <LDProvider
+      clientSideID={clientSideId}
+      context={{ kind: 'user', anonymous: true, key: 'anonymous' }}
+    >
+      <LaunchDarklyIdentifier clientSideId={clientSideId}>
+        {children}
+      </LaunchDarklyIdentifier>
+    </LDProvider>
   );
 }

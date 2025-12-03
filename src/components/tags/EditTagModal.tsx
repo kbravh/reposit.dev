@@ -108,7 +108,7 @@ export function EditTagModal({ tag, onClose }: EditTagModalProps) {
                             key={tagColor}
                             type="button"
                             onClick={() => setColor(tagColor)}
-                            className={`w-8 h-8 rounded-full border-2 ${
+                            className={`w-8 h-8 rounded-full border-2 cursor-pointer ${
                               color === tagColor
                                 ? 'border-gray-900 dark:border-gray-100'
                                 : 'border-gray-300 dark:border-gray-600'
@@ -125,7 +125,7 @@ export function EditTagModal({ tag, onClose }: EditTagModalProps) {
                 <button
                   type="submit"
                   disabled={updateTagMutation.isPending}
-                  className="inline-flex w-full justify-center rounded-md bg-teal-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-teal-500 sm:ml-3 sm:w-auto disabled:opacity-50"
+                  className="inline-flex w-full justify-center rounded-md bg-teal-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-teal-500 sm:ml-3 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {updateTagMutation.isPending ? 'Saving...' : 'Save'}
                 </button>
@@ -133,7 +133,7 @@ export function EditTagModal({ tag, onClose }: EditTagModalProps) {
                   type="button"
                   data-autofocus
                   onClick={handleClose}
-                  className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 sm:mt-0 sm:w-auto"
+                  className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer sm:mt-0 sm:w-auto"
                 >
                   Cancel
                 </button>

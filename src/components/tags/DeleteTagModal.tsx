@@ -121,7 +121,7 @@ export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
                 type="submit"
                 form="delete-tag-form"
                 disabled={deleteTagMutation.isPending}
-                className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto disabled:opacity-50"
+                className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {deleteTagMutation.isPending ? 'Deleting...' : 'Delete'}
               </button>
@@ -129,7 +129,7 @@ export function DeleteTagModal({ tag, onClose }: DeleteTagModalProps) {
                 type="button"
                 data-autofocus
                 onClick={handleClose}
-                className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 sm:mt-0 sm:w-auto"
+                className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer sm:mt-0 sm:w-auto"
               >
                 Cancel
               </button>

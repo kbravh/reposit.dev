@@ -38,7 +38,7 @@ export default function MobileSidebar({
               <button
                 type="button"
                 onClick={() => setSidebarOpen(false)}
-                className="-m-2.5 p-2.5"
+                className="-m-2.5 p-2.5 cursor-pointer"
               >
                 <span className="sr-only">Close sidebar</span>
                 <X
@@ -101,7 +101,7 @@ export function MobileSidebarButton() {
     <button
       type="button"
       onClick={() => setSidebarOpen(true)}
-      className="-m-2.5 p-2.5 text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white lg:hidden"
+      className="-m-2.5 p-2.5 text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white lg:hidden cursor-pointer"
     >
       <span className="sr-only">Open sidebar</span>
       <Menu aria-hidden="true" className="size-6" />

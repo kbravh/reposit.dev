@@ -34,14 +34,15 @@ export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
   }),
   beforeLoad: async () => {
     const ldClientId = process.env.LAUNCHDARKLY_CLIENT_SIDE_ID || '';
-    return { ldClientId };
+    const ldMemberId = process.env.LAUNCHDARKLY_MEMBER_ID || '';
+    return { ldClientId, ldMemberId };
   },
   component: RootComponent,
   notFoundComponent: () => <div>Not found</div>,
 });
 
 function RootComponent() {
-  const { ldClientId } = Route.useRouteContext();
+  const { ldClientId, ldMemberId } = Route.useRouteContext();
 
   useEffect(() => {
     initializeTheme();
@@ -49,7 +50,7 @@ function RootComponent() {
 
   return (
     <RootDocument>
-      <LaunchDarklyProvider clientSideId={ldClientId}>
+      <LaunchDarklyProvider clientSideId={ldClientId} memberId={ldMemberId}>
         <Outlet />
       </LaunchDarklyProvider>
     </RootDocument>

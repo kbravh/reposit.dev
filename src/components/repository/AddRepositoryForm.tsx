@@ -220,7 +220,7 @@ export function AddRepositoryForm({
         <button
           type="button"
           onClick={() => onOpenChange(true)}
-          className="block rounded-md bg-teal-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+          className="block rounded-md bg-teal-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 cursor-pointer"
         >
           <Plus className="inline-block w-4 h-4 mr-1" />
           Add repository
@@ -309,7 +309,7 @@ export function AddRepositoryForm({
                           createRepoMutation.isPending ||
                           searchMutation.isPending
                         }
-                        className="inline-flex w-full justify-center rounded-md bg-teal-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 disabled:opacity-50 sm:col-start-2"
+                        className="inline-flex w-full justify-center rounded-md bg-teal-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer sm:col-start-2"
                       >
                         {createRepoMutation.isPending
                           ? 'Adding...'
@@ -320,7 +320,7 @@ export function AddRepositoryForm({
                       <button
                         type="button"
                         onClick={handleCancel}
-                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 sm:col-start-1 sm:mt-0"
+                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer sm:col-start-1 sm:mt-0"
                       >
                         Cancel
                       </button>
@@ -336,7 +336,7 @@ export function AddRepositoryForm({
                       <button
                         type="button"
                         onClick={handleBackToSearch}
-                        className="rounded-full bg-teal-100 dark:bg-teal-900/30 p-2 text-teal-600 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-800/50"
+                        className="rounded-full bg-teal-100 dark:bg-teal-900/30 p-2 text-teal-600 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-800/50 cursor-pointer"
                       >
                         <ArrowLeft className="size-4" />
                       </button>
@@ -416,7 +416,7 @@ export function AddRepositoryForm({
                                 type="button"
                                 onClick={() => handleSelectRepository(repo)}
                                 disabled={createRepoMutation.isPending}
-                                className="rounded-md bg-teal-600 px-3 py-1.5 font-semibold text-white text-xs shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 disabled:opacity-50"
+                                className="rounded-md bg-teal-600 px-3 py-1.5 font-semibold text-white text-xs shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                               >
                                 {createRepoMutation.isPending
                                   ? 'Adding...'
@@ -442,7 +442,7 @@ export function AddRepositoryForm({
                       <button
                         type="button"
                         onClick={handleCancel}
-                        className="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600"
+                        className="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
                       >
                         Close
                       </button>

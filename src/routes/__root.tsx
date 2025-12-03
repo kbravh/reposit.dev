@@ -13,7 +13,6 @@ import { useEffect } from 'react';
 import { initializeTheme } from '../stores/themeStore';
 import { NavigationProgressBar } from '../components/navigation/NavigationLoadingIndicator';
 import { LaunchDarklyProvider } from '../components/providers/LaunchDarklyProvider';
-import { getLaunchDarklyClientId } from '../actions/launchdarkly';
 
 const queryClient = new QueryClient();
 
@@ -34,24 +33,24 @@ export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
     links: [{ rel: 'stylesheet', href: appCss }],
   }),
   beforeLoad: async () => {
-    const ldClientId = await getLaunchDarklyClientId();
-    return { ldClientId };
+    const ldClientId = process.env.LAUNCHDARKLY_CLIENT_SIDE_ID || '';
+    const ldMemberId = process.env.LAUNCHDARKLY_MEMBER_ID || '';
+    return { ldClientId, ldMemberId };
   },
   component: RootComponent,
   notFoundComponent: () => <div>Not found</div>,
 });
 
 function RootComponent() {
-  const { ldClientId } = Route.useRouteContext();
+  const { ldClientId, ldMemberId } = Route.useRouteContext();
 
   useEffect(() => {
-    // Initialize theme from localStorage after component mounts
     initializeTheme();
   }, []);
 
   return (
     <RootDocument>
-      <LaunchDarklyProvider clientSideId={ldClientId}>
+      <LaunchDarklyProvider clientSideId={ldClientId} memberId={ldMemberId}>
         <Outlet />
       </LaunchDarklyProvider>
     </RootDocument>
@@ -78,7 +77,6 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       </head>
       <body className="h-full">
         <QueryClientProvider client={queryClient}>
-          {/* Global navigation loading indicator */}
           <NavigationProgressBar />
           {children}
         </QueryClientProvider>

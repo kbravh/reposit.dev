@@ -40,7 +40,7 @@ export function TagCard({ tag, onEdit, onDelete }: TagCardProps) {
                 <MenuItem>
                   <button
                     onClick={() => onEdit(tag)}
-                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 data-focus:bg-gray-100 dark:data-focus:bg-gray-600 data-focus:text-gray-900 dark:data-focus:text-gray-100 data-focus:outline-hidden"
+                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 data-focus:bg-gray-100 dark:data-focus:bg-gray-600 data-focus:text-gray-900 dark:data-focus:text-gray-100 data-focus:outline-hidden cursor-pointer"
                   >
                     <Edit3 className="mr-3 h-4 w-4" />
                     Edit tag
@@ -49,7 +49,7 @@ export function TagCard({ tag, onEdit, onDelete }: TagCardProps) {
                 <MenuItem>
                   <button
                     onClick={() => onDelete(tag)}
-                    className="flex w-full items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 data-focus:bg-gray-100 dark:data-focus:bg-gray-600 data-focus:text-red-700 dark:data-focus:text-red-300 data-focus:outline-hidden"
+                    className="flex w-full items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 data-focus:bg-gray-100 dark:data-focus:bg-gray-600 data-focus:text-red-700 dark:data-focus:text-red-300 data-focus:outline-hidden cursor-pointer"
                   >
                     <Trash2 className="mr-3 h-4 w-4" />
                     Delete tag

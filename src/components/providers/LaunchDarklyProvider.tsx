@@ -5,22 +5,23 @@ import { getSession } from '../../actions/auth';
 interface LaunchDarklyProviderProps {
   children: ReactNode;
   clientSideId: string;
+  memberId: string;
 }
 
 function LaunchDarklyIdentifier({
   children,
-  clientSideId,
+  memberId,
 }: {
   children: ReactNode;
-  clientSideId: string;
+  memberId: string;
 }) {
   const ldClient = useLDClient();
 
   useEffect(() => {
     if (!ldClient) return;
 
-    if (clientSideId) {
-      ldClient.track(clientSideId);
+    if (memberId) {
+      ldClient.track(memberId);
     }
 
     async function identifyUser() {
@@ -37,7 +38,7 @@ function LaunchDarklyIdentifier({
     }
 
     identifyUser();
-  }, [ldClient, clientSideId]);
+  }, [ldClient, memberId]);
 
   return <>{children}</>;
 }
@@ -45,13 +46,14 @@ function LaunchDarklyIdentifier({
 export function LaunchDarklyProvider({
   children,
   clientSideId,
+  memberId,
 }: LaunchDarklyProviderProps) {
   return (
     <LDProvider
       clientSideID={clientSideId}
       context={{ kind: 'user', anonymous: true, key: 'anonymous' }}
     >
-      <LaunchDarklyIdentifier clientSideId={clientSideId}>
+      <LaunchDarklyIdentifier memberId={memberId}>
         {children}
       </LaunchDarklyIdentifier>
     </LDProvider>

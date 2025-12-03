@@ -6,7 +6,6 @@ import {
 } from '@headlessui/react';
 import {
   ArrowLeft,
-  Check,
   Code,
   GitFork,
   Loader2,
@@ -14,7 +13,7 @@ import {
   Search,
   Sparkles,
   Star,
-  Tag,
+  Tag as TagIcon,
 } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import type { GitHubRepository } from '../../utils/github';
@@ -31,6 +30,7 @@ import {
 } from '../../hooks/tags';
 import { getPredefinedColor, getHashedTagColor } from '../../utils/colors';
 import { useFlags } from 'launchdarkly-react-client-sdk';
+import { Tag } from '../tags/Tag';
 
 interface AddRepositoryFormProps {
   isOpen: boolean;
@@ -491,27 +491,14 @@ export function AddRepositoryForm({
                             </h4>
                             <div className="flex flex-wrap gap-2">
                               {tagSuggestions.existingTags.map(tag => (
-                                <button
+                                <Tag
                                   key={tag.id}
-                                  type="button"
+                                  title={tag.title}
+                                  color={tag.color}
+                                  variant="selectable"
+                                  selected={selectedTags.has(tag.title)}
                                   onClick={() => toggleTag(tag.title)}
-                                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
-                                    selectedTags.has(tag.title)
-                                      ? 'ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-gray-800'
-                                      : 'opacity-60 hover:opacity-100'
-                                  }`}
-                                  style={{
-                                    backgroundColor: `${tag.color}20`,
-                                    color: tag.color,
-                                  }}
-                                >
-                                  {selectedTags.has(tag.title) ? (
-                                    <Check className="size-3.5" />
-                                  ) : (
-                                    <Plus className="size-3.5" />
-                                  )}
-                                  {tag.title}
-                                </button>
+                                />
                               ))}
                             </div>
                           </div>
@@ -528,30 +515,15 @@ export function AddRepositoryForm({
                                   getPredefinedColor(tagTitle) ||
                                   getHashedTagColor(tagTitle);
                                 return (
-                                  <button
+                                  <Tag
                                     key={tagTitle}
-                                    type="button"
+                                    title={tagTitle}
+                                    color={color}
+                                    variant="selectable"
+                                    selected={selectedTags.has(tagTitle)}
+                                    isNew
                                     onClick={() => toggleTag(tagTitle)}
-                                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
-                                      selectedTags.has(tagTitle)
-                                        ? 'ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-gray-800'
-                                        : 'opacity-60 hover:opacity-100'
-                                    }`}
-                                    style={{
-                                      backgroundColor: `${color}20`,
-                                      color: color,
-                                    }}
-                                  >
-                                    {selectedTags.has(tagTitle) ? (
-                                      <Check className="size-3.5" />
-                                    ) : (
-                                      <Plus className="size-3.5" />
-                                    )}
-                                    {tagTitle}
-                                    <span className="ml-1 text-xs opacity-70">
-                                      (new)
-                                    </span>
-                                  </button>
+                                  />
                                 );
                               })}
                             </div>
@@ -560,7 +532,7 @@ export function AddRepositoryForm({
                       </div>
                     ) : (
                       <div className="text-center py-8">
-                        <Tag className="mx-auto size-8 text-gray-400 dark:text-gray-500" />
+                        <TagIcon className="mx-auto size-8 text-gray-400 dark:text-gray-500" />
                         <p className="mt-3 text-gray-500 dark:text-gray-400 text-sm">
                           No tag suggestions found for this repository.
                         </p>

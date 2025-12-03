@@ -30,7 +30,7 @@ import {
   type TagSuggestions,
 } from '../../hooks/tags';
 import { getPredefinedColor, getHashedTagColor } from '../../utils/colors';
-import { useFeatureFlag } from '../../lib/use-feature-flags';
+import { useFlags } from 'launchdarkly-react-client-sdk';
 
 interface AddRepositoryFormProps {
   isOpen: boolean;
@@ -54,12 +54,8 @@ export function AddRepositoryForm({
   );
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
-  // Feature flags
-  const autoTagSuggestionsEnabled = useFeatureFlag(
-    'auto-tag-suggestions',
-    false
-  );
-  const aiTagSuggestionsEnabled = useFeatureFlag('ai-tag-suggestions', false);
+  // Feature flags - LaunchDarkly SDK converts kebab-case to camelCase automatically
+  const { autoTagSuggestions = false, aiTagSuggestions = false } = useFlags();
 
   const suggestTagsMutation = useSuggestTagsForRepositoryMutation({
     onSuccess: data => {
@@ -97,7 +93,7 @@ export function AddRepositoryForm({
 
   const createRepoMutation = useCreateRepositoryMutation({
     onSuccess: data => {
-      if (autoTagSuggestionsEnabled) {
+      if (autoTagSuggestions) {
         setCreatedRepoInstanceId(data.id);
         setMode('tag-suggestions');
         // Fetch tag suggestions for the newly created repository
@@ -568,7 +564,7 @@ export function AddRepositoryForm({
                         <p className="mt-3 text-gray-500 dark:text-gray-400 text-sm">
                           No tag suggestions found for this repository.
                         </p>
-                        {aiTagSuggestionsEnabled && (
+                        {aiTagSuggestions && (
                           <button
                             type="button"
                             onClick={handleGetAiSuggestions}
@@ -605,7 +601,7 @@ export function AddRepositoryForm({
                     )}
 
                     {/* AI suggestions button - shown when there are some suggestions but user wants more */}
-                    {aiTagSuggestionsEnabled &&
+                    {aiTagSuggestions &&
                       tagSuggestions &&
                       (tagSuggestions.existingTags.length > 0 ||
                         tagSuggestions.suggestedNewTags.length > 0) &&

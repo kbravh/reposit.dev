@@ -7,17 +7,25 @@ import {
 import { repositoryKeys } from '../lib/query-keys';
 import type { Repository } from '../components/repository/types';
 
+export type CreatedRepositoryInstance = {
+  id: string;
+  repositoryId: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export function useCreateRepositoryMutation(options?: {
-  onSuccess?: () => void;
+  onSuccess?: (data: CreatedRepositoryInstance) => void;
 }) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (variables: { url: string }) =>
       createRepository({ data: variables }),
-    onSuccess: () => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: repositoryKeys.all });
-      options?.onSuccess?.();
+      options?.onSuccess?.(data as CreatedRepositoryInstance);
     },
   });
 }

@@ -690,7 +690,7 @@ Respond with ONLY a JSON object in this exact format (no markdown, no explanatio
         throw new Error('No text response from AI');
       }
 
-      // Parse and validate the JSON response with Zod
+      // Parse and validate the JSON response
       const responseText = textContent.text.trim();
       const aiResponseSchema = z.object({
         existingTags: z.array(z.string()).default([]),

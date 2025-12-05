@@ -11,7 +11,6 @@ import {
   Loader2,
   Plus,
   Search,
-  Sparkles,
   Star,
   Tag as TagIcon,
 } from 'lucide-react';
@@ -51,8 +50,6 @@ export function AddRepositoryForm({
   >(null);
   const [autoTagSuggestions, setAutoTagSuggestions] =
     useState<TagSuggestions | null>(null);
-  const [aiTagSuggestions, setAiTagSuggestions] =
-    useState<TagSuggestions | null>(null);
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
   // Feature flags - LaunchDarkly SDK converts kebab-case to camelCase automatically
@@ -64,38 +61,44 @@ export function AddRepositoryForm({
   const suggestTagsMutation = useSuggestTagsForRepositoryMutation({
     onSuccess: data => {
       setAutoTagSuggestions(data);
-      // Pre-select all automatic suggestions by default
-      const allTags = new Set([
-        ...data.existingTags.map(t => t.title),
-        ...data.suggestedNewTags,
-      ]);
-      setSelectedTags(allTags);
+      // Don't pre-select - user chooses which tags to apply
     },
   });
 
   const aiSuggestionsMutation = useAiTagSuggestionsMutation({
     onSuccess: data => {
-      // Filter out duplicates that exist in automatic suggestions (case-insensitive)
-      const autoTitles = new Set([
-        ...(autoTagSuggestions?.existingTags.map(t => t.title.toLowerCase()) ||
-          []),
-        ...(autoTagSuggestions?.suggestedNewTags.map(t => t.toLowerCase()) ||
-          []),
-      ]);
+      // Merge AI suggestions into autoTagSuggestions (deduped)
+      setAutoTagSuggestions(prev => {
+        if (!prev) {
+          return {
+            existingTags: data.existingTags,
+            suggestedNewTags: data.suggestedNewTags,
+            githubTopics: [],
+          };
+        }
 
-      const filteredExistingTags = data.existingTags.filter(
-        tag => !autoTitles.has(tag.title.toLowerCase())
-      );
-      const filteredNewTags = data.suggestedNewTags.filter(
-        tag => !autoTitles.has(tag.toLowerCase())
-      );
+        // Dedupe: get existing titles (already lowercase from server)
+        const existingTitles = new Set([
+          ...prev.existingTags.map(t => t.title.toLowerCase()),
+          ...prev.suggestedNewTags,
+        ]);
 
-      setAiTagSuggestions({
-        existingTags: filteredExistingTags,
-        suggestedNewTags: filteredNewTags,
-        githubTopics: [], // AI suggestions don't include GitHub topics
+        // Use Set.difference() for suggestedNewTags (simple strings)
+        const newSuggestedTags = [
+          ...new Set(data.suggestedNewTags).difference(existingTitles),
+        ];
+
+        // Filter for existingTags (objects - must compare by property)
+        const newExistingTags = data.existingTags.filter(
+          t => !existingTitles.has(t.title.toLowerCase())
+        );
+
+        return {
+          existingTags: [...prev.existingTags, ...newExistingTags],
+          suggestedNewTags: [...prev.suggestedNewTags, ...newSuggestedTags],
+          githubTopics: prev.githubTopics,
+        };
       });
-      // DO NOT pre-select AI suggestions - user chooses manually
     },
   });
 
@@ -173,7 +176,6 @@ export function AddRepositoryForm({
     setSearchResults([]);
     setCreatedRepoInstanceId(null);
     setAutoTagSuggestions(null);
-    setAiTagSuggestions(null);
     setSelectedTags(new Set());
     createRepoMutation.reset();
     searchMutation.reset();
@@ -569,78 +571,14 @@ export function AddRepositoryForm({
                       </div>
                     )}
 
-                    {/* AI Suggestions Section - Only shown when flag is enabled */}
-                    {aiTagSuggestionsEnabled && (
-                      <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Sparkles className="size-4 text-purple-600 dark:text-purple-400" />
-                          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            AI-powered suggestions
-                          </h4>
+                    {/* Subtle loading indicator while AI analyzes the repo */}
+                    {aiTagSuggestionsEnabled &&
+                      aiSuggestionsMutation.isPending && (
+                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-3">
+                          <Loader2 className="size-3 animate-spin" />
+                          <span>Analyzing repository...</span>
                         </div>
-
-                        {aiSuggestionsMutation.isPending ? (
-                          <div className="flex flex-col items-center justify-center py-6">
-                            <Loader2 className="size-6 text-purple-600 dark:text-purple-400 animate-spin" />
-                            <p className="mt-2 text-gray-500 dark:text-gray-400 text-xs">
-                              Analyzing repository with AI...
-                            </p>
-                          </div>
-                        ) : aiTagSuggestions &&
-                          (aiTagSuggestions.existingTags.length > 0 ||
-                            aiTagSuggestions.suggestedNewTags.length > 0) ? (
-                          <div className="space-y-3">
-                            {aiTagSuggestions.existingTags.length > 0 && (
-                              <div>
-                                <h5 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                                  From your existing tags
-                                </h5>
-                                <div className="flex flex-wrap gap-2">
-                                  {aiTagSuggestions.existingTags.map(tag => (
-                                    <Tag
-                                      key={tag.id}
-                                      title={tag.title}
-                                      color={tag.color}
-                                      variant="selectable"
-                                      selected={selectedTags.has(tag.title)}
-                                      onClick={() => toggleTag(tag.title)}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {aiTagSuggestions.suggestedNewTags.length > 0 && (
-                              <div>
-                                <h5 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                                  New tags
-                                </h5>
-                                <div className="flex flex-wrap gap-2">
-                                  {aiTagSuggestions.suggestedNewTags.map(
-                                    tagTitle => {
-                                      const color =
-                                        getPredefinedColor(tagTitle) ||
-                                        getHashedTagColor(tagTitle);
-                                      return (
-                                        <Tag
-                                          key={tagTitle}
-                                          title={tagTitle}
-                                          color={color}
-                                          variant="selectable"
-                                          selected={selectedTags.has(tagTitle)}
-                                          isNew
-                                          onClick={() => toggleTag(tagTitle)}
-                                        />
-                                      );
-                                    }
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
+                      )}
 
                     <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                       <button

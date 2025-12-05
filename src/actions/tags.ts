@@ -690,8 +690,13 @@ Respond with ONLY a JSON object in this exact format (no markdown, no explanatio
         throw new Error('No text response from AI');
       }
 
-      // Parse and validate the JSON response
-      const responseText = textContent.text.trim();
+      // Parse and validate the JSON response (strip markdown code block if present)
+      let responseText = textContent.text.trim();
+      if (responseText.startsWith('```')) {
+        responseText = responseText
+          .replace(/^```(?:json)?\n?/, '')
+          .replace(/\n?```$/, '');
+      }
       const aiResponseSchema = z.object({
         existingTags: z.array(z.string()).default([]),
         newTags: z.array(z.string()).default([]),

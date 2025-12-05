@@ -56,7 +56,7 @@ function Repositories() {
           <button
             type="button"
             onClick={() => setIsAddingRepo(true)}
-            className="inline-flex items-center rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+            className="inline-flex items-center rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 cursor-pointer"
           >
             <Plus className="-ml-0.5 mr-1.5 h-5 w-5" />
             Add repository
@@ -79,7 +79,7 @@ function Repositories() {
               <button
                 type="button"
                 onClick={() => setIsAddingRepo(true)}
-                className="inline-flex items-center rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+                className="inline-flex items-center rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 cursor-pointer"
               >
                 <Plus className="-ml-0.5 mr-1.5 h-5 w-5" />
                 Add repository

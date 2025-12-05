@@ -151,7 +151,7 @@ export function TagModal({
                             })
                           }
                           disabled={removeTagMutation.isPending}
-                          className="ml-0.5 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded-sm"
+                          className="ml-0.5 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded-sm disabled:cursor-not-allowed cursor-pointer"
                           type="button"
                         >
                           <X className="h-3.5 w-3.5" />

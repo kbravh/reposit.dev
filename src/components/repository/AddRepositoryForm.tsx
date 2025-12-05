@@ -4,7 +4,16 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import { ArrowLeft, Code, GitFork, Plus, Search, Star } from 'lucide-react';
+import {
+  ArrowLeft,
+  Code,
+  GitFork,
+  Loader2,
+  Plus,
+  Search,
+  Star,
+  Tag as TagIcon,
+} from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import type { GitHubRepository } from '../../utils/github';
 import { isValidRepositoryUrl } from '../../utils/github';
@@ -12,13 +21,22 @@ import {
   useCreateRepositoryMutation,
   useSearchRepositoriesMutation,
 } from '../../hooks/repositories';
+import {
+  useSuggestTagsForRepositoryMutation,
+  useCreateManyTagsForRepositoryMutation,
+  useAiTagSuggestionsMutation,
+  type TagSuggestions,
+} from '../../hooks/tags';
+import { getPredefinedColor, getHashedTagColor } from '../../utils/colors';
+import { useFlags } from 'launchdarkly-react-client-sdk';
+import { Tag } from '../tags/Tag';
 
 interface AddRepositoryFormProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-type FormMode = 'input' | 'search-results';
+type FormMode = 'input' | 'search-results' | 'tag-suggestions';
 
 export function AddRepositoryForm({
   isOpen,
@@ -27,11 +45,88 @@ export function AddRepositoryForm({
   const [mode, setMode] = useState<FormMode>('input');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<GitHubRepository[]>([]);
+  const [createdRepoInstanceId, setCreatedRepoInstanceId] = useState<
+    string | null
+  >(null);
+  const [autoTagSuggestions, setAutoTagSuggestions] =
+    useState<TagSuggestions | null>(null);
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
-  const createRepoMutation = useCreateRepositoryMutation({
+  // Feature flags - LaunchDarkly SDK converts kebab-case to camelCase automatically
+  const {
+    autoTagSuggestions: autoTagSuggestionsEnabled = false,
+    aiTagSuggestions: aiTagSuggestionsEnabled = false,
+  } = useFlags();
+
+  const suggestTagsMutation = useSuggestTagsForRepositoryMutation({
+    onSuccess: data => {
+      setAutoTagSuggestions(data);
+      // Don't pre-select - user chooses which tags to apply
+    },
+  });
+
+  const aiSuggestionsMutation = useAiTagSuggestionsMutation({
+    onSuccess: data => {
+      // Merge AI suggestions into autoTagSuggestions (deduped)
+      setAutoTagSuggestions(prev => {
+        if (!prev) {
+          return {
+            existingTags: data.existingTags,
+            suggestedNewTags: data.suggestedNewTags,
+            githubTopics: [],
+          };
+        }
+
+        // Dedupe: get existing titles (already lowercase from server)
+        const existingTitles = new Set([
+          ...prev.existingTags.map(t => t.title.toLowerCase()),
+          ...prev.suggestedNewTags,
+        ]);
+
+        // Use Set.difference() for suggestedNewTags (simple strings)
+        const newSuggestedTags = [
+          ...new Set(data.suggestedNewTags).difference(existingTitles),
+        ];
+
+        // Filter for existingTags (objects - must compare by property)
+        const newExistingTags = data.existingTags.filter(
+          t => !existingTitles.has(t.title.toLowerCase())
+        );
+
+        return {
+          existingTags: [...prev.existingTags, ...newExistingTags],
+          suggestedNewTags: [...prev.suggestedNewTags, ...newSuggestedTags],
+          githubTopics: prev.githubTopics,
+        };
+      });
+    },
+  });
+
+  const createTagsMutation = useCreateManyTagsForRepositoryMutation({
     onSuccess: () => {
       handleReset();
       onOpenChange(false);
+    },
+  });
+
+  const createRepoMutation = useCreateRepositoryMutation({
+    onSuccess: data => {
+      if (autoTagSuggestionsEnabled) {
+        setCreatedRepoInstanceId(data.id);
+        setMode('tag-suggestions');
+
+        // Always fire automatic suggestions
+        suggestTagsMutation.mutate({ repositoryInstanceId: data.id });
+
+        // Fire AI suggestions in parallel if flag is enabled
+        if (aiTagSuggestionsEnabled) {
+          aiSuggestionsMutation.mutate({ repositoryInstanceId: data.id });
+        }
+      } else {
+        // Skip tag suggestions if feature flag is disabled
+        handleReset();
+        onOpenChange(false);
+      }
     },
   });
 
@@ -79,8 +174,44 @@ export function AddRepositoryForm({
     setMode('input');
     setSearchQuery('');
     setSearchResults([]);
+    setCreatedRepoInstanceId(null);
+    setAutoTagSuggestions(null);
+    setSelectedTags(new Set());
     createRepoMutation.reset();
     searchMutation.reset();
+    suggestTagsMutation.reset();
+    createTagsMutation.reset();
+    aiSuggestionsMutation.reset();
+  };
+
+  const toggleTag = (tagTitle: string) => {
+    setSelectedTags(prev => {
+      const next = new Set(prev);
+      if (next.has(tagTitle)) {
+        next.delete(tagTitle);
+      } else {
+        next.add(tagTitle);
+      }
+      return next;
+    });
+  };
+
+  const handleApplyTags = () => {
+    if (!createdRepoInstanceId || selectedTags.size === 0) {
+      handleReset();
+      onOpenChange(false);
+      return;
+    }
+
+    createTagsMutation.mutate({
+      titles: Array.from(selectedTags),
+      repositoryInstanceId: createdRepoInstanceId,
+    });
+  };
+
+  const handleSkipTags = () => {
+    handleReset();
+    onOpenChange(false);
   };
 
   const handleCancel = () => {
@@ -327,6 +458,156 @@ export function AddRepositoryForm({
                         className="inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
                       >
                         Close
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {mode === 'tag-suggestions' && (
+                <>
+                  <div>
+                    <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                      <TagIcon
+                        aria-hidden="true"
+                        className="size-6 text-emerald-600 dark:text-emerald-400"
+                      />
+                    </div>
+                    <div className="mt-3 text-center sm:mt-5">
+                      <DialogTitle
+                        as="h3"
+                        className="font-semibold text-base text-gray-900 dark:text-gray-100"
+                      >
+                        Add Tags to Repository
+                      </DialogTitle>
+                      <div className="mt-2">
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                          We found some tags that might be relevant. Select the
+                          ones you want to add.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 sm:mt-6">
+                    {/* Automatic Suggestions Section */}
+                    {suggestTagsMutation.isPending ? (
+                      <div className="flex flex-col items-center justify-center py-8">
+                        <Loader2 className="size-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
+                        <p className="mt-3 text-gray-500 dark:text-gray-400 text-sm">
+                          Analyzing repository...
+                        </p>
+                      </div>
+                    ) : autoTagSuggestions &&
+                      (autoTagSuggestions.existingTags.length > 0 ||
+                        autoTagSuggestions.suggestedNewTags.length > 0) ? (
+                      <div className="space-y-4">
+                        {autoTagSuggestions.existingTags.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Your existing tags
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {autoTagSuggestions.existingTags.map(tag => (
+                                <Tag
+                                  key={tag.id}
+                                  title={tag.title}
+                                  color={tag.color}
+                                  variant="selectable"
+                                  selected={selectedTags.has(tag.title)}
+                                  onClick={() => toggleTag(tag.title)}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {autoTagSuggestions.suggestedNewTags.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Suggested new tags
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {autoTagSuggestions.suggestedNewTags.map(
+                                tagTitle => {
+                                  const color =
+                                    getPredefinedColor(tagTitle) ||
+                                    getHashedTagColor(tagTitle);
+                                  return (
+                                    <Tag
+                                      key={tagTitle}
+                                      title={tagTitle}
+                                      color={color}
+                                      variant="selectable"
+                                      selected={selectedTags.has(tagTitle)}
+                                      isNew
+                                      onClick={() => toggleTag(tagTitle)}
+                                    />
+                                  );
+                                }
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      !suggestTagsMutation.isPending && (
+                        <div className="text-center py-8">
+                          <TagIcon className="mx-auto size-8 text-gray-400 dark:text-gray-500" />
+                          <p className="mt-3 text-gray-500 dark:text-gray-400 text-sm">
+                            No tag suggestions found for this repository.
+                          </p>
+                        </div>
+                      )
+                    )}
+
+                    {suggestTagsMutation.error && (
+                      <div className="mt-3">
+                        <p className="text-sm text-red-600 dark:text-red-400">
+                          {suggestTagsMutation.error instanceof Error
+                            ? suggestTagsMutation.error.message
+                            : 'Failed to get tag suggestions'}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Subtle loading indicator while AI analyzes the repo */}
+                    {aiTagSuggestionsEnabled &&
+                      aiSuggestionsMutation.isPending && (
+                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-3">
+                          <Loader2 className="size-3 animate-spin" />
+                          <span>Analyzing repository...</span>
+                        </div>
+                      )}
+
+                    <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                      <button
+                        type="button"
+                        onClick={handleApplyTags}
+                        disabled={
+                          createTagsMutation.isPending ||
+                          suggestTagsMutation.isPending
+                        }
+                        className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2 disabled:opacity-50 sm:col-start-2"
+                      >
+                        {createTagsMutation.isPending ? (
+                          <>
+                            <Loader2 className="size-4 mr-2 animate-spin" />
+                            Applying...
+                          </>
+                        ) : selectedTags.size > 0 ? (
+                          `Apply ${selectedTags.size} tag${selectedTags.size !== 1 ? 's' : ''}`
+                        ) : (
+                          'Done'
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSkipTags}
+                        disabled={createTagsMutation.isPending}
+                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 font-semibold text-gray-900 dark:text-gray-100 text-sm shadow-xs ring-1 ring-gray-300 dark:ring-gray-600 ring-inset hover:bg-gray-50 dark:hover:bg-gray-600 sm:col-start-1 sm:mt-0"
+                      >
+                        Skip
                       </button>
                     </div>
                   </div>

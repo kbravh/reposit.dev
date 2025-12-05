@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
 import { getTagsForRepository } from '../../actions/tags';
 import { tagKeys } from '../../lib/query-keys';
+import { Tag } from './Tag';
 
 const TagModal = lazy(() =>
   import('./TagModal').then(m => ({ default: m.TagModal }))
@@ -24,22 +25,7 @@ export function RepositoryTags({
     <>
       <div className="flex flex-wrap gap-1">
         {repositoryTags.map(tag => (
-          <span
-            key={tag.id}
-            className="inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium text-gray-900 dark:text-white ring-1 ring-gray-300 dark:ring-gray-600 ring-inset"
-          >
-            <svg
-              viewBox="0 0 6 6"
-              aria-hidden="true"
-              className="size-1.5"
-              style={{ fill: tag.color }}
-              width="6"
-              height="6"
-            >
-              <circle r={3} cx={3} cy={3} />
-            </svg>
-            {tag.title}
-          </span>
+          <Tag key={tag.id} title={tag.title} color={tag.color} />
         ))}
         <button
           onClick={() => setIsModalOpen(true)}

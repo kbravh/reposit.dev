@@ -549,23 +549,20 @@ export const suggestTagsForRepository = createServerFn({
       throw new Error('Repository not found');
     }
 
-    // Fetch GitHub topics for this repository
-    const topics = await getRepositoryTopicsByPath(
-      repoInstance.repository.org,
-      repoInstance.repository.name
-    );
+    // Fetch GitHub topics and user's existing tags in parallel
+    const [topics, userTags] = await Promise.all([
+      getRepositoryTopicsByPath(
+        repoInstance.repository.org,
+        repoInstance.repository.name
+      ).catch(() => [] as string[]),
+      getDb().select().from(tagInstance).where(eq(tagInstance.userId, userId)),
+    ]);
 
     // Also include the primary language as a potential tag
     const potentialTags = [...topics];
     if (repoInstance.repository.primaryLanguage) {
       potentialTags.push(repoInstance.repository.primaryLanguage.toLowerCase());
     }
-
-    // Get user's existing tags
-    const userTags = await getDb()
-      .select()
-      .from(tagInstance)
-      .where(eq(tagInstance.userId, userId));
 
     // Create a map for case-insensitive lookup
     const userTagMap = new Map(
@@ -656,15 +653,7 @@ export const getAiTagSuggestions = createServerFn({
       };
     }
 
-    // Check if API key is configured
-    const apiKey = getEnv().ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      throw new Error(
-        'AI tag suggestions are not configured. Please set ANTHROPIC_API_KEY.'
-      );
-    }
-
-    const anthropic = new Anthropic({ apiKey });
+    const anthropic = new Anthropic({ apiKey: getEnv().ANTHROPIC_API_KEY });
 
     const prompt = `You are a helpful assistant that suggests tags for organizing code repositories.
 
@@ -681,7 +670,7 @@ ${readme || 'No README available'}
 Instructions:
 1. Prioritize suggesting tags from the user's existing tags that are relevant
 2. Only suggest new tags if they would be very useful and aren't covered by existing tags
-3. Keep tag names lowercase, concise (1-3 words), and use hyphens for multi-word tags
+3. Keep tag names lowercase and concise (1-3 words)
 4. Focus on: programming languages, frameworks, libraries, project types, domains
 5. Return at most 8 tags total
 
@@ -690,7 +679,7 @@ Respond with ONLY a JSON object in this exact format (no markdown, no explanatio
 
     try {
       const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 256,
         messages: [{ role: 'user', content: prompt }],
       });
@@ -701,25 +690,24 @@ Respond with ONLY a JSON object in this exact format (no markdown, no explanatio
         throw new Error('No text response from AI');
       }
 
-      // Parse the JSON response
+      // Parse and validate the JSON response with Zod
       const responseText = textContent.text.trim();
-      const parsed = JSON.parse(responseText) as {
-        existingTags: string[];
-        newTags: string[];
-      };
+      const aiResponseSchema = z.object({
+        existingTags: z.array(z.string()).default([]),
+        newTags: z.array(z.string()).default([]),
+      });
+      const parsed = aiResponseSchema.parse(JSON.parse(responseText));
 
       // Map existing tag titles back to full tag objects
       const userTagMap = new Map(
         userTags.map(tag => [tag.title.toLowerCase(), tag])
       );
 
-      const matchedExistingTags = (parsed.existingTags || [])
+      const matchedExistingTags = parsed.existingTags
         .map(title => userTagMap.get(title.toLowerCase()))
         .filter((tag): tag is NonNullable<typeof tag> => tag !== undefined);
 
-      const suggestedNewTags = (parsed.newTags || []).map(t =>
-        t.toLowerCase().trim()
-      );
+      const suggestedNewTags = parsed.newTags.map(t => t.toLowerCase().trim());
 
       return {
         existingTags: matchedExistingTags,

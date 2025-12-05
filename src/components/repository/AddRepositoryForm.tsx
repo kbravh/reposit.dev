@@ -49,18 +49,22 @@ export function AddRepositoryForm({
   const [createdRepoInstanceId, setCreatedRepoInstanceId] = useState<
     string | null
   >(null);
-  const [tagSuggestions, setTagSuggestions] = useState<TagSuggestions | null>(
-    null
-  );
+  const [autoTagSuggestions, setAutoTagSuggestions] =
+    useState<TagSuggestions | null>(null);
+  const [aiTagSuggestions, setAiTagSuggestions] =
+    useState<TagSuggestions | null>(null);
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
   // Feature flags - LaunchDarkly SDK converts kebab-case to camelCase automatically
-  const { autoTagSuggestions = false, aiTagSuggestions = false } = useFlags();
+  const {
+    autoTagSuggestions: autoTagSuggestionsEnabled = false,
+    aiTagSuggestions: aiTagSuggestionsEnabled = false,
+  } = useFlags();
 
   const suggestTagsMutation = useSuggestTagsForRepositoryMutation({
     onSuccess: data => {
-      setTagSuggestions(data);
-      // Pre-select all suggestions by default
+      setAutoTagSuggestions(data);
+      // Pre-select all automatic suggestions by default
       const allTags = new Set([
         ...data.existingTags.map(t => t.title),
         ...data.suggestedNewTags,
@@ -71,16 +75,27 @@ export function AddRepositoryForm({
 
   const aiSuggestionsMutation = useAiTagSuggestionsMutation({
     onSuccess: data => {
-      setTagSuggestions({
-        ...data,
-        githubTopics: tagSuggestions?.githubTopics || [],
-      });
-      // Pre-select all AI suggestions by default
-      const allTags = new Set([
-        ...data.existingTags.map(t => t.title),
-        ...data.suggestedNewTags,
+      // Filter out duplicates that exist in automatic suggestions (case-insensitive)
+      const autoTitles = new Set([
+        ...(autoTagSuggestions?.existingTags.map(t => t.title.toLowerCase()) ||
+          []),
+        ...(autoTagSuggestions?.suggestedNewTags.map(t => t.toLowerCase()) ||
+          []),
       ]);
-      setSelectedTags(allTags);
+
+      const filteredExistingTags = data.existingTags.filter(
+        tag => !autoTitles.has(tag.title.toLowerCase())
+      );
+      const filteredNewTags = data.suggestedNewTags.filter(
+        tag => !autoTitles.has(tag.toLowerCase())
+      );
+
+      setAiTagSuggestions({
+        existingTags: filteredExistingTags,
+        suggestedNewTags: filteredNewTags,
+        githubTopics: [], // AI suggestions don't include GitHub topics
+      });
+      // DO NOT pre-select AI suggestions - user chooses manually
     },
   });
 
@@ -93,11 +108,17 @@ export function AddRepositoryForm({
 
   const createRepoMutation = useCreateRepositoryMutation({
     onSuccess: data => {
-      if (autoTagSuggestions) {
+      if (autoTagSuggestionsEnabled) {
         setCreatedRepoInstanceId(data.id);
         setMode('tag-suggestions');
-        // Fetch tag suggestions for the newly created repository
+
+        // Always fire automatic suggestions
         suggestTagsMutation.mutate({ repositoryInstanceId: data.id });
+
+        // Fire AI suggestions in parallel if flag is enabled
+        if (aiTagSuggestionsEnabled) {
+          aiSuggestionsMutation.mutate({ repositoryInstanceId: data.id });
+        }
       } else {
         // Skip tag suggestions if feature flag is disabled
         handleReset();
@@ -151,20 +172,14 @@ export function AddRepositoryForm({
     setSearchQuery('');
     setSearchResults([]);
     setCreatedRepoInstanceId(null);
-    setTagSuggestions(null);
+    setAutoTagSuggestions(null);
+    setAiTagSuggestions(null);
     setSelectedTags(new Set());
     createRepoMutation.reset();
     searchMutation.reset();
     suggestTagsMutation.reset();
     createTagsMutation.reset();
     aiSuggestionsMutation.reset();
-  };
-
-  const handleGetAiSuggestions = () => {
-    if (!createdRepoInstanceId) return;
-    aiSuggestionsMutation.mutate({
-      repositoryInstanceId: createdRepoInstanceId,
-    });
   };
 
   const toggleTag = (tagTitle: string) => {
@@ -451,7 +466,7 @@ export function AddRepositoryForm({
                 <>
                   <div>
                     <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                      <Sparkles
+                      <TagIcon
                         aria-hidden="true"
                         className="size-6 text-emerald-600 dark:text-emerald-400"
                       />
@@ -473,6 +488,7 @@ export function AddRepositoryForm({
                   </div>
 
                   <div className="mt-5 sm:mt-6">
+                    {/* Automatic Suggestions Section */}
                     {suggestTagsMutation.isPending ? (
                       <div className="flex flex-col items-center justify-center py-8">
                         <Loader2 className="size-8 text-indigo-600 dark:text-indigo-400 animate-spin" />
@@ -480,17 +496,17 @@ export function AddRepositoryForm({
                           Analyzing repository...
                         </p>
                       </div>
-                    ) : tagSuggestions &&
-                      (tagSuggestions.existingTags.length > 0 ||
-                        tagSuggestions.suggestedNewTags.length > 0) ? (
+                    ) : autoTagSuggestions &&
+                      (autoTagSuggestions.existingTags.length > 0 ||
+                        autoTagSuggestions.suggestedNewTags.length > 0) ? (
                       <div className="space-y-4">
-                        {tagSuggestions.existingTags.length > 0 && (
+                        {autoTagSuggestions.existingTags.length > 0 && (
                           <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Your existing tags
                             </h4>
                             <div className="flex flex-wrap gap-2">
-                              {tagSuggestions.existingTags.map(tag => (
+                              {autoTagSuggestions.existingTags.map(tag => (
                                 <Tag
                                   key={tag.id}
                                   title={tag.title}
@@ -504,92 +520,127 @@ export function AddRepositoryForm({
                           </div>
                         )}
 
-                        {tagSuggestions.suggestedNewTags.length > 0 && (
+                        {autoTagSuggestions.suggestedNewTags.length > 0 && (
                           <div>
                             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Suggested new tags
                             </h4>
                             <div className="flex flex-wrap gap-2">
-                              {tagSuggestions.suggestedNewTags.map(tagTitle => {
-                                const color =
-                                  getPredefinedColor(tagTitle) ||
-                                  getHashedTagColor(tagTitle);
-                                return (
-                                  <Tag
-                                    key={tagTitle}
-                                    title={tagTitle}
-                                    color={color}
-                                    variant="selectable"
-                                    selected={selectedTags.has(tagTitle)}
-                                    isNew
-                                    onClick={() => toggleTag(tagTitle)}
-                                  />
-                                );
-                              })}
+                              {autoTagSuggestions.suggestedNewTags.map(
+                                tagTitle => {
+                                  const color =
+                                    getPredefinedColor(tagTitle) ||
+                                    getHashedTagColor(tagTitle);
+                                  return (
+                                    <Tag
+                                      key={tagTitle}
+                                      title={tagTitle}
+                                      color={color}
+                                      variant="selectable"
+                                      selected={selectedTags.has(tagTitle)}
+                                      isNew
+                                      onClick={() => toggleTag(tagTitle)}
+                                    />
+                                  );
+                                }
+                              )}
                             </div>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="text-center py-8">
-                        <TagIcon className="mx-auto size-8 text-gray-400 dark:text-gray-500" />
-                        <p className="mt-3 text-gray-500 dark:text-gray-400 text-sm">
-                          No tag suggestions found for this repository.
-                        </p>
-                        {aiTagSuggestions && (
-                          <button
-                            type="button"
-                            onClick={handleGetAiSuggestions}
-                            disabled={aiSuggestionsMutation.isPending}
-                            className="mt-4 inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-purple-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-                          >
-                            {aiSuggestionsMutation.isPending ? (
-                              <>
-                                <Loader2 className="size-4 animate-spin" />
-                                Analyzing with AI...
-                              </>
-                            ) : (
-                              <>
-                                <Sparkles className="size-4" />
-                                Get AI suggestions
-                              </>
-                            )}
-                          </button>
-                        )}
-                      </div>
+                      !suggestTagsMutation.isPending && (
+                        <div className="text-center py-8">
+                          <TagIcon className="mx-auto size-8 text-gray-400 dark:text-gray-500" />
+                          <p className="mt-3 text-gray-500 dark:text-gray-400 text-sm">
+                            No tag suggestions found for this repository.
+                          </p>
+                        </div>
+                      )
                     )}
 
-                    {(suggestTagsMutation.error ||
-                      aiSuggestionsMutation.error) && (
+                    {suggestTagsMutation.error && (
                       <div className="mt-3">
                         <p className="text-sm text-red-600 dark:text-red-400">
                           {suggestTagsMutation.error instanceof Error
                             ? suggestTagsMutation.error.message
-                            : aiSuggestionsMutation.error instanceof Error
-                              ? aiSuggestionsMutation.error.message
-                              : 'Failed to get tag suggestions'}
+                            : 'Failed to get tag suggestions'}
                         </p>
                       </div>
                     )}
 
-                    {/* AI suggestions button - shown when there are some suggestions but user wants more */}
-                    {aiTagSuggestions &&
-                      tagSuggestions &&
-                      (tagSuggestions.existingTags.length > 0 ||
-                        tagSuggestions.suggestedNewTags.length > 0) &&
-                      !aiSuggestionsMutation.isPending && (
-                        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                          <button
-                            type="button"
-                            onClick={handleGetAiSuggestions}
-                            disabled={aiSuggestionsMutation.isPending}
-                            className="inline-flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
-                          >
-                            <Sparkles className="size-4" />
-                            Get AI-powered suggestions
-                          </button>
+                    {/* AI Suggestions Section - Only shown when flag is enabled */}
+                    {aiTagSuggestionsEnabled && (
+                      <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Sparkles className="size-4 text-purple-600 dark:text-purple-400" />
+                          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            AI-powered suggestions
+                          </h4>
                         </div>
-                      )}
+
+                        {aiSuggestionsMutation.isPending ? (
+                          <div className="flex flex-col items-center justify-center py-6">
+                            <Loader2 className="size-6 text-purple-600 dark:text-purple-400 animate-spin" />
+                            <p className="mt-2 text-gray-500 dark:text-gray-400 text-xs">
+                              Analyzing repository with AI...
+                            </p>
+                          </div>
+                        ) : aiTagSuggestions &&
+                          (aiTagSuggestions.existingTags.length > 0 ||
+                            aiTagSuggestions.suggestedNewTags.length > 0) ? (
+                          <div className="space-y-3">
+                            {aiTagSuggestions.existingTags.length > 0 && (
+                              <div>
+                                <h5 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                  From your existing tags
+                                </h5>
+                                <div className="flex flex-wrap gap-2">
+                                  {aiTagSuggestions.existingTags.map(tag => (
+                                    <Tag
+                                      key={tag.id}
+                                      title={tag.title}
+                                      color={tag.color}
+                                      variant="selectable"
+                                      selected={selectedTags.has(tag.title)}
+                                      onClick={() => toggleTag(tag.title)}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {aiTagSuggestions.suggestedNewTags.length > 0 && (
+                              <div>
+                                <h5 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                  New tags
+                                </h5>
+                                <div className="flex flex-wrap gap-2">
+                                  {aiTagSuggestions.suggestedNewTags.map(
+                                    tagTitle => {
+                                      const color =
+                                        getPredefinedColor(tagTitle) ||
+                                        getHashedTagColor(tagTitle);
+                                      return (
+                                        <Tag
+                                          key={tagTitle}
+                                          title={tagTitle}
+                                          color={color}
+                                          variant="selectable"
+                                          selected={selectedTags.has(tagTitle)}
+                                          isNew
+                                          onClick={() => toggleTag(tagTitle)}
+                                        />
+                                      );
+                                    }
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
 
                     <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                       <button
